@@ -1,0 +1,5 @@
+{
+  "watch": ["server.js", "src/"],
+  "ignore": ["data/*", "uploads/*", "*.log", "out.txt", "err.txt"],
+  "ext": "js,html,css,json"
+}

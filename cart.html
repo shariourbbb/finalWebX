@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Cart - StudyMart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * {
+      font-family: 'Inter', sans-serif
+    }
+
+    .step-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      flex-shrink: 0
+    }
+  </style>
+</head>
+
+<body class="bg-[#F8F9FD] text-slate-900 antialiased">
+
+  <!-- Header: phone unchanged + desktop pic-like -->
+  <link rel="stylesheet" href="assets/navbar.css">
+  <header class="sticky top-0 z-50 bg-white border-b border-slate-100 shadow-sm">
+  <div class="hidden lg:block border-b border-slate-100">
+    <div class="max-w-[1400px] mx-auto px-6 h-[68px] flex items-center gap-4">
+      <button data-sm-desk-menu-btn class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-100 transition flex-shrink-0" aria-label="Menu"><i class="fa-solid fa-bars text-[20px] text-[#0F2043]"></i></button>
+      <a href="index.html" class="flex items-center gap-2 flex-shrink-0">
+        <img data-sm-desk-logo src="" alt="Logo" class="hidden w-10 h-10 object-contain rounded-lg">
+        <div data-sm-desk-logo-fb class="w-10 h-10 flex items-center justify-center"><svg width="40" height="40" viewBox="0 0 44 44" fill="none"><path d="M22 6 C16 10 8 12 8 20 C8 28 16 30 22 34 C28 30 36 28 36 20 C36 12 28 10 22 6Z" fill="#1A56FF"/><path d="M12 28 L22 38 L32 28" stroke="#1A56FF" stroke-width="2.5" fill="none" opacity="0.9"/><g><path d="M22 2 L32 7 L22 12 L12 7 Z" fill="#0F2043"/><rect x="21" y="7" width="2" height="8" fill="#FACC15"/></g></svg></div>
+        <span class="text-[22px] font-extrabold tracking-tight leading-none"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span>
+      </a>
+      <nav class="flex items-center gap-6 text-[14px] font-semibold flex-shrink-0 ml-2">
+        <a data-sm-nav="home" href="index.html" class="sm-desk-nav-link" data-i18n="home">Home</a>
+        <a data-sm-nav="courses" href="courses.html" class="sm-desk-nav-link" data-i18n="courses">Courses</a>
+        <a data-sm-nav="ebooks" href="index.html#secEbooks" class="sm-desk-nav-link" data-i18n="ebooks">Ebooks</a>
+        <a data-sm-nav="free" href="courses.html?q=" class="sm-desk-nav-link" data-i18n="free">Free Resources</a>
+        <a data-sm-nav="telegram" href="#" data-sm-telegram class="sm-desk-nav-link" data-i18n="telegram">Telegram</a>
+      </nav>
+      <div class="flex-1"></div>
+      <div class="sm-desk-search w-[280px] xl:w-[320px] flex-shrink-0"><i class="fa-solid fa-magnifying-glass text-slate-400 text-[14px]"></i><input data-sm-desk-search data-i18n-ph="searchPh" type="text" placeholder="Search courses, subjects, ebooks..."><button data-sm-desk-search-btn class="text-slate-400 hover:text-[#1A56FF]" aria-label="Search"><i class="fa-solid fa-arrow-right text-[12px]"></i></button></div>
+      <div class="sm-desk-drop flex-shrink-0"><button data-sm-desk-lang-btn class="sm-desk-pill"><i class="fa-solid fa-globe text-[15px] text-slate-500"></i><span data-i18n="lang">বাংলা/English</span><i class="fa-solid fa-chevron-down text-[11px] text-slate-400"></i></button><div data-sm-desk-lang-menu class="sm-desk-menu hidden"><button type="button" class="sm-mi" data-sm-lang-pick="bn">বাংলা (Bangla)</button><button type="button" class="sm-mi" data-sm-lang-pick="en">English</button></div></div>
+      <button data-sm-theme-btn class="sm-desk-pill flex-shrink-0"><i data-sm-theme-icon class="fa-solid fa-sun text-[15px] text-[#F59E0B]"></i><span data-i18n="theme">Theme</span></button>
+      <div class="sm-desk-drop flex-shrink-0"><button data-sm-desk-account-btn class="sm-desk-pill"><i class="fa-regular fa-user text-[15px] text-slate-600"></i><span data-i18n="account">Account</span><i class="fa-solid fa-chevron-down text-[11px] text-slate-400"></i></button><div data-sm-desk-account-menu class="sm-desk-menu hidden"></div></div>
+    </div>
+  </div>
+  <div id="smDeskDrawer" class="hidden"><div class="sm-backdrop"></div><div class="sm-panel"><div class="flex items-center justify-between mb-3"><span class="text-[18px] font-extrabold"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span><button data-sm-drawer-close class="w-9 h-9 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-xmark"></i></button></div><nav class="flex flex-col gap-1 text-[14px] font-semibold"><a href="index.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Home</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Courses</a><a href="index.html#secEbooks" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Ebooks</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Free Resources</a><a href="#" data-sm-telegram class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Telegram</a><a href="dashboard.html" data-account-link class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Account / Dashboard</a><a href="cart.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Cart (<span data-sm-cart-count>0</span>)</a></nav></div></div>
+  <!-- phone bar (unchanged) -->
+    <div class="lg:hidden max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 h-[60px] sm:h-[62px] flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <button id="menuBtn" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-100 lg:hidden">
+          <i class="fa-solid fa-bars text-[22px] text-[#0F2043]"></i>
+        </button>
+        <a href="index.html" class="flex items-center gap-2">
+          <img id="siteLogoImg" src="" alt="Logo"
+            class="hidden w-10 h-10 sm:w-11 sm:h-11 object-contain rounded-lg flex-shrink-0">
+          <div id="siteLogoFallback" class="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center flex-shrink-0">
+            <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+              <path d="M22 6 C16 10 8 12 8 20 C8 28 16 30 22 34 C28 30 36 28 36 20 C36 12 28 10 22 6Z"
+                fill="url(#g1)" />
+              <path d="M12 28 L22 38 L32 28" stroke="#1A56FF" stroke-width="2.5" fill="none" opacity="0.9" />
+              <g>
+                <path d="M22 2 L32 7 L22 12 L12 7 Z" fill="#0F2043" />
+                <rect x="21" y="7" width="2" height="8" fill="#FACC15" />
+              </g>
+              <defs>
+                <linearGradient id="g1" x1="8" y1="6" x2="36" y2="34" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#1A56FF" />
+                  <stop offset="1" stop-color="#7C3AED" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <span id="siteNameDisplay" class="text-[21px] sm:text-[22px] font-extrabold tracking-tight leading-none"><span
+              class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span>
+        </a>
+      </div>
+      <div class="flex items-center gap-2 sm:gap-6">
+        <a href="courses.html" class="hidden lg:flex flex-col items-center gap-0.5 text-slate-700 hover:text-[#1A56FF]">
+          <i class="fa-solid fa-book-open text-[18px]"></i><span class="text-[11px] font-semibold">Courses</span>
+        </a>
+        <a href="courses.html" class="flex flex-col items-center gap-0.5 text-slate-700 hover:text-[#1A56FF]">
+          <i class="fa-solid fa-magnifying-glass text-[18px]"></i><span
+            class="hidden sm:block text-[11px] font-medium">Search</span>
+        </a>
+        <a href="#" data-sm-telegram class="flex flex-col items-center gap-0.5 text-slate-700 hover:text-[#1A56FF]"
+          title="Telegram">
+          <span class="w-[30px] h-[30px] rounded-full bg-[#E6F0FF] flex items-center justify-center text-[#1A56FF]"><i
+              class="fa-brands fa-telegram text-[16px]"></i></span><span
+            class="hidden sm:block text-[11px] font-medium">Telegram</span>
+        </a>
+        <a href="cart.html" class="relative flex flex-col items-center gap-0.5 text-[#1A56FF]">
+          <span class="relative">
+            <i class="fa-solid fa-cart-shopping text-[18px]"></i>
+            <span data-sm-cart-count
+              class="absolute -top-2 -right-2 min-w-[16px] h-4 px-0.5 bg-[#EF4444] text-white text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
+          </span><span class="hidden sm:block text-[11px] font-semibold">Cart</span>
+        </a>
+        <a href="dashboard.html" data-account-link
+          class="flex flex-col items-center gap-0.5 text-slate-700 hover:text-[#1A56FF]">
+          <i class="fa-regular fa-circle-user text-[20px] sm:text-[22px]"></i><span
+            class="hidden sm:block text-[11px] font-medium">Dashboard</span>
+        </a>
+      </div>
+    </div>
+    <div id="mobileMenu" class="hidden border-t bg-white absolute w-full left-0 shadow-lg lg:hidden">
+      <nav class="px-4 py-3 flex flex-col gap-1 text-[14px] font-medium">
+        <a href="index.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Home</a>
+        <a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Courses</a>
+        <a href="cart.html" class="px-3 py-2.5 rounded-xl bg-[#EEF2FF] text-[#1A56FF]">Cart</a>
+        <a href="dashboard.html" data-account-link class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Dashboard</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-[1280px] mx-auto px-3 sm:px-6 lg:px-8 pb-24">
+
+    <!-- Breadcrumb -->
+    <nav class="mt-4 text-[12px] text-slate-500 font-medium flex items-center gap-1.5">
+      <a href="index.html" class="hover:text-[#1A56FF]">Home</a>
+      <i class="fa-solid fa-chevron-right text-[9px]"></i>
+      <span class="text-[#0F2043] font-bold">Cart</span>
+    </nav>
+
+    <!-- Title -->
+    <div class="mt-2">
+      <h1 class="text-[22px] sm:text-[26px] font-extrabold text-[#0F2043]">Your Cart <span id="itemCount"
+          class="text-[14px] font-bold text-slate-400"></span></h1>
+    </div>
+
+    <!-- Order success -->
+    <div id="orderSuccess"
+      class="hidden mt-5 bg-white rounded-[16px] border border-slate-100 shadow-sm p-8 sm:p-12 text-center">
+      <div class="w-16 h-16 mx-auto rounded-full bg-[#E6F4EA] flex items-center justify-center"><i
+          class="fa-solid fa-check text-[#16A34A] text-[26px]"></i></div>
+      <h2 class="mt-4 text-[20px] font-extrabold text-[#0F2043]">Order Placed Successfully!</h2>
+      <p class="mt-1 text-[13px] text-slate-500">Order No: <b id="orderNoTxt" class="text-[#1A56FF]"></b></p>
+      <p class="mt-1 text-[13px] text-slate-500">আমাদের টিম শীঘ্রই আপনার সাথে যোগাযোগ করবে।</p>
+      <div class="mt-5 flex flex-wrap justify-center gap-2">
+        <a href="courses.html" class="px-5 py-2.5 rounded-[10px] bg-[#1A56FF] text-white font-bold text-[13px]">Continue
+          Shopping</a>
+        <a href="dashboard.html" class="px-5 py-2.5 rounded-[10px] bg-slate-100 text-slate-700 font-bold text-[13px]">Go
+          to Dashboard</a>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div id="cartEmpty"
+      class="hidden mt-5 bg-white rounded-[16px] border border-slate-100 shadow-sm p-10 sm:p-14 text-center">
+      <div class="w-20 h-20 mx-auto rounded-full bg-[#EEF2FF] flex items-center justify-center"><i
+          class="fa-solid fa-cart-shopping text-[#1A56FF] text-[30px]"></i></div>
+      <h2 class="mt-4 text-[18px] font-extrabold text-[#0F2043]">Your cart is empty</h2>
+      <p class="mt-1 text-[13px] text-slate-500">কোর্স বা ই-বুক যোগ করে এখানে দেখুন।</p>
+      <div class="mt-5 flex flex-wrap justify-center gap-2">
+        <a href="courses.html" class="px-5 py-2.5 rounded-[10px] bg-[#1A56FF] text-white font-bold text-[13px]">Browse
+          Courses</a>
+        <a href="index.html" class="px-5 py-2.5 rounded-[10px] bg-slate-100 text-slate-700 font-bold text-[13px]">Back
+          to Home</a>
+      </div>
+    </div>
+
+    <!-- Cart content -->
+    <div id="cartMain" class="mt-5 grid grid-cols-1 lg:grid-cols-[1fr_370px] gap-4 sm:gap-5 items-start">
+
+      <!-- Items -->
+      <div class="bg-white rounded-[16px] border border-slate-100 shadow-sm overflow-hidden">
+        <div class="px-4 sm:px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
+          <h2 class="text-[15px] font-extrabold text-[#0F2043]"><i
+              class="fa-solid fa-basket-shopping text-[#1A56FF] mr-1.5"></i>Cart Items</h2>
+          <button id="clearCart" class="text-[12px] font-bold text-red-500 hover:text-red-600"><i
+              class="fa-solid fa-trash-can mr-1"></i>Clear all</button>
+        </div>
+        <div id="cartItems" class="divide-y divide-slate-100"></div>
+        <a href="courses.html"
+          class="flex items-center justify-center gap-2 px-4 py-3.5 text-[13px] font-bold text-[#1A56FF] hover:bg-[#F6F9FF] transition border-t border-slate-100">
+          <i class="fa-solid fa-plus text-[11px]"></i> Add more courses
+        </a>
+      </div>
+
+      <!-- Summary -->
+      <div class="bg-white rounded-[16px] border border-slate-100 shadow-sm overflow-hidden lg:sticky lg:top-[76px]">
+        <div class="px-4 sm:px-5 py-3.5 border-b border-slate-100">
+          <h2 class="text-[15px] font-extrabold text-[#0F2043]"><i
+              class="fa-solid fa-receipt text-[#1A56FF] mr-1.5"></i>Order Summary</h2>
+        </div>
+        <div class="p-4 sm:p-5">
+          <!-- Coupon -->
+          <label class="text-[11px] font-bold text-slate-600 uppercase tracking-wide"><i
+              class="fa-solid fa-ticket mr-1"></i>Coupon Code</label>
+          <div id="cpnForm" class="flex gap-2 mt-1.5">
+            <input id="cpnInput" placeholder="e.g. SAVE10"
+              class="flex-1 min-w-0 border border-slate-200 rounded-[10px] px-3 py-2.5 text-[13px] font-semibold uppercase outline-none focus:border-[#1A56FF] focus:ring-2 focus:ring-[#1A56FF]/10">
+            <button id="cpnApply"
+              class="px-4 py-2.5 rounded-[10px] bg-[#0F2043] hover:bg-[#1A56FF] text-white font-bold text-[13px] transition">Apply</button>
+          </div>
+          <div id="cpnApplied"
+            class="hidden mt-1.5 flex items-center justify-between gap-2 bg-[#E6F4EA] border border-[#C8E9D5] rounded-[10px] px-3 py-2.5">
+            <span class="text-[13px] font-bold text-[#15803D]"><i class="fa-solid fa-circle-check mr-1"></i><span
+                id="cpnCodeTxt"></span> <span class="font-semibold">(-<span id="cpnAmt"></span>)</span></span>
+            <button id="cpnRemove"
+              class="w-7 h-7 rounded-full bg-white text-red-500 hover:bg-red-50 flex items-center justify-center flex-shrink-0"><i
+                class="fa-solid fa-xmark text-[12px]"></i></button>
+          </div>
+          <p id="cpnMsg" class="text-[12px] mt-1.5 text-slate-400">কুপন থাকলে এখানে apply করুন</p>
+
+          <!-- Totals -->
+          <div class="mt-4 space-y-2 bg-[#F8F9FD] rounded-[12px] p-4">
+            <div class="flex justify-between text-[13px]"><span class="text-slate-600">Subtotal</span><b id="subTotal"
+                class="text-[#0F2043]">৳0</b></div>
+            <div class="flex justify-between text-[13px]"><span class="text-slate-600">Discount</span><b id="discAmt"
+                class="text-[#16A34A]">-৳0</b></div>
+            <div class="flex justify-between items-center pt-2 border-t border-slate-200"><span
+                class="font-extrabold text-[#0F2043] text-[15px]">Total</span><span id="grandTotal"
+                class="font-extrabold text-[#1A56FF] text-[20px]">৳0</span></div>
+          </div>
+
+          <!-- Payment method (temporarily hidden - manual only for now) -->
+          <div id="payMethodBox" class="mt-4 hidden">
+            <label class="text-[11px] font-bold text-slate-600 uppercase tracking-wide"><i
+                class="fa-solid fa-wallet mr-1"></i>Payment Method</label>
+            <div class="mt-1.5 space-y-2">
+              <label id="payOnlineOpt"
+                class="hidden flex items-center gap-3 border-2 border-[#1A56FF] bg-[#F6F9FF] rounded-[10px] px-3 py-2.5 cursor-pointer">
+                <input type="radio" name="payMethod" value="piprapay" checked class="w-4 h-4 accent-[#1A56FF]">
+                <span class="flex-1">
+                  <span class="block text-[13px] font-bold text-[#0F2043]"><i
+                      class="fa-solid fa-bolt text-[#16A34A] mr-1"></i>Online Payment</span>
+                  <span class="block text-[11px] text-slate-500">bKash • Nagad • Rocket • Card</span>
+                </span>
+                <span class="px-2 py-0.5 rounded-full bg-[#E6F4EA] text-[#16A34A] text-[10px] font-bold">FAST</span>
+              </label>
+              <label class="flex items-center gap-3 border border-slate-200 rounded-[10px] px-3 py-2.5 cursor-pointer">
+                <input type="radio" name="payMethod" value="manual" class="w-4 h-4 accent-[#1A56FF]">
+                <span class="flex-1">
+                  <span class="block text-[13px] font-bold text-[#0F2043]"><i
+                      class="fa-solid fa-hand-holding-dollar text-slate-500 mr-1"></i>Manual Payment</span>
+                  <span class="block text-[11px] text-slate-500">অর্ডার করে বিকাশে পাঠিয়ে confirm করুন</span>
+                </span>
+              </label>
+            </div>
+          </div>
+
+
+
+          <p id="orderMsg" class="hidden mt-3 text-[12px] font-semibold rounded-[10px] px-3 py-2"></p>
+          <button id="placeOrderBtn"
+            class="mt-4 w-full py-3 rounded-[12px] bg-[#1A56FF] hover:bg-[#1445D6] text-white font-extrabold text-[14px] flex items-center justify-center gap-2 transition shadow-[0_8px_24px_rgba(26,86,255,0.35)]">
+            <i class="fa-solid fa-bag-shopping"></i> Place Order
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-[#F3F4F8] border-t border-slate-100">
+    <div class="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-6">
+      <div class="grid grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr] gap-8">
+        <div class="col-span-2 lg:col-span-1">
+          <a href="index.html" class="flex items-center gap-2">
+            <svg width="38" height="38" viewBox="0 0 44 44" fill="none">
+              <path d="M22 6 C16 10 8 12 8 20 C8 28 16 30 22 34 C28 30 36 28 36 20 C36 12 28 10 22 6Z"
+                fill="url(#g2)" />
+              <path d="M12 28 L22 38 L32 28" stroke="#1A56FF" stroke-width="2.5" fill="none" opacity="0.9" />
+              <g>
+                <path d="M22 2 L32 7 L22 12 L12 7 Z" fill="#0F2043" />
+                <rect x="21" y="7" width="2" height="8" fill="#FACC15" />
+              </g>
+              <defs>
+                <linearGradient id="g2" x1="8" y1="6" x2="36" y2="34" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#1A56FF" />
+                  <stop offset="1" stop-color="#7C3AED" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <span class="leading-none"><span class="block text-[18px] font-extrabold"><span
+                  class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span><span
+                class="block text-[9px] tracking-[0.16em] text-slate-500 font-semibold -mt-0.5">Learn • Prepare •
+                Grow</span></span>
+          </a>
+          <div class="flex items-center gap-2.5 mt-4">
+            <a href="#"
+              class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-[#1A56FF]"><i
+                class="fa-solid fa-paper-plane text-[13px]"></i></a>
+            <a href="#"
+              class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-[#FF0000]"><i
+                class="fa-brands fa-youtube text-[13px]"></i></a>
+            <a href="#"
+              class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-[#1877F2]"><i
+                class="fa-brands fa-facebook-f text-[12px]"></i></a>
+          </div>
+        </div>
+        <div>
+          <h4 class="text-[13px] font-extrabold text-[#0F2043] mb-3">Explore</h4>
+          <ul class="space-y-2 text-[12.5px] text-slate-600">
+            <li><a href="courses.html" class="hover:text-[#1A56FF]">All Courses</a></li>
+            <li><a href="courses.html" class="hover:text-[#1A56FF]">HSC Courses</a></li>
+            <li><a href="courses.html" class="hover:text-[#1A56FF]">SSC Courses</a></li>
+            <li><a href="courses.html" class="hover:text-[#1A56FF]">Admission</a></li>
+            <li><a href="courses.html" class="hover:text-[#1A56FF]">Skill Development</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-[13px] font-extrabold text-[#0F2043] mb-3">Support</h4>
+          <ul class="space-y-2 text-[12.5px] text-slate-600">
+            <li><a href="#">FAQ</a></li>
+            <li><a href="#">Contact Us</a></li>
+            <li><a href="#">How to Buy</a></li>
+            <li><a href="#">Refund Policy</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-[13px] font-extrabold text-[#0F2043] mb-3">Company</h4>
+          <ul class="space-y-2 text-[12.5px] text-slate-600">
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Terms of Use</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="mt-8 pt-4 border-t border-slate-200 flex items-center justify-end">
+        <button onclick="window.scrollTo({top:0,behavior:'smooth'})"
+          class="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-600"><i
+            class="fa-solid fa-arrow-up text-[12px]"></i></button>
+      </div>
+    </div>
+  </footer>
+
+  <div id="pageToast"
+    class="hidden fixed bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 bg-[#0F2043] text-white px-5 py-3 rounded-full text-[13px] font-semibold shadow-xl z-[200]">
+  </div>
+
+  <!-- ===== Pro Mobile Bottom Nav (Android / Phone) ===== -->
+  <style>
+    .sm-bottom-nav {
+      padding-bottom: env(safe-area-inset-bottom)
+    }
+
+    .sm-bottom-nav .bn-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      min-width: 0;
+      flex: 1;
+      padding: 7px 2px 8px;
+      border-radius: 14px;
+      color: #64748B;
+      position: relative;
+      transition: background .15s, color .15s
+    }
+
+    .sm-bottom-nav .bn-item i {
+      font-size: 19px;
+      line-height: 1
+    }
+
+    .sm-bottom-nav .bn-item span {
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+      line-height: 1
+    }
+
+    .sm-bottom-nav .bn-item.bn-active {
+      background: #EAF0FF;
+      color: #1A56FF
+    }
+
+    .sm-bottom-nav .bn-item.bn-active span {
+      font-weight: 700
+    }
+
+    .sm-bottom-nav .bn-item.bn-active::before {
+      content: '';
+      position: absolute;
+      top: -9px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 22px;
+      height: 3px;
+      border-radius: 9999px;
+      background: linear-gradient(90deg, #1A56FF, #7C3AED)
+    }
+  </style>
+  <div class="h-[76px] lg:hidden" aria-hidden="true"></div>
+  <nav class="sm-bottom-nav fixed bottom-0 left-0 right-0 z-[70] border-t border-slate-200/90 lg:hidden"
+    style="background:rgba(255,255,255,.98);backdrop-filter:blur(12px);box-shadow:0 -6px 24px rgba(15,32,67,.08)">
+    <div class="grid grid-cols-5 gap-1 px-2 pt-2" style="padding-bottom:calc(8px + env(safe-area-inset-bottom))">
+      <a href="index.html" data-bn="home" class="bn-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
+      <a href="courses.html" data-bn="courses" class="bn-item"><i
+          class="fa-regular fa-square"></i><span>Courses</span></a>
+      <a href="courses.html" data-bn="ebook" class="bn-item"><i
+          class="fa-regular fa-file-lines"></i><span>E-Book</span></a>
+      <a href="cart.html" data-bn="cart" class="bn-item"><span class="relative"><i
+            class="fa-solid fa-cart-shopping"></i><span data-sm-cart-count
+            class="absolute -top-2 -right-3 min-w-[16px] h-4 px-1 bg-[#1A56FF] text-white text-[10px] font-bold rounded-full hidden items-center justify-center">0</span></span><span>Cart</span></a>
+      <a href="dashboard.html" data-bn="account" data-account-link class="bn-item"><i
+          class="fa-regular fa-user"></i><span>Account</span></a>
+    </div>
+  </nav>
+  <script>
+    (function () {
+      try {
+        var p = (location.pathname.split('/').pop() || 'index.html').split('?')[0].toLowerCase();
+        var map = { 'index.html': 'home', '': 'home', 'courses.html': 'courses', 'batch.html': 'courses', 'course.html': 'courses', 'ebook.html': 'ebook', 'cart.html': 'cart', 'dashboard.html': 'account', 'auth.html': 'account' };
+        var key = map[p] || 'home';
+        if (p === 'courses.html' && /ebook/i.test(location.search + location.hash)) key = 'ebook';
+        document.querySelectorAll('.sm-bottom-nav [data-bn]').forEach(function (a) { if (a.dataset.bn === key) a.classList.add('bn-active'); });
+        var n = 0; try { n = (JSON.parse(localStorage.getItem('sm_cart')) || []).length; } catch (e) { }
+        document.querySelectorAll('.sm-bottom-nav [data-sm-cart-count]').forEach(function (el) { el.textContent = n; el.classList.toggle('hidden', !n); el.classList.toggle('flex', !!n); });
+        // Smart Account routing: guest -> auth page, logged-in -> dashboard
+        var hasTok = function () { try { return !!(localStorage.getItem('sm_user_token') || sessionStorage.getItem('sm_user_token')); } catch (x) { return false; } };
+        if (!hasTok()) document.querySelectorAll('[data-account-link]').forEach(function (a) { a.href = 'auth.html?next=' + encodeURIComponent('dashboard.html'); });
+      } catch (e) { }
+      // click-time re-check (token may change without reload)
+      document.addEventListener('click', function (e) {
+        var a = e.target && e.target.closest ? e.target.closest('[data-account-link]') : null;
+        if (!a) return;
+        var t = ''; try { t = localStorage.getItem('sm_user_token') || sessionStorage.getItem('sm_user_token') || ''; } catch (x) { }
+        if (!t) { e.preventDefault(); location.href = 'auth.html?next=' + encodeURIComponent('dashboard.html'); }
+      });
+    })();
+  </script>
+
+  <script src="assets/navbar.js"></script>
+  <script src="assets/app.js"></script>
+  <script>
+    (function () {
+      'use strict';
+      document.getElementById('menuBtn').addEventListener('click', () => document.getElementById('mobileMenu').classList.toggle('hidden'));
+
+      const KEY = 'sm_cart';
+      let CP = { code: '', discount: 0 }; // applied coupon (page-local)
+
+      function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])) }
+      function cur(n) { const c = (window.SM && SM.settings && SM.settings.currency) || '৳'; return c + Number(n || 0).toLocaleString('en-IN') }
+      function read() { try { return JSON.parse(localStorage.getItem(KEY)) || [] } catch (e) { return [] } }
+      function write(items) { try { localStorage.setItem(KEY, JSON.stringify(items)) } catch (e) { } paintCount() }
+      function paintCount() {
+        const n = read().length;
+        document.querySelectorAll('[data-sm-cart-count]').forEach(el => { el.textContent = n });
+        const ic = document.getElementById('itemCount'); if (ic) ic.textContent = n ? ('(' + n + ' item' + (n > 1 ? 's' : '') + ')') : '';
+      }
+      function toast(msg) {
+        const t = document.getElementById('pageToast'); if (!t) return;
+        t.textContent = msg; t.classList.remove('hidden');
+        clearTimeout(t._h); t._h = setTimeout(() => t.classList.add('hidden'), 2600);
+      }
+      function thumb(it) {
+        const isEb = it.type === 'ebook';
+        if (it.image) {
+          return isEb
+            ? `<div class="w-[76px] h-[88px] sm:w-[88px] sm:h-[100px] rounded-[10px] overflow-hidden bg-[#F1F5F9] p-1 flex-shrink-0 border border-slate-100"><img src="${esc(it.image)}" alt="" class="w-full h-full object-contain rounded-[6px]"></div>`
+            : `<div class="w-[76px] h-[88px] sm:w-[88px] sm:h-[100px] rounded-[10px] overflow-hidden bg-[#0F2043] flex-shrink-0 border border-slate-100"><img src="${esc(it.image)}" alt="" class="w-full h-full object-cover"></div>`;
+        }
+        return `<div class="w-[76px] h-[88px] sm:w-[88px] sm:h-[100px] rounded-[10px] flex-shrink-0 flex items-center justify-center ${isEb ? 'bg-[#FFF7ED]' : 'bg-[#EEF2FF]'} border border-slate-100"><i class="fa-solid ${isEb ? 'fa-book text-[#F59E0B]' : 'fa-book-open text-[#1A56FF]'} text-[24px]"></i></div>`;
+      }
+
+      async function enrich() {
+        // fill missing image/type/url/price for old cart entries
+        const items = read(); let changed = false;
+        for (const it of items) {
+          if (it.image && it.type) continue;
+          const id = encodeURIComponent(it.id);
+          let d = null, isEb = false;
+          try { const r = await fetch('/api/courses/' + id); const j = await r.json(); if (r.ok && (j.data || j.id)) { d = j.data || j } } catch (e) { }
+          if (!d) { try { const r = await fetch('/api/ebooks/' + id); const j = await r.json(); if (r.ok && (j.data || j.id)) { d = j.data || j; isEb = true } } catch (e) { } }
+          if (d) {
+            it.title = d.title || it.title; it.price = (d.price !== undefined) ? Number(d.price) || 0 : it.price;
+            it.image = d.thumbnail || d.cover || it.image || '';
+            it.type = isEb || d.cover ? 'ebook' : 'course';
+            it.url = (it.type === 'ebook' ? 'ebook.html?id=' : 'course.html?id=') + it.id;
+            changed = true;
+          } else if (!it.type) { it.type = 'course'; it.url = 'course.html?id=' + it.id; changed = true }
+        }
+        if (changed) write(items);
+        return items;
+      }
+
+      function totals(items) {
+        const sub = items.reduce((s, c) => s + Number(c.price || 0), 0);
+        const disc = Math.min(Number(CP.discount) || 0, sub);
+        return { sub, disc, total: Math.max(0, sub - disc) };
+      }
+
+      function render(items) {
+        paintCount();
+        const has = items.length > 0;
+        document.getElementById('cartMain').classList.toggle('hidden', !has);
+        document.getElementById('cartEmpty').classList.toggle('hidden', has);
+        if (!has) return;
+        const box = document.getElementById('cartItems');
+        box.innerHTML = items.map(it => {
+          const isEb = it.type === 'ebook';
+          const price = Number(it.price) || 0;
+          return `<div class="p-3.5 sm:p-4 flex gap-3 sm:gap-4 items-center">
+        <a href="${esc(it.url || '#')}" class="flex-shrink-0">${thumb(it)}</a>
+        <div class="flex-1 min-w-0">
+          <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${isEb ? 'bg-[#FFF7ED] text-[#C2410C] border border-[#FFDCC2]' : 'bg-[#EEF2FF] text-[#1A56FF] border border-[#D7E3FF]'}"><i class="fa-solid ${isEb ? 'fa-book' : 'fa-circle-play'} mr-1"></i>${isEb ? 'E-Book' : 'Course'}</span>
+          <a href="${esc(it.url || '#')}" class="block mt-1 text-[13.5px] sm:text-[14.5px] font-bold text-[#0F2043] leading-snug hover:text-[#1A56FF] truncate">${esc(it.title || 'Untitled')}</a>
+          <div class="mt-0.5 text-[11.5px] text-slate-500 font-medium">${price === 0 ? '<span class="text-[#16A34A] font-bold">Free</span>' : 'Digital access • Lifetime'}</div>
+          <div class="mt-1.5 flex items-center justify-between gap-2">
+            <span class="text-[15px] sm:text-[16px] font-extrabold text-[#1A56FF]">${cur(price)}</span>
+            <button data-cart-rm="${esc(it.id)}" class="h-8 px-3 rounded-full bg-red-50 text-red-600 hover:bg-red-100 text-[12px] font-bold flex items-center gap-1.5 transition"><i class="fa-solid fa-trash-can text-[11px]"></i>Remove</button>
+          </div>
+        </div>
+      </div>`;
+        }).join('');
+        renderSummary(items);
+      }
+
+      function renderSummary(items) {
+        const t = totals(items || read());
+        document.getElementById('subTotal').textContent = cur(t.sub);
+        document.getElementById('discAmt').textContent = '-' + cur(t.disc);
+        document.getElementById('grandTotal').textContent = cur(t.total);
+        const hasCpn = !!CP.code;
+        document.getElementById('cpnForm').classList.toggle('hidden', hasCpn);
+        document.getElementById('cpnApplied').classList.toggle('hidden', !hasCpn);
+        if (hasCpn) { document.getElementById('cpnCodeTxt').textContent = CP.code; document.getElementById('cpnAmt').textContent = cur(CP.discount) }
+
+        // Free enrollment instant button
+        const isFree = t.total <= 0;
+        const btn = document.getElementById('placeOrderBtn');
+        if (btn) {
+          btn.innerHTML = isFree
+            ? '<i class="fa-solid fa-bolt mr-1"></i> Enroll Free'
+            : '<i class="fa-solid fa-bag-shopping"></i> Place Order';
+        }
+        const payBox = document.getElementById('payMethodBox');
+        if (payBox && isFree) payBox.classList.add('hidden');
+      }
+
+      async function revalidate(items) {
+        if (!CP.code) return;
+        try {
+          const t = totals(items);
+          const r = await fetch('/api/public/coupons/validate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: CP.code, subtotal: t.sub, items: items.map(c => ({ courseId: c.id, price: c.price })) }) });
+          const j = await r.json();
+          if (!r.ok) throw new Error(j.message || 'Coupon invalid');
+          CP = { code: j.data.code, discount: Number(j.data.discount) || 0 };
+          setCpnMsg('Coupon applied: -' + cur(CP.discount), 'ok');
+        } catch (e) { CP = { code: '', discount: 0 }; setCpnMsg('', ''); }
+      }
+      function setCpnMsg(msg, kind) {
+        const m = document.getElementById('cpnMsg');
+        m.textContent = msg;
+        m.className = 'text-[12px] mt-1.5 ' + (kind === 'ok' ? 'text-[#16A34A] font-semibold' : kind === 'err' ? 'text-red-600 font-semibold' : 'text-slate-400');
+      }
+
+      async function applyCoupon() {
+        const inp = document.getElementById('cpnInput');
+        const code = (inp.value || '').trim().toUpperCase();
+        if (!code) { toast('Enter a coupon code'); return }
+        const items = read();
+        if (!items.length) { toast('Your cart is empty'); return }
+        const t = totals(items);
+        const btn = document.getElementById('cpnApply');
+        btn.disabled = true; btn.textContent = '...';
+        try {
+          const r = await fetch('/api/public/coupons/validate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code, subtotal: t.sub, items: items.map(c => ({ courseId: c.id, price: c.price })) }) });
+          const j = await r.json();
+          if (!r.ok) throw new Error(j.message || 'Invalid coupon');
+          CP = { code: j.data.code, discount: Number(j.data.discount) || 0 };
+          setCpnMsg(j.message || ('Coupon applied: -' + cur(CP.discount)), 'ok');
+          toast('Coupon applied!');
+          renderSummary(items);
+        } catch (e) { setCpnMsg(e.message, 'err'); toast(e.message) }
+        btn.disabled = false; btn.textContent = 'Apply';
+      }
+
+      async function placeOrder() {
+        const items = read();
+        if (!items.length) { toast('Your cart is empty'); return }
+        const msg = document.getElementById('orderMsg');
+        const btn = document.getElementById('placeOrderBtn');
+        btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Placing order...';
+        msg.classList.add('hidden');
+        try {
+          const t = totals(items);
+          const isFree = t.total <= 0;
+          const methodEl = document.querySelector('input[name="payMethod"]:checked');
+          const method = isFree ? 'free' : (methodEl ? methodEl.value : 'manual');
+          // customer fields optional on this page (logged-in user info backend theke ney)
+          const val = id => { const el = document.getElementById(id); return el && el.value ? el.value.trim() : ''; };
+          const nm = val('fName');
+          const em = val('fEmail');
+          const ph = val('fPhone');
+          if (!isFree && method === 'piprapay' && !nm) { throw new Error('Online payment-এর জন্য আপনার নাম দিন') }
+          if (!isFree && method === 'piprapay' && !em && !ph) { throw new Error('Online payment-এর জন্য email বা phone দিন') }
+          const headers = { 'Content-Type': 'application/json' };
+          const tok = localStorage.getItem('sm_user_token') || sessionStorage.getItem('sm_user_token') || (window.SM && SM.token) || '';
+          if (tok) headers['Authorization'] = 'Bearer ' + tok;
+          const r = await fetch('/api/public/orders', {
+            method: 'POST', headers: headers, body: JSON.stringify({
+              items: items.map(c => ({ courseId: c.id })),
+              couponCode: CP.code || '',
+              paymentMethod: method,
+              name: nm, email: em, phone: ph
+            })
+          });
+          const j = await r.json();
+          if (!r.ok) throw new Error(j.message || 'Order failed');
+          if (j.data && j.data.pp_url) {
+            // online payment -> go to PipaPay checkout
+            try { sessionStorage.setItem('sm_pending_order', (j.data.order && j.data.order.orderNo) || '') } catch (e) { }
+            write([]); CP = { code: '', discount: 0 };
+            toast('Redirecting to payment...');
+            setTimeout(() => { window.location.href = j.data.pp_url }, 600);
+            btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-bag-shopping"></i> Place Order';
+            return;
+          }
+          write([]); CP = { code: '', discount: 0 };
+          document.getElementById('cartMain').classList.add('hidden');
+          document.getElementById('cartEmpty').classList.add('hidden');
+          const s = document.getElementById('orderSuccess');
+          document.getElementById('orderNoTxt').textContent = j.data && j.data.orderNo ? j.data.orderNo : '';
+          if (isFree) {
+            const succHead = s.querySelector('h2');
+            if (succHead) succHead.textContent = '🎉 Enrollment Complete!';
+            const succDesc = s.querySelector('p');
+            if (succDesc) succDesc.textContent = 'Free Course-এ আপনার এক্সেস সফলভাবে চালু হয়েছে! Dashboard-এ গিয়ে ক্লাস শুরু করতে পারেন।';
+          }
+          s.classList.remove('hidden');
+          // step indicator -> done
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          toast(j.message || 'Order placed!');
+        } catch (e) {
+          msg.textContent = e.message;
+          msg.className = 'mt-3 text-[12px] font-semibold rounded-[10px] px-3 py-2 bg-red-50 text-red-600 border border-red-100';
+          msg.classList.remove('hidden');
+          toast(e.message);
+        }
+        btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-bag-shopping"></i> Place Order';
+      }
+
+      // events
+      document.getElementById('cpnApply').addEventListener('click', applyCoupon);
+      document.getElementById('cpnInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); applyCoupon() } });
+      document.getElementById('cpnRemove').addEventListener('click', () => { CP = { code: '', discount: 0 }; document.getElementById('cpnInput').value = ''; setCpnMsg('কুপন থাকলে এখানে apply করুন', ''); renderSummary(read()) });
+      document.getElementById('placeOrderBtn').addEventListener('click', placeOrder);
+      document.getElementById('clearCart').addEventListener('click', () => { if (!read().length) return; if (confirm('Remove all items from cart?')) { write([]); CP = { code: '', discount: 0 }; render(read()) } });
+      document.getElementById('cartItems').addEventListener('click', async e => {
+        const b = e.target.closest('[data-cart-rm]'); if (!b) return;
+        const id = b.getAttribute('data-cart-rm');
+        const items = read().filter(c => String(c.id) !== String(id));
+        write(items);
+        await revalidate(items);
+        render(items);
+        toast('Removed from cart');
+      });
+
+      // init
+      (async function init() {
+        try {
+          const st = (window.SM && SM.settings) || {};
+          if (st.piprapayEnabled) {
+            document.getElementById('payOnlineOpt').classList.remove('hidden');
+            document.getElementById('payOnlineOpt').classList.add('flex');
+          } else {
+            const m = document.querySelector('input[name="payMethod"][value="manual"]');
+            if (m) m.checked = true;
+          }
+        } catch (e) { }
+        // settings may arrive after app.js fetch -> re-check shortly
+        setTimeout(() => {
+          try {
+            const st = (window.SM && SM.settings) || {};
+            if (st.piprapayEnabled) { document.getElementById('payOnlineOpt').classList.remove('hidden'); document.getElementById('payOnlineOpt').classList.add('flex') }
+          } catch (e) { }
+        }, 1800);
+        const populateUser = (u) => {
+          if (!u) return;
+          const fn = document.getElementById('fName'), fe = document.getElementById('fEmail'), fp = document.getElementById('fPhone');
+          if (fn && !fn.value && u.name) fn.value = u.name;
+          if (fe && !fe.value && u.email && !u.email.includes('@mobile.studymart')) fe.value = u.email;
+          if (fp && !fp.value && u.phone) fp.value = u.phone;
+        };
+        try { if (window.SM && SM.me) populateUser(SM.me); } catch (e) { }
+        const t = localStorage.getItem('sm_user_token') || sessionStorage.getItem('sm_user_token') || '';
+        if (t) {
+          fetch('/api/public/auth/me', { headers: { 'Authorization': 'Bearer ' + t } })
+            .then(r => r.json())
+            .then(j => { if (j.success && j.data) populateUser(j.data); })
+            .catch(() => { });
+        }
+        const items = await enrich();
+        render(items.length ? items : read());
+      })();
+    })();
+  </script>
+</body>
+
+</html>

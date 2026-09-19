@@ -1,0 +1,111 @@
+﻿<!DOCTYPE html>
+﻿<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel - StudyMart</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{font-family:'Inter',sans-serif}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:8px}
+.nav-item.active{background:#1A56FF;color:#fff}
+.nav-item.active:hover{background:#1445D6}
+.fade{animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body class="bg-[#F5F7FB] text-slate-900 antialiased">
+
+<!-- ================= LOGIN ================= -->
+<div id="loginScreen" class="hidden fixed inset-0 z-[100] flex items-center justify-center px-4" style="background:linear-gradient(135deg,#EEF2FF 0%,#F3F0FF 50%,#E0E7FF 100%)">
+  <div class="bg-white rounded-[20px] shadow-2xl border border-slate-100 w-full max-w-[410px] p-8">
+    <div class="text-center mb-6">
+      <span class="text-[26px] font-extrabold tracking-tight"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span>
+      <p class="text-[12px] font-bold text-slate-500 mt-1"><i class="fa-solid fa-user-shield mr-1 text-[#1A56FF]"></i>Admin Control Panel</p>
+    </div>
+    <form id="loginForm" class="space-y-4">
+      <div>
+        <label class="text-[11px] font-bold text-slate-600 uppercase">Username</label>
+        <input id="loginUser" required placeholder="admin" class="mt-1 w-full border border-slate-200 rounded-[10px] px-3 py-2.5 text-[14px] outline-none focus:border-[#1A56FF]">
+      </div>
+      <div>
+        <label class="text-[11px] font-bold text-slate-600 uppercase">Password</label>
+        <input id="loginPass" type="password" required placeholder="••••••••" class="mt-1 w-full border border-slate-200 rounded-[10px] px-3 py-2.5 text-[14px] outline-none focus:border-[#1A56FF]">
+      </div>
+      <p id="loginError" class="hidden text-[12px] font-semibold text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2"></p>
+      <button type="submit" class="w-full bg-[#1A56FF] hover:bg-[#1445D6] text-white font-bold text-[14px] py-2.5 rounded-[10px] transition">
+        <i class="fa-solid fa-right-to-bracket mr-1"></i> Login to Dashboard
+      </button>
+    </form>
+    <div class="mt-5 pt-4 border-t border-slate-100 text-center">
+      <a href="index.html" class="text-[12px] font-semibold text-slate-500 hover:text-[#1A56FF]"><i class="fa-solid fa-arrow-left mr-1"></i>Back to website</a>
+      <p class="text-[11px] text-slate-400 mt-2">Default: <b>admin</b> / <b>admin123</b></p>
+    </div>
+  </div>
+</div>
+
+﻿<!-- ================= APP SHELL ================= -->
+<div id="appShell" class="hidden">
+  <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-[248px] bg-[#0F2043] text-white flex flex-col -translate-x-full lg:translate-x-0 transition-transform duration-200">
+    <div class="h-[62px] flex items-center justify-between px-4 border-b border-white/10">
+      <a href="index.html" class="flex items-center gap-2">
+        <span class="text-[19px] font-extrabold tracking-tight">Study<span class="text-[#4D8BFF]">Mart</span></span>
+      </a>
+      <span class="px-2 py-0.5 rounded-full bg-[#1A56FF] text-[9px] font-black tracking-wider">ADMIN</span>
+    </div>
+    <nav id="sideNav" class="flex-1 overflow-y-auto px-3 py-4 space-y-1 text-[13.5px] font-semibold"></nav>
+    <div class="p-3 border-t border-white/10">
+      <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-white/10 text-slate-300 text-[13px]">
+        <i class="fa-solid fa-globe w-5 text-center"></i> View Website
+      </a>
+    </div>
+  </aside>
+  <div id="backdrop" class="hidden fixed inset-0 bg-black/40 z-40 lg:hidden"></div>
+
+  <div class="lg:pl-[248px] min-h-screen flex flex-col">
+    <header class="sticky top-0 z-30 bg-white border-b border-slate-200 h-[62px] flex items-center justify-between px-4 sm:px-6 gap-3">
+      <div class="flex items-center gap-3">
+        <button id="menuBtn" class="lg:hidden w-9 h-9 rounded-lg hover:bg-slate-100 flex items-center justify-center">
+          <i class="fa-solid fa-bars text-[18px] text-[#0F2043]"></i>
+        </button>
+        <div>
+          <h1 id="pageTitle" class="text-[16px] sm:text-[18px] font-extrabold text-[#0F2043] leading-tight">Dashboard</h1>
+          <p id="pageSub" class="text-[11px] text-slate-500 hidden sm:block">Overview of your platform</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 sm:gap-3">
+        <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#E6F4EA] text-[#16A34A] text-[11px] font-bold">
+          <span class="w-2 h-2 rounded-full bg-[#16A34A]"></span> Server Online
+        </div>
+        <div class="flex items-center gap-2 pl-2 sm:pl-3 border-l border-slate-200">
+          <div class="w-8 h-8 rounded-full bg-[#EDE9FF] border border-[#DDD6FE] flex items-center justify-center text-[#4F46E5] font-extrabold text-[12px]" id="adminAvatar">A</div>
+          <div class="hidden sm:block leading-tight">
+            <div class="text-[12.5px] font-bold text-[#0F2043]" id="adminName">Admin</div>
+            <div class="text-[10px] text-slate-500">Super Admin</div>
+          </div>
+        </div>
+        <button id="logoutBtn" class="w-9 h-9 rounded-full bg-red-50 text-red-600 hover:bg-red-100 transition" title="Logout">
+          <i class="fa-solid fa-right-from-bracket text-[14px]"></i>
+        </button>
+      </div>
+    </header>
+    <main id="view" class="flex-1 p-4 sm:p-6 fade"></main>
+    <footer class="px-6 py-4 text-[11px] text-slate-400 border-t border-slate-200 bg-white">
+      StudyMart Admin Panel &copy; 2026 &middot; Node.js + Express
+    </footer>
+  </div>
+</div>
+
+<div id="modalWrap" class="hidden fixed inset-0 z-[90] bg-black/50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+  <div id="modalBox" class="bg-white rounded-[16px] shadow-2xl w-full max-w-[720px] max-h-[90vh] overflow-y-auto my-6 flex flex-col"></div>
+</div>
+
+<div id="toast" class="fixed bottom-5 right-5 z-[110] hidden text-white text-[13px] font-semibold px-4 py-3 rounded-[10px] shadow-2xl"></div>
+
+<script src="assets/admin-app.js"></script>
+</body>
+</html>
+

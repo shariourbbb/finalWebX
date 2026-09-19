@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-Books - StudyMart</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Hind+Siliguri:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{font-family:'Inter',sans-serif}
+.bangla{font-family:'Hind Siliguri',sans-serif}
+.scrollbar-hide::-webkit-scrollbar{display:none}
+.scrollbar-hide{-ms-overflow-style:none;scrollbar-width:none}
+.filter-pill{transition:all .15s}
+.filter-pill.active{background:#1A56FF;color:white;border-color:#1A56FF}
+.filter-pill:not(.active){background:white;color:#475569;border:1px solid #E2E8F0}
+.filter-pill:not(.active):hover{border-color:#1A56FF;color:#1A56FF}
+.course-card{transition:all .2s}
+.course-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.08)}
+</style>
+</head>
+<body class="bg-[#F8F9FD] text-slate-900 antialiased pb-[86px] lg:pb-6">
+
+<!-- Header: phone unchanged + desktop pic-like -->
+<link rel="stylesheet" href="assets/navbar.css">
+<header class="sticky top-0 z-40 bg-white border-b border-slate-100 shadow-sm">
+  <div class="hidden lg:block border-b border-slate-100">
+    <div class="max-w-[1400px] mx-auto px-6 h-[68px] flex items-center gap-4">
+      <button data-sm-desk-menu-btn class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-100 transition flex-shrink-0" aria-label="Menu"><i class="fa-solid fa-bars text-[20px] text-[#0F2043]"></i></button>
+      <a href="index.html" class="flex items-center gap-2 flex-shrink-0">
+        <img data-sm-desk-logo src="" alt="Logo" class="hidden w-10 h-10 object-contain rounded-lg">
+        <div data-sm-desk-logo-fb class="w-10 h-10 flex items-center justify-center"><svg width="40" height="40" viewBox="0 0 44 44" fill="none"><path d="M22 6 C16 10 8 12 8 20 C8 28 16 30 22 34 C28 30 36 28 36 20 C36 12 28 10 22 6Z" fill="#1A56FF"/><path d="M12 28 L22 38 L32 28" stroke="#1A56FF" stroke-width="2.5" fill="none" opacity="0.9"/><g><path d="M22 2 L32 7 L22 12 L12 7 Z" fill="#0F2043"/><rect x="21" y="7" width="2" height="8" fill="#FACC15"/></g></svg></div>
+        <span class="text-[22px] font-extrabold tracking-tight leading-none"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span>
+      </a>
+      <nav class="flex items-center gap-6 text-[14px] font-semibold flex-shrink-0 ml-2">
+        <a data-sm-nav="home" href="index.html" class="sm-desk-nav-link" data-i18n="home">Home</a>
+        <a data-sm-nav="courses" href="courses.html" class="sm-desk-nav-link" data-i18n="courses">Courses</a>
+        <a data-sm-nav="ebooks" href="ebooks.html" class="sm-desk-nav-link" data-i18n="ebooks">Ebooks</a>
+        <a data-sm-nav="free" href="courses.html?q=" class="sm-desk-nav-link" data-i18n="free">Free Resources</a>
+        <a data-sm-nav="telegram" href="#" data-sm-telegram class="sm-desk-nav-link" data-i18n="telegram">Telegram</a>
+      </nav>
+      <div class="flex-1"></div>
+      <div class="sm-desk-search w-[280px] xl:w-[320px] flex-shrink-0"><i class="fa-solid fa-magnifying-glass text-slate-400 text-[14px]"></i><input data-sm-desk-search data-i18n-ph="searchPh" type="text" placeholder="Search courses, subjects, ebooks..."><button data-sm-desk-search-btn class="text-slate-400 hover:text-[#1A56FF]" aria-label="Search"><i class="fa-solid fa-arrow-right text-[12px]"></i></button></div>
+      <div class="sm-desk-drop flex-shrink-0"><button data-sm-desk-lang-btn class="sm-desk-pill"><i class="fa-solid fa-globe text-[15px] text-slate-500"></i><span data-i18n="lang">বাংলা/English</span><i class="fa-solid fa-chevron-down text-[11px] text-slate-400"></i></button><div data-sm-desk-lang-menu class="sm-desk-menu hidden"><button type="button" class="sm-mi" data-sm-lang-pick="bn">বাংলা (Bangla)</button><button type="button" class="sm-mi" data-sm-lang-pick="en">English</button></div></div>
+      <button data-sm-theme-btn class="sm-desk-pill flex-shrink-0"><i data-sm-theme-icon class="fa-solid fa-sun text-[15px] text-[#F59E0B]"></i><span data-i18n="theme">Theme</span></button>
+      <div class="sm-desk-drop flex-shrink-0"><button data-sm-desk-account-btn class="sm-desk-pill"><i class="fa-regular fa-user text-[15px] text-slate-600"></i><span data-i18n="account">Account</span><i class="fa-solid fa-chevron-down text-[11px] text-slate-400"></i></button><div data-sm-desk-account-menu class="sm-desk-menu hidden"></div></div>
+    </div>
+  </div>
+  <div id="smDeskDrawer" class="hidden"><div class="sm-backdrop"></div><div class="sm-panel"><div class="flex items-center justify-between mb-3"><span class="text-[18px] font-extrabold"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span><button data-sm-drawer-close class="w-9 h-9 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-xmark"></i></button></div><nav class="flex flex-col gap-1 text-[14px] font-semibold"><a href="index.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Home</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Courses</a><a href="ebooks.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Ebooks</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Free Resources</a><a href="#" data-sm-telegram class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Telegram</a><a href="dashboard.html" data-account-link class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Account / Dashboard</a><a href="cart.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Cart (<span data-sm-cart-count>0</span>)</a></nav></div></div>
+  <!-- phone bar (unchanged) -->
+  <div class="lg:hidden max-w-[720px] lg:max-w-[1000px] mx-auto px-3 sm:px-4 h-[56px] flex items-center justify-between gap-2">
+    <div class="flex items-center gap-2">
+      <a href="index.html" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100">
+        <i class="fa-solid fa-arrow-left text-[16px] text-[#0F2043]"></i>
+      </a>
+      <a href="index.html" class="flex items-center gap-1.5">
+        <svg width="32" height="32" viewBox="0 0 44 44" fill="none">
+          <path d="M22 6 C16 10 8 12 8 20 C8 28 16 30 22 34 C28 30 36 28 36 20 C36 12 28 10 22 6Z" fill="url(#g1)" />
+          <path d="M12 28 L22 38 L32 28" stroke="#1A56FF" stroke-width="2.5" fill="none" opacity="0.9"/>
+          <g><path d="M22 2 L32 7 L22 12 L12 7 Z" fill="#0F2043"/></g>
+          <defs><linearGradient id="g1" x1="8" y1="6" x2="36" y2="34" gradientUnits="userSpaceOnUse"><stop stop-color="#1A56FF"/><stop offset="1" stop-color="#7C3AED"/></linearGradient></defs>
+        </svg>
+        <span class="text-[18px] font-extrabold tracking-tight"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span>
+      </a>
+    </div>
+    <div class="flex items-center gap-1 sm:gap-2">
+      <a href="#" data-sm-telegram class="w-8 h-8 rounded-full bg-[#E6F0FF] flex items-center justify-center text-[#1A56FF] hover:bg-[#D6E4FF] transition flex-shrink-0" title="Telegram">
+        <i class="fa-brands fa-telegram text-[15px]"></i>
+      </a>
+      <a href="cart.html" class="relative w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100">
+        <i class="fa-solid fa-cart-shopping text-[16px] text-[#0F2043]"></i>
+        <span id="cartBadge" data-sm-cart-count class="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-[#1A56FF] text-white text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-[720px] lg:max-w-[1000px] mx-auto px-3 sm:px-4">
+
+  <!-- Banner -->
+  <section id="ebBanner" class="mt-3 rounded-[16px] border overflow-hidden relative px-4 sm:px-6 py-5 flex items-center justify-between" style="background:#F0F9FF;border-color:#E0F2FE">
+    <div>
+      <span class="px-2 py-0.5 rounded-full bg-[#E0F2FE] text-[#0284C7] text-[10px] font-bold"><i class="fa-solid fa-book-open mr-1"></i> PDF Library</span>
+      <h1 id="ebTitle" class="text-[20px] sm:text-[22px] font-extrabold text-[#0F2043] mt-1.5">E-Books</h1>
+      <p id="ebSub" class="text-[12px] text-slate-500 mt-0.5">Sob e-book ek jaygay</p>
+    </div>
+    <div id="ebBannerIcon" class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-book-open text-[#0284C7] text-[20px]"></i></div>
+  </section>
+
+  <!-- E-Book Batch pills -->
+  <div id="ebPills" class="flex gap-2 overflow-x-auto scrollbar-hide py-3">
+    <p class="text-[13px] text-slate-400 py-2"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading...</p>
+  </div>
+
+  <!-- Search -->
+  <div class="relative mb-3">
+    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[13px]"></i>
+    <input id="ebSearch" placeholder="Search PDF books..." class="w-full bg-white border border-slate-200 rounded-[12px] pl-10 pr-3 py-2.5 text-[13px] outline-none focus:border-[#1A56FF]">
+  </div>
+
+  <!-- PDF list -->
+  <div class="flex items-center justify-between mb-2">
+    <span id="ebCount" class="text-[11px] font-semibold text-slate-500"></span>
+  </div>
+  <div id="ebList" class="space-y-3">
+    <p class="text-[13px] text-slate-400 text-center py-10"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading e-books...</p>
+  </div>
+  <div id="ebEmpty" class="hidden text-center py-12">
+    <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto"><i class="fa-solid fa-book-open text-slate-400 text-[20px]"></i></div>
+    <p class="text-[13px] font-semibold text-slate-500 mt-3">Ei batch-e ekhono kono e-book nai</p>
+    <a href="ebooks.html" class="mt-2 inline-block text-[12px] font-bold text-[#1A56FF]">Sob E-Book Dekho</a>
+  </div>
+
+</main>
+
+<!-- ===== Pro Mobile Bottom Nav (Android / Phone) ===== -->
+<style>
+.sm-bottom-nav{padding-bottom:env(safe-area-inset-bottom)}
+.sm-bottom-nav .bn-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;flex:1;padding:7px 2px 8px;border-radius:14px;color:#64748B;position:relative;transition:background .15s,color .15s}
+.sm-bottom-nav .bn-item i{font-size:19px;line-height:1}
+.sm-bottom-nav .bn-item span{font-size:11px;font-weight:600;white-space:nowrap;line-height:1}
+.sm-bottom-nav .bn-item.bn-active{background:#EAF0FF;color:#1A56FF}
+.sm-bottom-nav .bn-item.bn-active span{font-weight:700}
+.sm-bottom-nav .bn-item.bn-active::before{content:'';position:absolute;top:-9px;left:50%;transform:translateX(-50%);width:22px;height:3px;border-radius:9999px;background:linear-gradient(90deg,#1A56FF,#7C3AED)}
+</style>
+<nav class="sm-bottom-nav fixed bottom-0 left-0 right-0 z-[70] border-t border-slate-200/90 lg:hidden" style="background:rgba(255,255,255,.98);backdrop-filter:blur(12px);box-shadow:0 -6px 24px rgba(15,32,67,.08)">
+  <div class="grid grid-cols-5 gap-1 px-2 pt-2" style="padding-bottom:calc(8px + env(safe-area-inset-bottom))">
+    <a href="index.html" data-bn="home" class="bn-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
+    <a href="courses.html" data-bn="courses" class="bn-item"><i class="fa-regular fa-square"></i><span>Courses</span></a>
+    <a href="ebooks.html" data-bn="ebook" class="bn-item"><i class="fa-regular fa-file-lines"></i><span>E-Book</span></a>
+    <a href="cart.html" data-bn="cart" class="bn-item"><span class="relative"><i class="fa-solid fa-cart-shopping"></i><span data-sm-cart-count class="absolute -top-2 -right-3 min-w-[16px] h-4 px-1 bg-[#1A56FF] text-white text-[10px] font-bold rounded-full hidden items-center justify-center">0</span></span><span>Cart</span></a>
+    <a href="dashboard.html" data-bn="account" data-account-link class="bn-item"><i class="fa-regular fa-user"></i><span>Account</span></a>
+  </div>
+</nav>
+<script>
+(function(){
+  try{
+    document.querySelectorAll('.sm-bottom-nav [data-bn]').forEach(function(a){ if(a.dataset.bn==='ebook') a.classList.add('bn-active'); });
+    var n=0; try{ n=(JSON.parse(localStorage.getItem('sm_cart'))||[]).length; }catch(e){}
+    document.querySelectorAll('.sm-bottom-nav [data-sm-cart-count]').forEach(function(el){ el.textContent=n; el.classList.toggle('hidden',!n); el.classList.toggle('flex',!!n); });
+    var hasTok=function(){ try{return !!(localStorage.getItem('sm_user_token')||sessionStorage.getItem('sm_user_token'));}catch(x){return false;} };
+    if(!hasTok()) document.querySelectorAll('[data-account-link]').forEach(function(a){ a.href='auth.html?next='+encodeURIComponent('dashboard.html'); });
+  }catch(e){}
+  document.addEventListener('click',function(e){
+    var a=e.target&&e.target.closest?e.target.closest('[data-account-link]'):null;
+    if(!a) return;
+    var t=''; try{t=localStorage.getItem('sm_user_token')||sessionStorage.getItem('sm_user_token')||'';}catch(x){}
+    if(!t){ e.preventDefault(); location.href='auth.html?next='+encodeURIComponent('dashboard.html'); }
+  });
+  try{
+    var c=0; try{ c=(JSON.parse(localStorage.getItem('sm_cart'))||[]).length; }catch(x){}
+    var badge=document.getElementById('cartBadge'); if(badge){ badge.textContent=c; badge.style.display=c?'flex':'none'; }
+  }catch(e){}
+})();
+</script>
+<script>
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(m){ return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]); });
+}
+
+var ebParam = '';
+try { ebParam = (new URLSearchParams(window.location.search).get('ebookBatch') || '').trim(); } catch (e) {}
+var ebBatches = [];
+var ebAllBooks = [];
+var ebActive = '';
+
+function ebPillHtml(id, name, active){
+  return '<button data-ebbatch="' + esc(id) + '" class="filter-pill flex-shrink-0 px-4 py-2 rounded-full text-[12px] font-bold border whitespace-nowrap' + (active ? ' active' : '') + '">' + esc(name) + '</button>';
+}
+
+function renderEbPills(){
+  var box = document.getElementById('ebPills');
+  var html = ebPillHtml('', 'All E-Books', !ebActive);
+  html += ebBatches.map(function(b){
+    return ebPillHtml(b.id, b.name, String(b.id) === String(ebActive));
+  }).join('');
+  box.innerHTML = html;
+  box.querySelectorAll('[data-ebbatch]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var id = btn.dataset.ebbatch;
+      var url = id ? ('ebooks.html?ebookBatch=' + encodeURIComponent(id)) : 'ebooks.html';
+      if (String(id || '') !== String(ebActive || '')) window.location.href = url;
+    });
+  });
+}
+
+function renderEbList(){
+  var box = document.getElementById('ebList');
+  var empty = document.getElementById('ebEmpty');
+  var q = '';
+  try { q = (document.getElementById('ebSearch').value || '').toLowerCase().trim(); } catch (e) {}
+  var list = ebAllBooks.filter(function(b){
+    if (ebActive && String(b.ebookBatchId) !== String(ebActive)) return false;
+    if (q && ((b.title + ' ' + (b.details || '') + ' ' + (b.author || '')).toLowerCase().indexOf(q) === -1)) return false;
+    return true;
+  });
+  document.getElementById('ebCount').textContent = list.length ? (list.length + ' PDF Found') : '';
+  if (!list.length) { box.innerHTML = ''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  box.innerHTML = list.map(function(b){
+    var price = Number(b.price) || 0, old = Number(b.oldPrice) || 0;
+    var off = old > price && price > 0 ? Math.round(((old - price) / old) * 100) : 0;
+    var cover = b.cover
+      ? '<img src="' + esc(b.cover) + '" alt="' + esc(b.title) + '" class="absolute inset-0 w-full h-full object-cover" loading="lazy">'
+      : '<div class="absolute inset-0 flex items-center justify-center" style="background:linear-gradient(135deg,' + esc(b.ebookBatchColor || b.batchColor || '#0EA5E9') + ' 0%,#0F2043 100%)"><i class="fa-solid fa-book-open text-white/30 text-[28px]"></i></div>';
+    var priceHtml = price > 0
+      ? '<span class="text-[#1A56FF] font-extrabold text-[14px] whitespace-nowrap">৳' + price + '</span>' + (old > price ? '<span class="text-[11px] text-slate-400 line-through">৳' + old + '</span>' : '') + (off ? '<span class="px-1.5 py-0.5 rounded-full bg-[#E6F4EA] text-[#16A34A] text-[9px] font-bold">-' + off + '%</span>' : '')
+      : '<span class="text-[#16A34A] font-extrabold text-[13px]">FREE</span>';
+    var batchPill = (b.ebookBatchName || b.batchName)
+      ? '<span class="px-1.5 py-0.5 rounded-full bg-[#E0F2FE] text-[#0284C7] text-[9px] font-bold">' + esc(b.ebookBatchName || b.batchName) + '</span>' : '';
+    return '' +
+    '<div onclick="window.location.href=\'ebook.html?id=' + b.id + '\'" class="course-card bg-white rounded-[14px] border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.04)] overflow-hidden flex cursor-pointer">' +
+      '<div class="w-[110px] sm:w-[128px] flex-shrink-0 relative overflow-hidden bg-[#F1F5F9]">' +
+        cover +
+        '<span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/45 backdrop-blur border border-white/25 text-white text-[8px] font-semibold"><i class="fa-solid fa-file-pdf mr-0.5"></i>PDF</span>' +
+      '</div>' +
+      '<div class="flex-1 min-w-0 p-3 flex flex-col">' +
+        '<div class="flex items-center gap-1.5 flex-wrap mb-1">' + batchPill + (b.downloads ? '<span class="text-[10px] text-slate-400 font-semibold"><i class="fa-solid fa-download mr-0.5"></i>' + b.downloads + '</span>' : '') + '</div>' +
+        '<h3 class="bangla font-bold text-[12px] sm:text-[13px] text-[#0F2043] leading-tight line-clamp-2">' + esc(b.title) + '</h3>' +
+        '<p class="text-[11px] text-slate-500 mt-1 truncate">' + esc(b.author ? 'By ' + b.author : (b.categoryName || '')) + '</p>' +
+        '<div class="mt-auto flex items-center justify-between pt-2 gap-2">' +
+          '<div class="flex items-center gap-1.5 flex-wrap">' + priceHtml + '</div>' +
+          '<span class="px-3 py-1.5 bg-white border border-[#1A56FF] text-[#1A56FF] rounded-full text-[11px] font-bold whitespace-nowrap">View <i class="fa-solid fa-arrow-right text-[9px] ml-0.5"></i></span>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+async function initEbooks(){
+  try {
+    var bRes = await fetch('/api/public/ebook-batches');
+    var bj = await bRes.json();
+    ebBatches = bj.data || [];
+    // ?ebookBatch= id ba slug — duitai support
+    if (ebParam) {
+      var found = ebBatches.find(function(b){
+        return String(b.id) === String(ebParam) || String(b.slug || '').toLowerCase() === String(ebParam).toLowerCase();
+      });
+      if (found) {
+        ebActive = found.id;
+        document.getElementById('ebTitle').textContent = found.name;
+        document.getElementById('ebSub').textContent = 'Ei batch-er sob PDF e-book';
+      }
+    }
+    renderEbPills();
+    var url = '/api/public/ebooks?limit=200';
+    if (ebActive) url = '/api/public/ebooks?ebookBatchId=' + encodeURIComponent(ebActive) + '&limit=200';
+    var r = await fetch(url);
+    var j = await r.json();
+    ebAllBooks = j.data || [];
+    renderEbList();
+  } catch (e) {
+    document.getElementById('ebList').innerHTML = '<p class="text-[13px] text-red-400 text-center py-10">Failed to load e-books</p>';
+  }
+}
+
+document.getElementById('ebSearch').addEventListener('input', renderEbList);
+initEbooks();
+</script>
+<script src="assets/navbar.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

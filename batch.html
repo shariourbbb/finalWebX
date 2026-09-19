@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Batch - StudyMart</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Hind+Siliguri:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{font-family:'Inter',sans-serif}
+.bangla{font-family:'Hind Siliguri',sans-serif}
+.scrollbar-hide::-webkit-scrollbar{display:none}
+.scrollbar-hide{-ms-overflow-style:none;scrollbar-width:none}
+.filter-pill{transition:all .15s}
+.filter-pill.active{background:#1A56FF;color:white;border-color:#1A56FF}
+.filter-pill:not(.active){background:white;color:#475569;border:1px solid #E2E8F0}
+.filter-pill:not(.active):hover{border-color:#1A56FF;color:#1A56FF}
+.tab-active{background:#4F46E5;color:white}
+.tab-inactive{background:white;color:#475569}
+.course-card{transition:all .2s}
+.course-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.08)}
+</style>
+</head>
+<body class="bg-[#F8F9FD] text-slate-900 antialiased pb-[86px] lg:pb-6">
+
+<!-- Header: phone unchanged + desktop pic-like -->
+<link rel="stylesheet" href="assets/navbar.css">
+<header class="sticky top-0 z-40 bg-white border-b border-slate-100 shadow-sm">
+  <div class="hidden lg:block border-b border-slate-100">
+    <div class="max-w-[1400px] mx-auto px-6 h-[68px] flex items-center gap-4">
+      <button data-sm-desk-menu-btn class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-100 transition flex-shrink-0" aria-label="Menu"><i class="fa-solid fa-bars text-[20px] text-[#0F2043]"></i></button>
+      <a href="index.html" class="flex items-center gap-2 flex-shrink-0">
+        <img data-sm-desk-logo src="" alt="Logo" class="hidden w-10 h-10 object-contain rounded-lg">
+        <div data-sm-desk-logo-fb class="w-10 h-10 flex items-center justify-center"><svg width="40" height="40" viewBox="0 0 44 44" fill="none"><path d="M22 6 C16 10 8 12 8 20 C8 28 16 30 22 34 C28 30 36 28 36 20 C36 12 28 10 22 6Z" fill="#1A56FF"/><path d="M12 28 L22 38 L32 28" stroke="#1A56FF" stroke-width="2.5" fill="none" opacity="0.9"/><g><path d="M22 2 L32 7 L22 12 L12 7 Z" fill="#0F2043"/><rect x="21" y="7" width="2" height="8" fill="#FACC15"/></g></svg></div>
+        <span class="text-[22px] font-extrabold tracking-tight leading-none"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span>
+      </a>
+      <nav class="flex items-center gap-6 text-[14px] font-semibold flex-shrink-0 ml-2">
+        <a data-sm-nav="home" href="index.html" class="sm-desk-nav-link" data-i18n="home">Home</a>
+        <a data-sm-nav="courses" href="courses.html" class="sm-desk-nav-link" data-i18n="courses">Courses</a>
+        <a data-sm-nav="ebooks" href="index.html#secEbooks" class="sm-desk-nav-link" data-i18n="ebooks">Ebooks</a>
+        <a data-sm-nav="free" href="courses.html?q=" class="sm-desk-nav-link" data-i18n="free">Free Resources</a>
+        <a data-sm-nav="telegram" href="#" data-sm-telegram class="sm-desk-nav-link" data-i18n="telegram">Telegram</a>
+      </nav>
+      <div class="flex-1"></div>
+      <div class="sm-desk-search w-[280px] xl:w-[320px] flex-shrink-0"><i class="fa-solid fa-magnifying-glass text-slate-400 text-[14px]"></i><input data-sm-desk-search data-i18n-ph="searchPh" type="text" placeholder="Search courses, subjects, ebooks..."><button data-sm-desk-search-btn class="text-slate-400 hover:text-[#1A56FF]" aria-label="Search"><i class="fa-solid fa-arrow-right text-[12px]"></i></button></div>
+      <div class="sm-desk-drop flex-shrink-0"><button data-sm-desk-lang-btn class="sm-desk-pill"><i class="fa-solid fa-globe text-[15px] text-slate-500"></i><span data-i18n="lang">বাংলা/English</span><i class="fa-solid fa-chevron-down text-[11px] text-slate-400"></i></button><div data-sm-desk-lang-menu class="sm-desk-menu hidden"><button type="button" class="sm-mi" data-sm-lang-pick="bn">বাংলা (Bangla)</button><button type="button" class="sm-mi" data-sm-lang-pick="en">English</button></div></div>
+      <button data-sm-theme-btn class="sm-desk-pill flex-shrink-0"><i data-sm-theme-icon class="fa-solid fa-sun text-[15px] text-[#F59E0B]"></i><span data-i18n="theme">Theme</span></button>
+      <div class="sm-desk-drop flex-shrink-0"><button data-sm-desk-account-btn class="sm-desk-pill"><i class="fa-regular fa-user text-[15px] text-slate-600"></i><span data-i18n="account">Account</span><i class="fa-solid fa-chevron-down text-[11px] text-slate-400"></i></button><div data-sm-desk-account-menu class="sm-desk-menu hidden"></div></div>
+    </div>
+  </div>
+  <div id="smDeskDrawer" class="hidden"><div class="sm-backdrop"></div><div class="sm-panel"><div class="flex items-center justify-between mb-3"><span class="text-[18px] font-extrabold"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span><button data-sm-drawer-close class="w-9 h-9 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-xmark"></i></button></div><nav class="flex flex-col gap-1 text-[14px] font-semibold"><a href="index.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Home</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Courses</a><a href="index.html#secEbooks" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Ebooks</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Free Resources</a><a href="#" data-sm-telegram class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Telegram</a><a href="dashboard.html" data-account-link class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Account / Dashboard</a><a href="cart.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Cart (<span data-sm-cart-count>0</span>)</a></nav></div></div>
+  <!-- phone bar (unchanged) -->
+  <div class="lg:hidden max-w-[720px] lg:max-w-[1000px] mx-auto px-3 sm:px-4 h-[56px] flex items-center justify-between gap-2">
+    <div class="flex items-center gap-2">
+      <a href="index.html" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100">
+        <i class="fa-solid fa-arrow-left text-[16px] text-[#0F2043]"></i>
+      </a>
+      <a href="index.html" class="flex items-center gap-1.5">
+        <svg width="32" height="32" viewBox="0 0 44 44" fill="none">
+          <path d="M22 6 C16 10 8 12 8 20 C8 28 16 30 22 34 C28 30 36 28 36 20 C36 12 28 10 22 6Z" fill="url(#g1)" />
+          <path d="M12 28 L22 38 L32 28" stroke="#1A56FF" stroke-width="2.5" fill="none" opacity="0.9"/>
+          <g><path d="M22 2 L32 7 L22 12 L12 7 Z" fill="#0F2043"/></g>
+          <defs><linearGradient id="g1" x1="8" y1="6" x2="36" y2="34" gradientUnits="userSpaceOnUse"><stop stop-color="#1A56FF"/><stop offset="1" stop-color="#7C3AED"/></linearGradient></defs>
+        </svg>
+        <span class="text-[18px] font-extrabold tracking-tight"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span>
+      </a>
+    </div>
+    <div class="flex items-center gap-1 sm:gap-2">
+      <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100">
+        <i class="fa-solid fa-magnifying-glass text-[16px] text-[#0F2043]"></i>
+      </button>
+      <a href="#" data-sm-telegram class="w-8 h-8 rounded-full bg-[#E6F0FF] flex items-center justify-center text-[#1A56FF] hover:bg-[#D6E4FF] transition flex-shrink-0" title="Telegram">
+        <i class="fa-brands fa-telegram text-[15px]"></i>
+      </a>
+      <a href="cart.html" class="relative w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100">
+        <i class="fa-solid fa-cart-shopping text-[16px] text-[#0F2043]"></i>
+        <span id="cartBadge" data-sm-cart-count class="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-[#1A56FF] text-white text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-[720px] lg:max-w-[1000px] mx-auto px-3 sm:px-4">
+
+  <!-- Batch Banner (dynamic: name + color from ?batch=) -->
+  <section id="batchBanner" class="mt-3 bg-[#F3F0FF] rounded-[16px] border border-[#EDE9FF] overflow-hidden relative px-4 sm:px-6 py-4 flex items-center justify-between">
+    <div>
+      <div class="flex items-center gap-2">
+        <div class="w-9 h-9 rounded-full bg-white shadow-sm flex items-center justify-center"><i id="batchBannerIcon" class="fa-solid fa-graduation-cap text-[#4F46E5] text-[16px]"></i></div>
+        <h1 id="batchTitle" class="text-[20px] sm:text-[22px] font-extrabold text-[#0F2043]">Loading...</h1>
+      </div>
+      <p class="bangla text-[12px] sm:text-[13px] text-slate-500 mt-1">তোমার স্বপ্নের যাত্রা শুরু হোক এখান থেকে</p>
+    </div>
+    <div class="hidden sm:flex w-[180px] h-[90px] items-end justify-center relative">
+      <div class="absolute right-6 bottom-2 flex flex-col items-center">
+        <div data-banner-bar class="w-[120px] h-[18px] bg-[#4F46E5] rounded-[3px] border-l-[4px] border-[#312E81]"></div>
+        <div data-banner-bar class="w-[128px] h-[20px] bg-[#7C3AED] rounded-[3px] border-l-[4px] border-[#4C1D95] -mt-0.5 mx-[-4px]"></div>
+        <div data-banner-bar class="w-[122px] h-[22px] bg-[#4338CA] rounded-[3px] border-l-[4px] border-[#1E1B4B] -mt-0.5"></div>
+        <div class="absolute -top-4 left-1/2 -translate-x-1/2 w-[56px] h-[12px] bg-[#0F172A] rotate-[-3deg] rounded-[2px]"></div>
+      </div>
+      <div class="absolute left-2 bottom-3 w-8 h-8 bg-white rounded-b-[10px] border border-slate-200"></div>
+    </div>
+    <div class="sm:hidden absolute right-2 bottom-2 opacity-60">
+      <div data-banner-bar class="w-[90px] h-[14px] bg-[#4F46E5] rounded-[2px]"></div>
+      <div data-banner-bar class="w-[96px] h-[16px] bg-[#7C3AED] rounded-[2px] mx-[-3px] -mt-0.5"></div>
+      <div data-banner-bar class="w-[92px] h-[14px] bg-[#4338CA] rounded-[2px] -mt-0.5"></div>
+    </div>
+  </section>
+
+  <!-- Category Tabs (built dynamically from this batch's courses) -->
+  <section class="mt-3">
+    <div id="categoryTabs" class="grid grid-cols-3 gap-2 bg-[#F1F5F9] p-1.5 rounded-[12px]">
+      <div class="col-span-3 text-center text-[12px] text-slate-400 py-2"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading...</div>
+    </div>
+  </section>
+
+  <!-- Filters (Platform pills built dynamically from this batch's courses) -->
+  <section class="mt-4 space-y-3">
+    <!-- Platform -->
+    <div>
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-[12px] font-bold text-[#0F2043]">Platform</span>
+        <button onclick="setPlatformFilter('All')" class="text-[11px] font-semibold text-slate-500 flex items-center gap-1">All <i class="fa-solid fa-chevron-down text-[10px]"></i></button>
+      </div>
+      <div id="platformFilters" class="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+        <button data-filter="platform" data-value="All" class="filter-pill active px-4 py-1.5 rounded-full text-[12px] font-semibold whitespace-nowrap">All</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sort + Count -->
+  <section class="mt-4 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <button class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-full text-[11px] font-semibold text-slate-700">
+        <i class="fa-solid fa-arrow-up-wide-short text-[11px]"></i> Sort by: <span id="sortLabel">Latest</span> <i class="fa-solid fa-chevron-down text-[10px]"></i>
+      </button>
+      <select id="sortSelect" onchange="sortCourses()" class="hidden">
+        <option value="latest">Latest</option>
+        <option value="priceLow">Price Low</option>
+        <option value="priceHigh">Price High</option>
+      </select>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="text-[11px] font-semibold text-slate-600"><span id="courseCount">0</span> Courses Found</span>
+      <button class="flex items-center gap-1 px-3 py-1.5 bg-[#EEF2FF] text-[#1A56FF] rounded-full text-[11px] font-bold"><i class="fa-solid fa-filter text-[11px]"></i> Filter</button>
+    </div>
+  </section>
+
+  <!-- Course List -->
+  <section class="mt-3 space-y-3" id="courseList">
+    <!-- Rendered by JS -->
+  </section>
+
+  <div id="noResult" class="hidden text-center py-12">
+    <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto"><i class="fa-solid fa-search text-slate-400 text-[20px]"></i></div>
+    <p class="text-[13px] font-semibold text-slate-500 mt-3">No courses found for selected filters</p>
+    <button onclick="resetFilters()" class="mt-2 text-[12px] font-bold text-[#1A56FF]">Reset Filters</button>
+  </div>
+
+  <!-- E-Books of this batch (same Batch system as courses) -->
+  <section id="secBatchEbooks" class="mt-5 hidden">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-[17px] sm:text-[19px] font-extrabold text-[#0F2043]"><i class="fa-solid fa-book-open text-[#1A56FF] mr-1"></i> E-Books</h2>
+      <span id="ebookCount" class="text-[11px] font-semibold text-slate-500"></span>
+    </div>
+    <div id="ebookList" class="space-y-3"></div>
+  </section>
+
+</main>
+
+<!-- ===== Pro Mobile Bottom Nav (Android / Phone) ===== -->
+<style>
+.sm-bottom-nav{padding-bottom:env(safe-area-inset-bottom)}
+.sm-bottom-nav .bn-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;flex:1;padding:7px 2px 8px;border-radius:14px;color:#64748B;position:relative;transition:background .15s,color .15s}
+.sm-bottom-nav .bn-item i{font-size:19px;line-height:1}
+.sm-bottom-nav .bn-item span{font-size:11px;font-weight:600;white-space:nowrap;line-height:1}
+.sm-bottom-nav .bn-item.bn-active{background:#EAF0FF;color:#1A56FF}
+.sm-bottom-nav .bn-item.bn-active span{font-weight:700}
+.sm-bottom-nav .bn-item.bn-active::before{content:'';position:absolute;top:-9px;left:50%;transform:translateX(-50%);width:22px;height:3px;border-radius:9999px;background:linear-gradient(90deg,#1A56FF,#7C3AED)}
+</style>
+<nav class="sm-bottom-nav fixed bottom-0 left-0 right-0 z-[70] border-t border-slate-200/90 lg:hidden" style="background:rgba(255,255,255,.98);backdrop-filter:blur(12px);box-shadow:0 -6px 24px rgba(15,32,67,.08)">
+  <div class="grid grid-cols-5 gap-1 px-2 pt-2" style="padding-bottom:calc(8px + env(safe-area-inset-bottom))">
+    <a href="index.html" data-bn="home" class="bn-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
+    <a href="courses.html" data-bn="courses" class="bn-item"><i class="fa-regular fa-square"></i><span>Courses</span></a>
+    <a href="courses.html" data-bn="ebook" class="bn-item"><i class="fa-regular fa-file-lines"></i><span>E-Book</span></a>
+    <a href="cart.html" data-bn="cart" class="bn-item"><span class="relative"><i class="fa-solid fa-cart-shopping"></i><span data-sm-cart-count class="absolute -top-2 -right-3 min-w-[16px] h-4 px-1 bg-[#1A56FF] text-white text-[10px] font-bold rounded-full hidden items-center justify-center">0</span></span><span>Cart</span></a>
+    <a href="dashboard.html" data-bn="account" data-account-link class="bn-item"><i class="fa-regular fa-user"></i><span>Account</span></a>
+  </div>
+</nav>
+<script>
+(function(){
+  try{
+    var p=(location.pathname.split('/').pop()||'index.html').split('?')[0].toLowerCase();
+    var map={'index.html':'home','':'home','courses.html':'courses','batch.html':'courses','course.html':'courses','ebook.html':'ebook','cart.html':'cart','dashboard.html':'account','auth.html':'account'};
+    var key=map[p]||'home';
+    if(p==='courses.html' && /ebook/i.test(location.search+location.hash)) key='ebook';
+    document.querySelectorAll('.sm-bottom-nav [data-bn]').forEach(function(a){ if(a.dataset.bn===key) a.classList.add('bn-active'); });
+    var n=0; try{ n=(JSON.parse(localStorage.getItem('sm_cart'))||[]).length; }catch(e){}
+    document.querySelectorAll('.sm-bottom-nav [data-sm-cart-count]').forEach(function(el){ el.textContent=n; el.classList.toggle('hidden',!n); el.classList.toggle('flex',!!n); });
+    // Smart Account routing: guest -> auth page, logged-in -> dashboard
+    var hasTok=function(){ try{return !!(localStorage.getItem('sm_user_token')||sessionStorage.getItem('sm_user_token'));}catch(x){return false;} };
+    if(!hasTok()) document.querySelectorAll('[data-account-link]').forEach(function(a){ a.href='auth.html?next='+encodeURIComponent('dashboard.html'); });
+  }catch(e){}
+  // click-time re-check (token may change without reload)
+  document.addEventListener('click',function(e){
+    var a=e.target&&e.target.closest?e.target.closest('[data-account-link]'):null;
+    if(!a) return;
+    var t=''; try{t=localStorage.getItem('sm_user_token')||sessionStorage.getItem('sm_user_token')||'';}catch(x){}
+    if(!t){ e.preventDefault(); location.href='auth.html?next='+encodeURIComponent('dashboard.html'); }
+  });
+})();
+</script>
+
+<script>
+const batchParam = (new URLSearchParams(window.location.search).get('batch') || '').trim();
+let batchInfo = null;
+let allCourses = [];
+let tabList = [];
+let selectedCategory = '';
+let platformFilter = 'All';
+let sortBy = 'latest';
+
+const TAB_ICONS = {
+  academic: 'fa-book-open',
+  admission: 'fa-building-columns',
+  revision: 'fa-bullseye',
+  skill: 'fa-laptop-code',
+  ebook: 'fa-book'
+};
+const TAB_ORDER = ['academic', 'admission', 'revision'];
+
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function selectCategory(slug){
+  selectedCategory = slug;
+  document.querySelectorAll('#categoryTabs [data-tab]').forEach(b => {
+    const on = b.dataset.tab === slug;
+    b.className = (on ? 'tab-active' : 'tab-inactive') + ' flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] font-bold text-[12px] sm:text-[13px]' + (on ? ' shadow-sm' : '');
+  });
+  render();
+}
+
+function setPlatformFilter(val){
+  platformFilter = val;
+  document.querySelectorAll('#platformFilters [data-filter="platform"]').forEach(b => {
+    b.classList.toggle('active', b.dataset.value === val);
+  });
+  render();
+}
+
+function sortCourses(){
+  const sel = document.getElementById('sortSelect');
+  sortBy = sel.value;
+  document.getElementById('sortLabel').textContent = sel.options[sel.selectedIndex].text;
+  render();
+}
+
+function getFiltered(){
+  let list = allCourses.filter(c => {
+    if (selectedCategory && String(c.categorySlug || '').toLowerCase() !== String(selectedCategory).toLowerCase()) return false;
+    if (platformFilter !== 'All' && String(c.platformName || '') !== platformFilter) return false;
+    return true;
+  });
+  if (sortBy === 'priceLow') list = list.slice().sort((a, b) => Number(a.price) - Number(b.price));
+  else if (sortBy === 'priceHigh') list = list.slice().sort((a, b) => Number(b.price) - Number(a.price));
+  else list = list.slice().sort((a, b) => Number(b.id) - Number(a.id));
+  return list;
+}
+
+function render(){
+  const list = getFiltered();
+  document.getElementById('courseCount').textContent = list.length;
+  const container = document.getElementById('courseList');
+  const noRes = document.getElementById('noResult');
+  if (list.length === 0) {
+    container.innerHTML = '';
+    noRes.classList.remove('hidden');
+    return;
+  }
+  noRes.classList.add('hidden');
+  container.innerHTML = list.map(c => {
+    const color = c.batchColor || (batchInfo && batchInfo.color) || '#4F46E5';
+    const grad = 'linear-gradient(135deg, ' + color + ' 0%, #0F2043 100%)';
+    const catSlug = String(c.categorySlug || '').toLowerCase();
+    const icon = TAB_ICONS[catSlug] || 'fa-book-open';
+    const classes = c.totalClass ? c.totalClass + ' Classes' : (c.duration || 'Full Course');
+    const oldP = c.oldPrice && Number(c.oldPrice) > Number(c.price)
+      ? '<span class="text-[11px] text-slate-400 line-through ml-1">৳' + esc(c.oldPrice) + '</span>' : '';
+    const leftBlock = c.thumbnail
+      ? `<img src="${esc(c.thumbnail)}" alt="${esc(c.title)}" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
+         <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/45 backdrop-blur border border-white/25 text-white text-[8px] font-semibold">${esc(c.batchName || (batchInfo && batchInfo.name) || 'Batch')}</span>`
+      : `<div class="absolute inset-0" style="background:${grad}"></div>
+         <div class="relative p-3 flex flex-col h-full">
+           <span class="w-fit px-2 py-0.5 rounded-full bg-white/15 border border-white/20 text-white text-[8px] font-semibold">${esc(c.batchName || (batchInfo && batchInfo.name) || 'Batch')}</span>
+           <h3 class="text-white font-black text-[13px] sm:text-[14px] leading-tight mt-2">${esc((c.categoryName || 'Course').toUpperCase())}</h3>
+           <p class="text-white/80 text-[8px] font-semibold mt-1">${esc((c.platformName || '').toUpperCase())}</p>
+           <div class="absolute right-1 bottom-1 opacity-15"><i class="fa-solid ${icon} text-white text-[36px]"></i></div>
+         </div>`;
+    const teacherRow = c.teacher ? `
+        <div class="flex items-center gap-1 mt-1.5">
+          <span class="w-5 h-5 rounded-full bg-[#EEF2FF] text-[#1A56FF] flex items-center justify-center text-[10px] font-bold flex-shrink-0">${esc(c.teacher.trim().charAt(0).toUpperCase())}</span>
+          <span class="text-[11px] font-medium text-slate-600 truncate">${esc(c.teacher)}</span>
+        </div>` : '';
+    return `
+    <div onclick="window.location.href='course.html?id=${c.id}'" class="course-card bg-white rounded-[14px] border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.04)] overflow-hidden flex cursor-pointer">
+      <div class="w-[110px] sm:w-[128px] flex-shrink-0 relative overflow-hidden">
+        ${leftBlock}
+      </div>
+      <div class="flex-1 min-w-0 p-3 flex flex-col">
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex-1 min-w-0">
+            <span class="inline-flex px-2 py-0.5 rounded bg-[#E6F4EA] text-[#16A34A] text-[9px] font-bold">${esc(c.platformName || 'Online')}</span>
+            <h3 class="font-bold text-[12px] sm:text-[13px] text-[#0F2043] leading-tight mt-1 line-clamp-2">${esc(c.title)}</h3>
+          </div>
+        </div>
+        ${teacherRow}
+        <div class="flex items-center gap-2 mt-2 text-[10px] text-slate-500">
+          <span class="flex items-center gap-1 bg-[#F1F5F9] px-2 py-1 rounded-full whitespace-nowrap"><i class="fa-regular fa-clock text-[10px]"></i> ${esc(classes)}</span>
+          ${c.discount ? '<span class="flex items-center gap-1 bg-[#E6F4EA] text-[#16A34A] px-2 py-1 rounded-full font-bold whitespace-nowrap">-' + c.discount + '%</span>' : ''}
+        </div>
+        <div class="mt-auto flex items-center justify-between pt-2 gap-2">
+          <span class="text-[#1A56FF] font-extrabold text-[14px] whitespace-nowrap">৳${esc(c.price)}${oldP}</span>
+          <span class="flex items-center gap-1.5">
+            <a href="course.html?id=${c.id}" onclick="event.stopPropagation()" class="px-3 py-1.5 bg-white border border-[#1A56FF] text-[#1A56FF] rounded-full text-[11px] font-bold">Details</a>
+            <button data-sm-add="${c.id}" onclick="event.stopPropagation()" class="px-3 py-1.5 bg-[#1A56FF] hover:bg-[#1446D1] text-white rounded-full text-[11px] font-bold flex items-center gap-1"><i class="fa-solid fa-cart-shopping text-[10px]"></i> Add to Cart</button>
+          </span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function resetFilters(){
+  platformFilter = 'All';
+  const sel = document.getElementById('sortSelect');
+  if (sel) sel.value = 'latest';
+  sortBy = 'latest';
+  const lbl = document.getElementById('sortLabel');
+  if (lbl) lbl.textContent = 'Latest';
+  if (tabList.length) selectCategory(tabList[0].slug);
+  else render();
+}
+
+function buildTabs(){
+  const seen = {};
+  tabList = [];
+  allCourses.forEach(c => {
+    const slug = String(c.categorySlug || '').toLowerCase();
+    if (!slug || seen[slug]) return;
+    seen[slug] = true;
+    tabList.push({ slug, name: c.categoryName || slug });
+  });
+  tabList.sort((a, b) => {
+    const ia = TAB_ORDER.indexOf(a.slug), ib = TAB_ORDER.indexOf(b.slug);
+    if (ia === -1 && ib === -1) return a.name.localeCompare(b.name);
+    if (ia === -1) return 1;
+    if (ib === -1) return -1;
+    return ia - ib;
+  });
+  const wrap = document.getElementById('categoryTabs');
+  if (!tabList.length) {
+    wrap.className = 'bg-[#F1F5F9] p-1.5 rounded-[12px] text-center text-[12px] text-slate-400 py-3';
+    wrap.innerHTML = 'No categories yet';
+    selectedCategory = '';
+    return;
+  }
+  const cols = Math.min(tabList.length, 3);
+  wrap.className = 'grid gap-2 bg-[#F1F5F9] p-1.5 rounded-[12px] grid-cols-' + cols;
+  wrap.innerHTML = tabList.map(t => `
+    <button data-tab="${esc(t.slug)}" onclick="selectCategory('${esc(t.slug)}')" class="tab-inactive flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] font-bold text-[12px] sm:text-[13px]">
+      <i class="fa-solid ${TAB_ICONS[t.slug] || 'fa-layer-group'} text-[13px]"></i> ${esc(t.name)}
+    </button>`).join('');
+  const preferred = tabList.some(t => t.slug === 'academic') ? 'academic' : tabList[0].slug;
+  selectCategory(preferred);
+}
+
+function buildPlatforms(){
+  const wrap = document.getElementById('platformFilters');
+  const names = [];
+  allCourses.forEach(c => {
+    const n = String(c.platformName || '').trim();
+    if (n && !names.includes(n)) names.push(n);
+  });
+  wrap.innerHTML = ['All'].concat(names).map((n, i) =>
+    `<button data-filter="platform" data-value="${esc(n)}" onclick="setPlatformFilter('${esc(n)}')" class="filter-pill${i === 0 ? ' active' : ''} px-4 py-1.5 rounded-full text-[12px] font-semibold whitespace-nowrap">${esc(n)}</button>`
+  ).join('');
+  platformFilter = 'All';
+}
+
+function paintBanner(){
+  const titleEl = document.getElementById('batchTitle');
+  const name = (batchInfo && batchInfo.name) || (batchParam ? batchParam.toUpperCase() : 'Batch');
+  titleEl.textContent = name;
+  document.title = name + ' - StudyMart';
+  const color = (batchInfo && batchInfo.color) || '#4F46E5';
+  const banner = document.getElementById('batchBanner');
+  if (banner) {
+    banner.style.background = color + '14';
+    banner.style.borderColor = color + '40';
+  }
+  document.querySelectorAll('[data-banner-bar]').forEach(el => { el.style.background = color; });
+  const icon = document.getElementById('batchBannerIcon');
+  if (icon) icon.style.color = color;
+}
+
+async function init(){
+  const listEl = document.getElementById('courseList');
+  try {
+    // 1) batch info (match by slug OR id)
+    try {
+      const rb = await fetch('/api/public/batches');
+      if (rb.ok) {
+        const jb = await rb.json();
+        batchInfo = (jb.data || []).find(b =>
+          String(b.slug || '').toLowerCase() === String(batchParam).toLowerCase() ||
+          String(b.id) === String(batchParam)
+        ) || null;
+      }
+    } catch (e) { /* offline -> fallback below */ }
+    paintBanner();
+    // 2) courses of this batch (batchId works even when slug is empty)
+    let url = '/api/public/courses?limit=200';
+    if (batchInfo) url = '/api/public/courses?batchId=' + encodeURIComponent(batchInfo.id) + '&limit=200';
+    else if (batchParam) url = '/api/public/courses?batch=' + encodeURIComponent(batchParam) + '&limit=200';
+    const rc = await fetch(url);
+    if (!rc.ok) throw new Error('HTTP ' + rc.status);
+    const jc = await rc.json();
+    allCourses = jc.data || [];
+    loadBatchEbooks();
+    if (!allCourses.length) {
+      document.getElementById('courseCount').textContent = '0';
+      document.getElementById('categoryTabs').innerHTML = '<div class="col-span-3 text-center text-[12px] text-slate-400 py-2">No courses in this batch yet</div>';
+      listEl.innerHTML = '';
+      document.getElementById('noResult').classList.remove('hidden');
+      document.querySelector('#noResult p').textContent = 'No courses found in this batch yet';
+      return;
+    }
+    buildPlatforms();
+    buildTabs(); // calls render() via selectCategory
+  } catch (e) {
+    document.getElementById('courseCount').textContent = '0';
+    listEl.innerHTML = '';
+    document.getElementById('noResult').classList.remove('hidden');
+    document.querySelector('#noResult p').textContent = 'Could not load courses. Please check your connection and retry.';
+  }
+}
+
+async function loadBatchEbooks(){
+  const sec = document.getElementById('secBatchEbooks');
+  const box = document.getElementById('ebookList');
+  if (!sec || !box) return;
+  try {
+    let url = '/api/public/ebooks?limit=50';
+    if (batchInfo) url = '/api/public/ebooks?batchId=' + encodeURIComponent(batchInfo.id) + '&limit=50';
+    else if (batchParam) url = '/api/public/ebooks?batch=' + encodeURIComponent(batchParam) + '&limit=50';
+    const r = await fetch(url);
+    if (!r.ok) return;
+    const j = await r.json();
+    const list = j.data || [];
+    if (!list.length) return;
+    document.getElementById('ebookCount').textContent = list.length + ' Books Found';
+    box.innerHTML = list.map(b => {
+      const price = Number(b.price) || 0, old = Number(b.oldPrice) || 0;
+      const off = old > price && price > 0 ? Math.round(((old - price) / old) * 100) : 0;
+      const cover = b.cover
+        ? `<img src="${esc(b.cover)}" alt="${esc(b.title)}" class="absolute inset-0 w-full h-full object-cover" loading="lazy">`
+        : `<div class="absolute inset-0 flex items-center justify-center" style="background:linear-gradient(135deg,${esc(b.batchColor || '#4F46E5')} 0%,#0F2043 100%)"><i class="fa-solid fa-book-open text-white/30 text-[28px]"></i></div>`;
+      const priceHtml = price > 0
+        ? `<span class="text-[#1A56FF] font-extrabold text-[14px] whitespace-nowrap">৳${price}</span>${old > price ? `<span class="text-[11px] text-slate-400 line-through">৳${old}</span>` : ''}${off ? `<span class="px-1.5 py-0.5 rounded-full bg-[#E6F4EA] text-[#16A34A] text-[9px] font-bold">-${off}%</span>` : ''}`
+        : `<span class="text-[#16A34A] font-extrabold text-[13px]">FREE</span>`;
+      return `
+      <div onclick="window.location.href='ebook.html?id=${b.id}'" class="course-card bg-white rounded-[14px] border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.04)] overflow-hidden flex cursor-pointer">
+        <div class="w-[110px] sm:w-[128px] flex-shrink-0 relative overflow-hidden bg-[#F1F5F9]">
+          ${cover}
+          <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/45 backdrop-blur border border-white/25 text-white text-[8px] font-semibold">E-Book</span>
+        </div>
+        <div class="flex-1 min-w-0 p-3 flex flex-col">
+          <h3 class="font-bold text-[12px] sm:text-[13px] text-[#0F2043] leading-tight line-clamp-2">${esc(b.title)}</h3>
+          <p class="text-[11px] text-slate-500 mt-1 truncate">${esc(b.author ? 'By ' + b.author : (b.categoryName || ''))}</p>
+          <div class="mt-auto flex items-center justify-between pt-2 gap-2">
+            <div class="flex items-center gap-1.5 flex-wrap">${priceHtml}</div>
+            <span class="px-3 py-1.5 bg-white border border-[#1A56FF] text-[#1A56FF] rounded-full text-[11px] font-bold whitespace-nowrap">View <i class="fa-solid fa-arrow-right text-[9px] ml-0.5"></i></span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    sec.classList.remove('hidden');
+  } catch (e) {}
+}
+
+// sort label click toggles the select
+document.getElementById('sortLabel').parentElement.addEventListener('click', () => {
+  const sel = document.getElementById('sortSelect');
+  sel.classList.toggle('hidden');
+  sel.focus();
+});
+document.getElementById('sortSelect').addEventListener('change', () => {
+  sortBy = document.getElementById('sortSelect').value;
+  document.getElementById('sortLabel').textContent = document.getElementById('sortSelect').options[document.getElementById('sortSelect').selectedIndex].text;
+  document.getElementById('sortSelect').classList.add('hidden');
+  render();
+});
+
+init();
+</script>
+<script src="assets/navbar.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

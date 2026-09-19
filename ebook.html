@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-Book - StudyMart</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{font-family:'Inter',sans-serif}
+.bangla{font-family:'Hind Siliguri',sans-serif}
+.scrollbar-hide::-webkit-scrollbar{display:none}
+</style>
+</head>
+<body class="bg-[#F8F9FD] text-slate-900 antialiased pb-[152px] lg:pb-0">
+
+<!-- Header: phone unchanged + desktop pic-like -->
+<link rel="stylesheet" href="assets/navbar.css">
+<header class="sticky top-0 z-50 bg-white border-b border-slate-100 shadow-sm">
+  <div class="hidden lg:block border-b border-slate-100">
+    <div class="max-w-[1400px] mx-auto px-6 h-[68px] flex items-center gap-4">
+      <button data-sm-desk-menu-btn class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-100 transition flex-shrink-0" aria-label="Menu"><i class="fa-solid fa-bars text-[20px] text-[#0F2043]"></i></button>
+      <a href="index.html" class="flex items-center gap-2 flex-shrink-0">
+        <img data-sm-desk-logo src="" alt="Logo" class="hidden w-10 h-10 object-contain rounded-lg">
+        <div data-sm-desk-logo-fb class="w-10 h-10 flex items-center justify-center"><svg width="40" height="40" viewBox="0 0 44 44" fill="none"><path d="M22 6 C16 10 8 12 8 20 C8 28 16 30 22 34 C28 30 36 28 36 20 C36 12 28 10 22 6Z" fill="#1A56FF"/><path d="M12 28 L22 38 L32 28" stroke="#1A56FF" stroke-width="2.5" fill="none" opacity="0.9"/><g><path d="M22 2 L32 7 L22 12 L12 7 Z" fill="#0F2043"/><rect x="21" y="7" width="2" height="8" fill="#FACC15"/></g></svg></div>
+        <span class="text-[22px] font-extrabold tracking-tight leading-none"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span>
+      </a>
+      <nav class="flex items-center gap-6 text-[14px] font-semibold flex-shrink-0 ml-2">
+        <a data-sm-nav="home" href="index.html" class="sm-desk-nav-link" data-i18n="home">Home</a>
+        <a data-sm-nav="courses" href="courses.html" class="sm-desk-nav-link" data-i18n="courses">Courses</a>
+        <a data-sm-nav="ebooks" href="index.html#secEbooks" class="sm-desk-nav-link" data-i18n="ebooks">Ebooks</a>
+        <a data-sm-nav="free" href="courses.html?q=" class="sm-desk-nav-link" data-i18n="free">Free Resources</a>
+        <a data-sm-nav="telegram" href="#" data-sm-telegram class="sm-desk-nav-link" data-i18n="telegram">Telegram</a>
+      </nav>
+      <div class="flex-1"></div>
+      <div class="sm-desk-search w-[280px] xl:w-[320px] flex-shrink-0"><i class="fa-solid fa-magnifying-glass text-slate-400 text-[14px]"></i><input data-sm-desk-search data-i18n-ph="searchPh" type="text" placeholder="Search courses, subjects, ebooks..."><button data-sm-desk-search-btn class="text-slate-400 hover:text-[#1A56FF]" aria-label="Search"><i class="fa-solid fa-arrow-right text-[12px]"></i></button></div>
+      <div class="sm-desk-drop flex-shrink-0"><button data-sm-desk-lang-btn class="sm-desk-pill"><i class="fa-solid fa-globe text-[15px] text-slate-500"></i><span data-i18n="lang">বাংলা/English</span><i class="fa-solid fa-chevron-down text-[11px] text-slate-400"></i></button><div data-sm-desk-lang-menu class="sm-desk-menu hidden"><button type="button" class="sm-mi" data-sm-lang-pick="bn">বাংলা (Bangla)</button><button type="button" class="sm-mi" data-sm-lang-pick="en">English</button></div></div>
+      <button data-sm-theme-btn class="sm-desk-pill flex-shrink-0"><i data-sm-theme-icon class="fa-solid fa-sun text-[15px] text-[#F59E0B]"></i><span data-i18n="theme">Theme</span></button>
+      <div class="sm-desk-drop flex-shrink-0"><button data-sm-desk-account-btn class="sm-desk-pill"><i class="fa-regular fa-user text-[15px] text-slate-600"></i><span data-i18n="account">Account</span><i class="fa-solid fa-chevron-down text-[11px] text-slate-400"></i></button><div data-sm-desk-account-menu class="sm-desk-menu hidden"></div></div>
+    </div>
+  </div>
+  <div id="smDeskDrawer" class="hidden"><div class="sm-backdrop"></div><div class="sm-panel"><div class="flex items-center justify-between mb-3"><span class="text-[18px] font-extrabold"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span><button data-sm-drawer-close class="w-9 h-9 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-xmark"></i></button></div><nav class="flex flex-col gap-1 text-[14px] font-semibold"><a href="index.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Home</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Courses</a><a href="index.html#secEbooks" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Ebooks</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Free Resources</a><a href="#" data-sm-telegram class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Telegram</a><a href="dashboard.html" data-account-link class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Account / Dashboard</a><a href="cart.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Cart (<span data-sm-cart-count>0</span>)</a></nav></div></div>
+  <!-- phone bar (unchanged) -->
+  <div class="lg:hidden max-w-[1280px] mx-auto px-4 sm:px-6 h-[56px] flex items-center justify-between gap-3">
+    <div class="flex items-center gap-2">
+      <a href="index.html" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100">
+        <i class="fa-solid fa-arrow-left text-[16px] text-[#0F2043]"></i>
+      </a>
+      <a href="index.html" class="flex items-center gap-1.5">
+        <img id="siteLogoImg" src="" alt="Logo" class="hidden w-8 h-8 object-contain rounded-lg flex-shrink-0">
+        <div id="siteLogoFallback" class="flex items-center justify-center flex-shrink-0">
+          <svg width="32" height="32" viewBox="0 0 44 44" fill="none">
+            <path d="M22 6 C16 10 8 12 8 20 C8 28 16 30 22 34 C28 30 36 28 36 20 C36 12 28 10 22 6Z" fill="url(#g1)" />
+            <path d="M12 28 L22 38 L32 28" stroke="#1A56FF" stroke-width="2.5" fill="none" opacity="0.9"/>
+            <g><path d="M22 2 L32 7 L22 12 L12 7 Z" fill="#0F2043"/></g>
+            <defs><linearGradient id="g1" x1="8" y1="6" x2="36" y2="34" gradientUnits="userSpaceOnUse"><stop stop-color="#1A56FF"/><stop offset="1" stop-color="#7C3AED"/></linearGradient></defs>
+          </svg>
+        </div>
+        <span id="siteNameDisplay" class="text-[18px] font-extrabold tracking-tight hidden sm:block"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span>
+      </a>
+    </div>
+    <div class="flex items-center gap-1.5">
+      <a href="#" data-sm-telegram class="w-8 h-8 rounded-full bg-[#E6F0FF] flex items-center justify-center text-[#1A56FF] hover:bg-[#D6E4FF] transition flex-shrink-0" title="Telegram"><i class="fa-brands fa-telegram text-[15px]"></i></a>
+      <a href="cart.html" class="relative w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100">
+        <i class="fa-solid fa-cart-shopping text-[16px] text-[#0F2043]"></i>
+        <span id="cartBadge" data-sm-cart-count class="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-[#1A56FF] text-white text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-[1280px] mx-auto px-4 sm:px-6 py-4 lg:py-6">
+  <!-- Title banner -->
+  <section class="rounded-[16px] overflow-hidden relative" style="background:linear-gradient(115deg,#0B3A8A 0%,#1550C0 60%,#1E40AF 100%)">
+    <div class="absolute inset-0" style="background-image:radial-gradient(rgba(255,255,255,0.09) 1px,transparent 1.5px);background-size:18px 18px"></div>
+    <div class="absolute -right-10 -top-16 w-64 h-64 rounded-full bg-white/5"></div>
+    <h1 id="bannerTitle" class="bangla relative px-5 sm:px-8 py-6 sm:py-9 text-white font-black text-[22px] sm:text-[30px] lg:text-[32px] leading-tight">Loading...</h1>
+  </section>
+
+  <div class="grid grid-cols-1 lg:grid-cols-[1.7fr_0.9fr] gap-6 mt-4 lg:mt-6">
+
+    <!-- Left: cover + about -->
+    <div class="space-y-4 order-2 lg:order-1">
+      <div class="bg-white rounded-[14px] border border-slate-100 shadow-sm p-4 sm:p-6 flex flex-col sm:flex-row gap-5">
+        <div id="bigCover" class="w-full sm:w-[220px] flex-shrink-0 rounded-[12px] overflow-hidden bg-[#F1F5F9] border border-slate-100 aspect-[3/4] flex items-center justify-center">
+          <i class="fa-solid fa-book-open text-slate-300 text-[44px]"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <span class="px-2 py-0.5 rounded-full bg-[#EDE9FF] text-[#4F46E5] text-[10px] font-bold"><i class="fa-solid fa-book mr-0.5"></i> E-Book</span>
+          <h2 id="bookTitle" class="bangla font-extrabold text-[18px] sm:text-[20px] text-[#0F2043] leading-snug mt-2">...</h2>
+          <p id="bookAuthor" class="text-[13px] text-slate-500 mt-1"></p>
+          <div id="bookMeta" class="flex flex-wrap gap-2 mt-3"></div>
+        </div>
+      </div>
+
+      <div id="aboutCard" class="hidden bg-white rounded-[14px] border border-slate-100 shadow-sm p-4 sm:p-6">
+        <h3 class="font-extrabold text-[17px] sm:text-[19px] text-[#0F2043] flex items-center gap-2"><i class="fa-regular fa-file-lines text-[#1A56FF]"></i> About This Book</h3>
+        <p id="bookDetails" class="bangla mt-3 text-[14px] text-slate-700 leading-relaxed" style="white-space:pre-line"></p>
+      </div>
+    </div>
+
+    <!-- Right sticky download card -->
+    <div class="order-1 lg:order-2 lg:sticky lg:top-[80px] h-fit">
+      <div class="bg-white rounded-[14px] border border-slate-200 shadow-[0_8px_24px_rgba(0,0,0,0.06)] overflow-hidden">
+        <div class="p-4 sm:p-5">
+          <h2 id="sideTitle" class="bangla font-extrabold text-[16px] sm:text-[18px] text-[#0F2043] leading-snug">...</h2>
+          <div id="priceRow" class="flex items-baseline gap-2 flex-wrap mt-2">
+            <span class="text-[20px] font-extrabold text-[#16A34A]">...</span>
+          </div>
+          <div id="actionBox" class="mt-3">
+            <div class="w-full py-3 rounded-[10px] bg-slate-100 text-slate-400 text-[14px] font-bold flex items-center justify-center gap-2"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>
+          </div>
+          <div id="fileInfo" class="mt-3 flex items-center justify-center gap-3 text-[11px] text-slate-500"></div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- Mobile Fixed Bottom Bar (sits above bottom nav) -->
+<div class="fixed bottom-[70px] lg:bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-3 lg:hidden z-40" style="padding-bottom:calc(12px + env(safe-area-inset-bottom))">
+  <div id="mActionBox" class="w-full">
+    <div class="w-full py-3 rounded-[10px] bg-slate-100 text-slate-400 text-[14px] font-bold flex items-center justify-center gap-2"><i class="fa-solid fa-spinner fa-spin"></i></div>
+  </div>
+</div>
+
+<!-- ===== Pro Mobile Bottom Nav (Android / Phone) ===== -->
+<style>
+.sm-bottom-nav{padding-bottom:env(safe-area-inset-bottom)}
+.sm-bottom-nav .bn-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;flex:1;padding:7px 2px 8px;border-radius:14px;color:#64748B;position:relative;transition:background .15s,color .15s}
+.sm-bottom-nav .bn-item i{font-size:19px;line-height:1}
+.sm-bottom-nav .bn-item span{font-size:11px;font-weight:600;white-space:nowrap;line-height:1}
+.sm-bottom-nav .bn-item.bn-active{background:#EAF0FF;color:#1A56FF}
+.sm-bottom-nav .bn-item.bn-active span{font-weight:700}
+.sm-bottom-nav .bn-item.bn-active::before{content:'';position:absolute;top:-9px;left:50%;transform:translateX(-50%);width:22px;height:3px;border-radius:9999px;background:linear-gradient(90deg,#1A56FF,#7C3AED)}
+</style>
+<nav class="sm-bottom-nav fixed bottom-0 left-0 right-0 z-[70] border-t border-slate-200/90 lg:hidden" style="background:rgba(255,255,255,.98);backdrop-filter:blur(12px);box-shadow:0 -6px 24px rgba(15,32,67,.08)">
+  <div class="grid grid-cols-5 gap-1 px-2 pt-2" style="padding-bottom:calc(8px + env(safe-area-inset-bottom))">
+    <a href="index.html" data-bn="home" class="bn-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
+    <a href="courses.html" data-bn="courses" class="bn-item"><i class="fa-regular fa-square"></i><span>Courses</span></a>
+    <a href="courses.html" data-bn="ebook" class="bn-item"><i class="fa-regular fa-file-lines"></i><span>E-Book</span></a>
+    <a href="cart.html" data-bn="cart" class="bn-item"><span class="relative"><i class="fa-solid fa-cart-shopping"></i><span data-sm-cart-count class="absolute -top-2 -right-3 min-w-[16px] h-4 px-1 bg-[#1A56FF] text-white text-[10px] font-bold rounded-full hidden items-center justify-center">0</span></span><span>Cart</span></a>
+    <a href="dashboard.html" data-bn="account" data-account-link class="bn-item"><i class="fa-regular fa-user"></i><span>Account</span></a>
+  </div>
+</nav>
+<script>
+(function(){
+  try{
+    var p=(location.pathname.split('/').pop()||'index.html').split('?')[0].toLowerCase();
+    var map={'index.html':'home','':'home','courses.html':'courses','batch.html':'courses','course.html':'courses','ebook.html':'ebook','cart.html':'cart','dashboard.html':'account','auth.html':'account'};
+    var key=map[p]||'home';
+    if(p==='courses.html' && /ebook/i.test(location.search+location.hash)) key='ebook';
+    document.querySelectorAll('.sm-bottom-nav [data-bn]').forEach(function(a){ if(a.dataset.bn===key) a.classList.add('bn-active'); });
+    var n=0; try{ n=(JSON.parse(localStorage.getItem('sm_cart'))||[]).length; }catch(e){}
+    document.querySelectorAll('.sm-bottom-nav [data-sm-cart-count]').forEach(function(el){ el.textContent=n; el.classList.toggle('hidden',!n); el.classList.toggle('flex',!!n); });
+    // Smart Account routing: guest -> auth page, logged-in -> dashboard
+    var hasTok=function(){ try{return !!(localStorage.getItem('sm_user_token')||sessionStorage.getItem('sm_user_token'));}catch(x){return false;} };
+    if(!hasTok()) document.querySelectorAll('[data-account-link]').forEach(function(a){ a.href='auth.html?next='+encodeURIComponent('dashboard.html'); });
+  }catch(e){}
+  // click-time re-check (token may change without reload)
+  document.addEventListener('click',function(e){
+    var a=e.target&&e.target.closest?e.target.closest('[data-account-link]'):null;
+    if(!a) return;
+    var t=''; try{t=localStorage.getItem('sm_user_token')||sessionStorage.getItem('sm_user_token')||'';}catch(x){}
+    if(!t){ e.preventDefault(); location.href='auth.html?next='+encodeURIComponent('dashboard.html'); }
+  });
+})();
+</script>
+
+<script>
+function ebEsc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+}
+function ebSize(n){
+  n = Number(n) || 0;
+  if (n >= 1024 * 1024) return (n / (1024 * 1024)).toFixed(1) + 'MB';
+  if (n >= 1024) return Math.round(n / 1024) + 'KB';
+  return n + 'B';
+}
+async function initEbookPage(){
+  const id = new URLSearchParams(window.location.search).get('id') || '';
+  if (!id) { document.getElementById('bannerTitle').textContent = 'No e-book selected'; return; }
+  let b;
+  try {
+    const r = await fetch('/api/public/ebooks/' + encodeURIComponent(id));
+    const j = await r.json();
+    if (!j.success) throw new Error(j.message || 'E-book not found');
+    b = j.data;
+  } catch (e) {
+    document.getElementById('bannerTitle').textContent = e.message;
+    return;
+  }
+  document.title = b.title + ' - StudyMart';
+  document.getElementById('bannerTitle').textContent = b.title;
+  document.getElementById('sideTitle').textContent = b.title;
+  document.getElementById('bookTitle').textContent = b.title;
+  document.getElementById('bookAuthor').textContent = b.author ? 'By ' + b.author : '';
+  if (b.cover) {
+    document.getElementById('bigCover').innerHTML = `<img src="${ebEsc(b.cover)}" alt="${ebEsc(b.title)}" class="w-full h-full object-cover">`;
+  }
+  const price = Number(b.price) || 0, old = Number(b.oldPrice) || 0;
+  const off = old > price && price > 0 ? Math.round(((old - price) / old) * 100) : 0;
+  document.getElementById('priceRow').innerHTML = price > 0
+    ? `<span class="text-[16px] font-bold text-[#0F2043]">Price :</span>
+       <span class="text-[22px] font-extrabold text-[#16A34A]">৳${price}</span>
+       ${old > price ? `<span class="text-[18px] font-extrabold text-[#EF4444] line-through">৳${old}</span>
+       <span class="px-2 py-0.5 bg-[#DCFCE7] text-[#15803D] text-[11px] font-bold rounded-full">${off}% OFF</span>` : ''}`
+    : `<span class="px-2.5 py-1 rounded-full bg-[#E6F4EA] text-[#16A34A] text-[12px] font-extrabold">FREE DOWNLOAD</span>`;
+  const hasFile = !!(b.fileUrl || b.linkUrl);
+  const isFree = !(Number(b.price) > 0);
+  let purchased = isFree;
+  const ebToken = (() => { try { return localStorage.getItem('sm_user_token') || sessionStorage.getItem('sm_user_token') || ''; } catch (e) { return ''; } })();
+  if (hasFile && !isFree && ebToken) {
+    try {
+      const ra = await fetch('/api/my/ebooks/' + b.id + '/access', { headers: { 'Authorization': 'Bearer ' + ebToken } });
+      const ja = await ra.json();
+      if (ja.success) purchased = !!ja.data.purchased;
+    } catch (e) { /* guest mode */ }
+  }
+  renderEbookActions(b, { hasFile, isFree, purchased, token: ebToken });
+  document.getElementById('bookMeta').innerHTML =
+    (b.fileUrl ? `<span class="px-2.5 py-1 rounded-full bg-[#E6F4EA] text-[#16A34A] text-[11px] font-bold"><i class="fa-solid fa-file-pdf mr-1"></i>PDF${b.fileSize ? ' • ' + ebSize(b.fileSize) : ''}</span>` : '') +
+    (b.linkUrl && !b.fileUrl ? `<span class="px-2.5 py-1 rounded-full bg-[#E0F2FE] text-[#0EA5E9] text-[11px] font-bold"><i class="fa-solid fa-link mr-1"></i>External Link</span>` : '') +
+    (b.downloads ? `<span class="px-2.5 py-1 rounded-full bg-[#F1F5F9] text-slate-600 text-[11px] font-bold"><i class="fa-solid fa-download mr-1"></i>${b.downloads} downloads</span>` : '');
+  document.getElementById('fileInfo').innerHTML =
+    (b.fileSize ? `<span><i class="fa-solid fa-hard-drive mr-1"></i>${ebSize(b.fileSize)}</span>` : '') +
+    (b.fileName ? `<span class="truncate max-w-[200px]"><i class="fa-solid fa-file mr-1"></i>${ebEsc(decodeURIComponent(b.fileName))}</span>` : '');
+  if (b.details) {
+    document.getElementById('aboutCard').classList.remove('hidden');
+    document.getElementById('bookDetails').textContent = b.details;
+  }
+}
+function ebTokenNow() {
+  try { return localStorage.getItem('sm_user_token') || sessionStorage.getItem('sm_user_token') || ''; } catch (e) { return ''; }
+}
+function ebToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'fixed bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 bg-[#0F2043] text-white px-5 py-3 rounded-full text-[13px] font-semibold shadow-xl z-50';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2200);
+}
+function guardLogin(e) {
+  if (!ebTokenNow()) {
+    e.preventDefault();
+    e.stopPropagation();
+    ebToast('Please login to buy this e-book');
+    setTimeout(() => { window.location.href = 'auth.html?next=' + encodeURIComponent('ebook.html?id=' + (new URLSearchParams(location.search).get('id') || '')); }, 800);
+  }
+}
+async function gatedDownload(id) {
+  try {
+    const r = await fetch('/api/my/ebooks/' + id + '/download', { headers: { 'Authorization': 'Bearer ' + ebTokenNow() } });
+    const j = await r.json();
+    if (!j.success) throw new Error(j.message);
+    window.location.href = j.data.fileUrl;
+  } catch (e) { ebToast(e.message); }
+}
+function renderEbookActions(b, st) {
+  const box = document.getElementById('actionBox');
+  const mBox = document.getElementById('mActionBox');
+  const dlUrl = '/api/public/ebooks/' + b.id + '/download';
+  if (!st.hasFile) {
+    const na = `<div class="w-full py-3 rounded-[10px] bg-slate-100 text-slate-400 text-[14px] font-bold text-center">File coming soon</div>`;
+    box.innerHTML = na; mBox.innerHTML = na;
+    return;
+  }
+  if (st.isFree || st.purchased) {
+    // FREE or already bought -> direct / gated download
+    const direct = st.isFree
+      ? `<a href="${dlUrl}" class="w-full text-white font-bold text-[15px] py-3 rounded-[10px] flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(26,86,255,0.35)] transition hover:brightness-110" style="background:#1A56FF"><i class="fa-solid fa-download text-[13px]"></i> Download Now</a>`
+      : `<button onclick="gatedDownload(${b.id})" class="w-full text-white font-bold text-[15px] py-3 rounded-[10px] flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(22,163,74,0.35)] transition hover:brightness-110" style="background:#16A34A"><i class="fa-solid fa-download text-[13px]"></i> Download Now</button>`;
+    const mDirect = direct.replaceAll('text-[15px]', 'text-[14px]');
+    box.innerHTML = direct; mBox.innerHTML = mDirect;
+    return;
+  }
+  // PAID + not bought yet -> Buy Now + Add to Cart (course style)
+  box.innerHTML = `
+    <button data-sm-buy="${b.id}" class="w-full text-white font-bold text-[15px] py-3 rounded-[10px] flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(138,54,235,0.4)] transition hover:brightness-110" style="background:#8a36eb">Buy Now <i class="fa-solid fa-arrow-right text-[13px]"></i></button>
+    <button data-sm-add="${b.id}" class="mt-2 w-full bg-white border-2 border-[#1A56FF] text-[#1A56FF] hover:bg-[#EEF2FF] font-bold text-[13px] py-2.5 rounded-[10px] flex items-center justify-center gap-2 transition"><i class="fa-solid fa-cart-shopping text-[13px]"></i> Add to Cart</button>`;
+  mBox.innerHTML = `
+    <button data-sm-buy="${b.id}" class="w-full text-white font-bold text-[14px] py-3 rounded-[10px] flex items-center justify-center gap-2" style="background:#8a36eb">Buy Now <i class="fa-solid fa-arrow-right text-[11px]"></i></button>`;
+  ['actionBox', 'mActionBox'].forEach(boxId => {
+    const el = document.getElementById(boxId);
+    if (el) el.querySelectorAll('[data-sm-buy],[data-sm-add]').forEach(btn => {
+      btn.addEventListener('click', guardLogin, true);
+    });
+  });
+}
+initEbookPage();
+</script>
+<script src="assets/navbar.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

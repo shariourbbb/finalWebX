@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Courses - StudyMart</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{font-family:'Inter',sans-serif}
+.scrollbar-hide::-webkit-scrollbar{display:none}
+.scrollbar-hide{-ms-overflow-style:none;scrollbar-width:none}
+.course-scroll{scroll-snap-type:x mandatory}
+.course-scroll>div{scroll-snap-align:start}
+.cat-academic{background:#EDE9FF;border:1px solid #E0D8FF}
+.cat-revision{background:#E6F4EA;border:1px solid #C8E9D5}
+.cat-admission{background:#FFF2E6;border:1px solid #FFDCC2}
+.skill-prog{background:#EDE9FF;border:1px solid #DDD6FE}
+.skill-graphic{background:#E6F4EA;border:1px solid #C8E9D5}
+.skill-digital{background:#E6F0FF;border:1px solid #C7D9FF}
+.skill-lang{background:#FCE7F3;border:1px solid #F9C6E0}
+.skill-others{background:#F1F5F9;border:1px solid #E2E8F0}
+</style>
+</head>
+<body class="bg-[#F8F9FD] text-slate-900 antialiased">
+
+<!-- Header: phone unchanged + desktop pic-like -->
+<link rel="stylesheet" href="assets/navbar.css">
+<header class="sticky top-0 z-50 bg-white border-b border-slate-100 shadow-sm">
+  <div class="hidden lg:block border-b border-slate-100">
+    <div class="max-w-[1400px] mx-auto px-6 h-[68px] flex items-center gap-4">
+      <button data-sm-desk-menu-btn class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-100 transition flex-shrink-0" aria-label="Menu"><i class="fa-solid fa-bars text-[20px] text-[#0F2043]"></i></button>
+      <a href="index.html" class="flex items-center gap-2 flex-shrink-0">
+        <img data-sm-desk-logo src="" alt="Logo" class="hidden w-10 h-10 object-contain rounded-lg">
+        <div data-sm-desk-logo-fb class="w-10 h-10 flex items-center justify-center"><svg width="40" height="40" viewBox="0 0 44 44" fill="none"><path d="M22 6 C16 10 8 12 8 20 C8 28 16 30 22 34 C28 30 36 28 36 20 C36 12 28 10 22 6Z" fill="#1A56FF"/><path d="M12 28 L22 38 L32 28" stroke="#1A56FF" stroke-width="2.5" fill="none" opacity="0.9"/><g><path d="M22 2 L32 7 L22 12 L12 7 Z" fill="#0F2043"/><rect x="21" y="7" width="2" height="8" fill="#FACC15"/></g></svg></div>
+        <span class="text-[22px] font-extrabold tracking-tight leading-none"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span>
+      </a>
+      <nav class="flex items-center gap-6 text-[14px] font-semibold flex-shrink-0 ml-2">
+        <a data-sm-nav="home" href="index.html" class="sm-desk-nav-link" data-i18n="home">Home</a>
+        <a data-sm-nav="courses" href="courses.html" class="sm-desk-nav-link" data-i18n="courses">Courses</a>
+        <a data-sm-nav="ebooks" href="index.html#secEbooks" class="sm-desk-nav-link" data-i18n="ebooks">Ebooks</a>
+        <a data-sm-nav="free" href="courses.html?q=" class="sm-desk-nav-link" data-i18n="free">Free Resources</a>
+        <a data-sm-nav="telegram" href="#" data-sm-telegram class="sm-desk-nav-link" data-i18n="telegram">Telegram</a>
+      </nav>
+      <div class="flex-1"></div>
+      <div class="sm-desk-search w-[280px] xl:w-[320px] flex-shrink-0"><i class="fa-solid fa-magnifying-glass text-slate-400 text-[14px]"></i><input data-sm-desk-search data-i18n-ph="searchPh" type="text" placeholder="Search courses, subjects, ebooks..."><button data-sm-desk-search-btn class="text-slate-400 hover:text-[#1A56FF]" aria-label="Search"><i class="fa-solid fa-arrow-right text-[12px]"></i></button></div>
+      <div class="sm-desk-drop flex-shrink-0"><button data-sm-desk-lang-btn class="sm-desk-pill"><i class="fa-solid fa-globe text-[15px] text-slate-500"></i><span data-i18n="lang">বাংলা/English</span><i class="fa-solid fa-chevron-down text-[11px] text-slate-400"></i></button><div data-sm-desk-lang-menu class="sm-desk-menu hidden"><button type="button" class="sm-mi" data-sm-lang-pick="bn">বাংলা (Bangla)</button><button type="button" class="sm-mi" data-sm-lang-pick="en">English</button></div></div>
+      <button data-sm-theme-btn class="sm-desk-pill flex-shrink-0"><i data-sm-theme-icon class="fa-solid fa-sun text-[15px] text-[#F59E0B]"></i><span data-i18n="theme">Theme</span></button>
+      <div class="sm-desk-drop flex-shrink-0"><button data-sm-desk-account-btn class="sm-desk-pill"><i class="fa-regular fa-user text-[15px] text-slate-600"></i><span data-i18n="account">Account</span><i class="fa-solid fa-chevron-down text-[11px] text-slate-400"></i></button><div data-sm-desk-account-menu class="sm-desk-menu hidden"></div></div>
+    </div>
+  </div>
+  <div id="smDeskDrawer" class="hidden"><div class="sm-backdrop"></div><div class="sm-panel"><div class="flex items-center justify-between mb-3"><span class="text-[18px] font-extrabold"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span><button data-sm-drawer-close class="w-9 h-9 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-xmark"></i></button></div><nav class="flex flex-col gap-1 text-[14px] font-semibold"><a href="index.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Home</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Courses</a><a href="index.html#secEbooks" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Ebooks</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Free Resources</a><a href="#" data-sm-telegram class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Telegram</a><a href="dashboard.html" data-account-link class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Account / Dashboard</a><a href="cart.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Cart (<span data-sm-cart-count>0</span>)</a></nav></div></div>
+  <!-- phone bar (unchanged) -->
+  <div class="lg:hidden max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 h-[60px] sm:h-[62px] flex items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <button id="menuBtn" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-100 lg:hidden">
+        <i class="fa-solid fa-bars text-[22px] text-[#0F2043]"></i>
+      </button>
+      <a href="index.html" class="flex items-center gap-2">
+        <img id="siteLogoImg" src="" alt="Logo" class="hidden w-10 h-10 sm:w-11 sm:h-11 object-contain rounded-lg flex-shrink-0">
+        <div id="siteLogoFallback" class="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center flex-shrink-0">
+          <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+            <path d="M22 6 C16 10 8 12 8 20 C8 28 16 30 22 34 C28 30 36 28 36 20 C36 12 28 10 22 6Z" fill="url(#g1)" />
+            <path d="M12 28 L22 38 L32 28" stroke="#1A56FF" stroke-width="2.5" fill="none" opacity="0.9"/>
+            <g><path d="M22 2 L32 7 L22 12 L12 7 Z" fill="#0F2043"/><rect x="21" y="7" width="2" height="8" fill="#FACC15"/></g>
+            <defs><linearGradient id="g1" x1="8" y1="6" x2="36" y2="34" gradientUnits="userSpaceOnUse"><stop stop-color="#1A56FF"/><stop offset="1" stop-color="#7C3AED"/></linearGradient></defs>
+          </svg>
+        </div>
+        <span id="siteNameDisplay" class="text-[21px] sm:text-[22px] font-extrabold tracking-tight leading-none"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span>
+      </a>
+    </div>
+
+    <div class="flex items-center gap-2 sm:gap-6">
+      <a href="courses.html" class="hidden lg:flex flex-col items-center gap-0.5 text-[#1A56FF]">
+        <i class="fa-solid fa-book-open text-[18px]"></i><span class="text-[11px] font-semibold">Courses</span>
+      </a>
+      <a href="courses.html" class="flex flex-col items-center gap-0.5 text-slate-700 hover:text-[#1A56FF]">
+        <i class="fa-solid fa-magnifying-glass text-[18px] sm:text-[18px]"></i><span class="hidden sm:block text-[11px] font-medium">Search</span>
+      </a>
+      <a href="#" data-sm-telegram class="flex flex-col items-center gap-0.5 text-slate-700 hover:text-[#1A56FF]" title="Telegram">
+        <span class="w-[30px] h-[30px] rounded-full bg-[#E6F0FF] flex items-center justify-center text-[#1A56FF]"><i class="fa-brands fa-telegram text-[16px]"></i></span><span class="hidden sm:block text-[11px] font-medium">Telegram</span>
+      </a>
+      <a href="dashboard.html" data-account-link class="flex flex-col items-center gap-0.5 text-slate-700 hover:text-[#1A56FF]">
+        <i class="fa-regular fa-circle-user text-[20px] sm:text-[22px]"></i><span class="hidden sm:block text-[11px] font-medium">Dashboard</span>
+      </a>
+    </div>
+  </div>
+  <div id="mobileMenu" class="hidden border-t bg-white absolute w-full left-0 shadow-lg lg:hidden">
+    <nav class="px-4 py-3 flex flex-col gap-1 text-[14px] font-medium">
+      <a href="index.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Home</a>
+      <a href="courses.html" class="px-3 py-2.5 rounded-xl bg-[#EEF2FF] text-[#1A56FF]">Courses</a>
+      <a href="#" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Search</a>
+      <a href="dashboard.html" data-account-link class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Dashboard</a>
+    </nav>
+  </div>
+</header>
+
+<main class="max-w-[1280px] mx-auto px-2.5 sm:px-6 lg:px-8 pb-20">
+
+  <!-- Top Filter Pills (dynamic: batch names from Admin Panel) -->
+  <section class="mt-2.5 sm:mt-5">
+    <div id="batchPills" class="flex gap-2 overflow-x-auto scrollbar-hide py-1 sm:grid sm:grid-cols-3 lg:grid-cols-5 sm:gap-3">
+      <p class="col-span-full text-[13px] text-slate-400 text-center py-2"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading batches...</p>
+    </div>
+  </section>
+
+  <!-- Per-batch summary sections (dynamic, same design) -->
+  <div id="batchSections"></div>
+
+  <!-- DYNAMIC-SECTIONS-START -->
+  <!-- ===== Live data from Admin Panel ===== -->
+  <section class="mt-6 sm:mt-7">
+    <h2 class="text-[18px] sm:text-[20px] font-extrabold text-[#0F2043] mb-1">All Courses</h2>
+    <p class="text-[12px] text-slate-500 mb-3">Every course added from the Admin Panel appears here automatically</p>
+    <div data-sm-courses data-sm-limit="40">
+      <p class="text-[13px] text-slate-400 text-center py-8"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading courses...</p>
+    </div>
+  </section>
+
+  <!-- <section class="mt-6 sm:mt-7 grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div class="bg-white rounded-[16px] border border-slate-100 shadow-sm p-4 sm:p-5">
+      <h2 class="text-[16px] font-extrabold text-[#0F2043] mb-3">All Batches</h2>
+      <div data-sm-batches class="grid grid-cols-2 gap-3"></div>
+    </div>
+    <div class="bg-white rounded-[16px] border border-slate-100 shadow-sm p-4 sm:p-5">
+      <h2 class="text-[16px] font-extrabold text-[#0F2043] mb-3">Categories</h2>
+      <div data-sm-categories class="flex flex-wrap gap-2"></div>
+      <div data-sm-stats class="grid grid-cols-2 gap-3 mt-5"></div>
+    </div>
+  </section> -->
+
+
+</main>
+
+<!-- Floating Cart -->
+<a href="cart.html" class="fixed bottom-[86px] lg:bottom-6 right-4 sm:right-6 w-14 h-14 bg-[#1A56FF] rounded-full shadow-[0_8px_24px_rgba(26,86,255,0.4)] flex items-center justify-center text-white z-50 hover:bg-[#1446D1] transition">
+  <i class="fa-solid fa-cart-shopping text-[20px]"></i>
+  <span data-sm-cart-count class="absolute -top-1 -right-1 w-6 h-6 bg-[#EF4444] text-white text-[11px] font-bold rounded-full flex items-center justify-center border-2 border-white">0</span>
+</a>
+
+<!-- Footer same as index -->
+<footer class="bg-[#F3F4F8] border-t border-slate-100">
+  <div class="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-6">
+    <div class="grid grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr] gap-8">
+      <div class="col-span-2 lg:col-span-1">
+        <a href="index.html" class="flex items-center gap-2">
+          <svg width="38" height="38" viewBox="0 0 44 44" fill="none">
+            <path d="M22 6 C16 10 8 12 8 20 C8 28 16 30 22 34 C28 30 36 28 36 20 C36 12 28 10 22 6Z" fill="url(#g2)" />
+            <path d="M12 28 L22 38 L32 28" stroke="#1A56FF" stroke-width="2.5" fill="none" opacity="0.9"/>
+            <g><path d="M22 2 L32 7 L22 12 L12 7 Z" fill="#0F2043"/><rect x="21" y="7" width="2" height="8" fill="#FACC15"/></g>
+            <defs><linearGradient id="g2" x1="8" y1="6" x2="36" y2="34" gradientUnits="userSpaceOnUse"><stop stop-color="#1A56FF"/><stop offset="1" stop-color="#7C3AED"/></linearGradient></defs>
+          </svg>
+          <span class="leading-none"><span class="block text-[18px] font-extrabold"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span><span class="block text-[9px] tracking-[0.16em] text-slate-500 font-semibold -mt-0.5">Learn • Prepare • Grow</span></span>
+        </a>
+        <div class="flex items-center gap-2.5 mt-4">
+          <a href="#" class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-[#1A56FF]"><i class="fa-solid fa-paper-plane text-[13px]"></i></a>
+          <a href="#" class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-[#FF0000]"><i class="fa-brands fa-youtube text-[13px]"></i></a>
+          <a href="#" class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-[#1877F2]"><i class="fa-brands fa-facebook-f text-[12px]"></i></a>
+        </div>
+      </div>
+      <div><h4 class="text-[13px] font-extrabold text-[#0F2043] mb-3">Explore</h4><ul class="space-y-2 text-[12.5px] text-slate-600"><li><a href="#" class="hover:text-[#1A56FF]">All Courses</a></li><li><a href="#" class="hover:text-[#1A56FF]">HSC Courses</a></li><li><a href="#" class="hover:text-[#1A56FF]">SSC Courses</a></li><li><a href="#" class="hover:text-[#1A56FF]">Admission</a></li><li><a href="#" class="hover:text-[#1A56FF]">Skill Development</a></li></ul></div>
+      <div><h4 class="text-[13px] font-extrabold text-[#0F2043] mb-3">Support</h4><ul class="space-y-2 text-[12.5px] text-slate-600"><li><a href="#">FAQ</a></li><li><a href="#">Contact Us</a></li><li><a href="#">How to Buy</a></li><li><a href="#">Refund Policy</a></li></ul></div>
+      <div><h4 class="text-[13px] font-extrabold text-[#0F2043] mb-3">Company</h4><ul class="space-y-2 text-[12.5px] text-slate-600"><li><a href="#">About Us</a></li><li><a href="#">Terms of Use</a></li><li><a href="#">Privacy Policy</a></li></ul></div>
+    </div>
+    <div class="mt-8 pt-4 border-t border-slate-200 flex items-center justify-end">
+      <button onclick="window.scrollTo({top:0,behavior:'smooth'})" class="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-600"><i class="fa-solid fa-arrow-up text-[12px]"></i></button>
+    </div>
+  </div>
+</footer>
+
+<!-- ===== Pro Mobile Bottom Nav (Android / Phone) ===== -->
+<style>
+.sm-bottom-nav{padding-bottom:env(safe-area-inset-bottom)}
+.sm-bottom-nav .bn-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;flex:1;padding:7px 2px 8px;border-radius:14px;color:#64748B;position:relative;transition:background .15s,color .15s}
+.sm-bottom-nav .bn-item i{font-size:19px;line-height:1}
+.sm-bottom-nav .bn-item span{font-size:11px;font-weight:600;white-space:nowrap;line-height:1}
+.sm-bottom-nav .bn-item.bn-active{background:#EAF0FF;color:#1A56FF}
+.sm-bottom-nav .bn-item.bn-active span{font-weight:700}
+.sm-bottom-nav .bn-item.bn-active::before{content:'';position:absolute;top:-9px;left:50%;transform:translateX(-50%);width:22px;height:3px;border-radius:9999px;background:linear-gradient(90deg,#1A56FF,#7C3AED)}
+</style>
+<div class="h-[76px] lg:hidden" aria-hidden="true"></div>
+<nav class="sm-bottom-nav fixed bottom-0 left-0 right-0 z-[70] border-t border-slate-200/90 lg:hidden" style="background:rgba(255,255,255,.98);backdrop-filter:blur(12px);box-shadow:0 -6px 24px rgba(15,32,67,.08)">
+  <div class="grid grid-cols-5 gap-1 px-2 pt-2" style="padding-bottom:calc(8px + env(safe-area-inset-bottom))">
+    <a href="index.html" data-bn="home" class="bn-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
+    <a href="courses.html" data-bn="courses" class="bn-item"><i class="fa-regular fa-square"></i><span>Courses</span></a>
+    <a href="courses.html" data-bn="ebook" class="bn-item"><i class="fa-regular fa-file-lines"></i><span>E-Book</span></a>
+    <a href="cart.html" data-bn="cart" class="bn-item"><span class="relative"><i class="fa-solid fa-cart-shopping"></i><span data-sm-cart-count class="absolute -top-2 -right-3 min-w-[16px] h-4 px-1 bg-[#1A56FF] text-white text-[10px] font-bold rounded-full hidden items-center justify-center">0</span></span><span>Cart</span></a>
+    <a href="dashboard.html" data-bn="account" data-account-link class="bn-item"><i class="fa-regular fa-user"></i><span>Account</span></a>
+  </div>
+</nav>
+<script>
+(function(){
+  try{
+    var p=(location.pathname.split('/').pop()||'index.html').split('?')[0].toLowerCase();
+    var map={'index.html':'home','':'home','courses.html':'courses','batch.html':'courses','course.html':'courses','ebook.html':'ebook','cart.html':'cart','dashboard.html':'account','auth.html':'account'};
+    var key=map[p]||'home';
+    if(p==='courses.html' && /ebook/i.test(location.search+location.hash)) key='ebook';
+    document.querySelectorAll('.sm-bottom-nav [data-bn]').forEach(function(a){ if(a.dataset.bn===key) a.classList.add('bn-active'); });
+    var n=0; try{ n=(JSON.parse(localStorage.getItem('sm_cart'))||[]).length; }catch(e){}
+    document.querySelectorAll('.sm-bottom-nav [data-sm-cart-count]').forEach(function(el){ el.textContent=n; el.classList.toggle('hidden',!n); el.classList.toggle('flex',!!n); });
+    // Smart Account routing: guest -> auth page, logged-in -> dashboard
+    var hasTok=function(){ try{return !!(localStorage.getItem('sm_user_token')||sessionStorage.getItem('sm_user_token'));}catch(x){return false;} };
+    if(!hasTok()) document.querySelectorAll('[data-account-link]').forEach(function(a){ a.href='auth.html?next='+encodeURIComponent('dashboard.html'); });
+  }catch(e){}
+  // click-time re-check (token may change without reload)
+  document.addEventListener('click',function(e){
+    var a=e.target&&e.target.closest?e.target.closest('[data-account-link]'):null;
+    if(!a) return;
+    var t=''; try{t=localStorage.getItem('sm_user_token')||sessionStorage.getItem('sm_user_token')||'';}catch(x){}
+    if(!t){ e.preventDefault(); location.href='auth.html?next='+encodeURIComponent('dashboard.html'); }
+  });
+})();
+</script>
+
+<script>
+document.getElementById('menuBtn').addEventListener('click',()=>document.getElementById('mobileMenu').classList.toggle('hidden'));
+function scrollRow(id,amt){const el=document.getElementById(id);if(el)el.scrollBy({left:amt,behavior:'smooth'})}
+
+/* ===== Dynamic batches + per-batch category summary (same design, live data) ===== */
+function dynEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function batchIcon(b){
+  const n=(b.name||'').toLowerCase();
+  if(n.includes('skill')) return 'fa-briefcase';
+  if(n.includes('ssc')) return 'fa-book-open';
+  return 'fa-graduation-cap';
+}
+const CAT_STYLES=[
+  {box:'cat-academic',icon:'fa-layer-group',iconCls:'text-[#3B5BFE] text-[22px]',pill:'bg-[#DDD6FE] text-[#4F46E5]',hover:'hover:bg-[#1A56FF]'},
+  {box:'cat-revision',icon:'fa-bullseye',iconCls:'text-[#16A34A] text-[28px]',pill:'bg-[#C8E9D5] text-[#15803D]',hover:'hover:bg-[#16A34A]'},
+  {box:'cat-admission',icon:'fa-building-columns',iconCls:'text-[#F59E0B] text-[22px]',pill:'bg-[#FFE4C7] text-[#C2410C]',hover:'hover:bg-[#F59E0B]'}
+];
+function catStyle(name,idx){
+  const n=(name||'').toLowerCase();
+  if(n.includes('academic')) return CAT_STYLES[0];
+  if(n.includes('revision')) return CAT_STYLES[1];
+  if(n.includes('admission')) return CAT_STYLES[2];
+  return CAT_STYLES[idx%3];
+}
+function twoLine(name){
+  const parts=String(name||'').split(' ');
+  if(parts.length>1) return dynEsc(parts.slice(0,-1).join(' '))+'<br>'+dynEsc(parts[parts.length-1]);
+  return dynEsc(name);
+}
+async function loadCoursePage(){
+  const pillsEl=document.getElementById('batchPills');
+  const secsEl=document.getElementById('batchSections');
+  try{
+    const unwrap=j=>Array.isArray(j)?j:(j&&Array.isArray(j.data)?j.data:[]);
+    const [batches,cats,courses]=await Promise.all([
+      fetch('/api/batches').then(r=>r.json()).then(unwrap),
+      fetch('/api/categories').then(r=>r.json()).then(unwrap),
+      fetch('/api/courses').then(r=>r.json()).then(unwrap)
+    ]);
+    const activeBatches=(Array.isArray(batches)?batches:[]).filter(b=>b.status!=='inactive'&&b.status!=='archived').sort((a,b)=>((Number(a.order)||999)-(Number(b.order)||999))||(Number(a.id)-Number(b.id)));
+    const catById={};(Array.isArray(cats)?cats:[]).forEach(c=>{catById[c.id]=c.name||'General'});
+
+    // --- Top pills: compact scrollable pills on mobile, grid on desktop ---
+    pillsEl.innerHTML=activeBatches.map((b)=>{
+      return `<a href="#batch-${dynEsc(b.slug||b.id)}" class="flex-shrink-0 bg-white rounded-full sm:rounded-[14px] border border-slate-200/90 shadow-xs px-3 py-1.5 sm:px-4 sm:py-2.5 flex items-center gap-2 hover:border-[#1A56FF] hover:text-[#1A56FF] transition whitespace-nowrap">
+        <div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-[#EEF2FF] flex items-center justify-center flex-shrink-0"><i class="fa-solid ${batchIcon(b)} text-[#3B5BFE] text-[11px] sm:text-[13px]"></i></div>
+        <span class="text-[12px] sm:text-[13px] font-bold text-[#0F2043]">${dynEsc(b.name||'Batch')}</span>
+      </a>`;
+    }).join('')||'<p class="col-span-full text-[13px] text-slate-400 text-center py-2">No batches found</p>';
+
+    // --- Per-batch summary sections: 3 columns on mobile ---
+    secsEl.innerHTML=activeBatches.map((b,bi)=>{
+      const slug=dynEsc(b.slug||b.id);
+      const list=(Array.isArray(courses)?courses:[]).filter(c=>String(c.batchId)===String(b.id)&&c.status!=='inactive');
+      const groups={};const order=[];
+      list.forEach(c=>{const cn=catById[c.categoryId]||'General';if(!groups[cn]){groups[cn]=0;order.push(cn)}groups[cn]++});
+      const cols=Math.max(1,Math.min(order.length||1,3));
+      const isMulti = order.length > 3;
+
+      const cards=order.length?order.map((cn,ci)=>{
+        const st=catStyle(cn,ci);const n=groups[cn];
+        const catParam=encodeURIComponent(cn);
+        return `<a href="batch.html?batch=${slug}&category=${catParam}" class="group ${st.box} rounded-[12px] sm:rounded-[14px] p-2 sm:p-3.5 flex flex-col justify-between transition-all duration-150 active:scale-[0.98] hover:shadow-md ${isMulti ? 'w-[calc(33.333%-5px)] min-w-[98px] flex-shrink-0 snap-start' : 'w-full'}">
+          <div>
+            <div class="flex items-center justify-between gap-1.5 mb-1 sm:mb-2">
+              <div class="w-7 h-7 sm:w-11 sm:h-11 rounded-full bg-white flex items-center justify-center shadow-xs flex-shrink-0">
+                <i class="fa-solid ${st.icon} ${st.iconCls} text-[13px] sm:text-[18px]"></i>
+              </div>
+              <span class="w-5 h-5 sm:w-7 sm:h-7 rounded-full bg-white/90 shadow-xs flex items-center justify-center text-slate-500 group-hover:bg-[#1A56FF] group-hover:text-white transition flex-shrink-0">
+                <i class="fa-solid fa-arrow-right text-[8px] sm:text-[10px]"></i>
+              </span>
+            </div>
+            <h3 class="font-bold text-[10.5px] sm:text-[13.5px] leading-tight text-[#0F2043] line-clamp-2">
+              ${dynEsc(cn)}<span class="hidden sm:inline"> Courses</span>
+            </h3>
+          </div>
+          <div class="mt-2 sm:mt-3 pt-1 border-t border-black/5 flex items-center justify-between">
+            <span class="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full ${st.pill} text-[8.5px] sm:text-[11px] font-bold truncate">
+              ${n} Course${n>1?'s':''}
+            </span>
+            <span class="text-[8.5px] sm:text-[10px] text-slate-400 group-hover:text-[#1A56FF] font-semibold hidden sm:inline">Explore &rarr;</span>
+          </div>
+        </a>`;
+      }).join(''):`<p class="col-span-full text-[12px] text-slate-400 py-4 text-center">No courses in this batch yet</p>`;
+
+      const dots=order.length>1?`<div class="flex justify-center gap-1.5 mt-2.5">${order.slice(0, Math.min(order.length, 5)).map((_,di)=>`<span class="${di===0?'w-3.5 bg-[#1A56FF]':'w-1.5 bg-slate-200'} h-1.5 rounded-full transition-all"></span>`).join('')}</div>`:'';
+      const containerClass = isMulti
+        ? `flex gap-1.5 sm:gap-3 overflow-x-auto scrollbar-hide snap-x course-scroll pb-1`
+        : `grid grid-cols-${cols} gap-1.5 sm:gap-3`;
+
+      return `<section id="batch-${slug}" class="${bi===0?'mt-3 sm:mt-5':'mt-3 sm:mt-4'} bg-white rounded-[16px] border border-slate-100/90 shadow-xs p-2.5 sm:p-4">
+        <div class="flex items-center justify-between mb-2 sm:mb-3">
+          <div class="flex items-center gap-2 sm:gap-2.5">
+            <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-[#EEF2FF] flex items-center justify-center flex-shrink-0">
+              <i class="fa-solid ${batchIcon(b)} text-[#3B5BFE] text-[13px] sm:text-[16px]"></i>
+            </div>
+            <h2 class="text-[15px] sm:text-[19px] font-extrabold text-[#0F2043]">${dynEsc(b.name||'Batch')}</h2>
+          </div>
+          <a href="batch.html?batch=${slug}" class="text-[#1A56FF] font-bold text-[11px] sm:text-[13px] flex items-center gap-1 hover:underline">View All <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+        </div>
+        <div class="relative">
+          <button onclick="scrollRow('row-${slug}',-240)" class="hidden sm:flex absolute -left-3.5 top-1/2 -translate-y-1/2 w-7 h-7 bg-white rounded-full shadow border border-slate-200 items-center justify-center z-10 hover:bg-slate-50"><i class="fa-solid fa-chevron-left text-[10px] text-[#1A56FF]"></i></button>
+          <button onclick="scrollRow('row-${slug}',240)" class="hidden sm:flex absolute -right-3.5 top-1/2 -translate-y-1/2 w-7 h-7 bg-white rounded-full shadow border border-slate-200 items-center justify-center z-10 hover:bg-slate-50"><i class="fa-solid fa-chevron-right text-[10px] text-[#1A56FF]"></i></button>
+          <div id="row-${slug}" class="${containerClass}">${cards}</div>
+        </div>${dots}
+      </section>`;
+    }).join('');
+  }catch(e){
+    pillsEl.innerHTML='<p class="col-span-full text-[13px] text-red-400 text-center py-4">Failed to load batches</p>';
+  }
+}
+document.addEventListener('DOMContentLoaded',loadCoursePage);
+</script>
+<script src="assets/navbar.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

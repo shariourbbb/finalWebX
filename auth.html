@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login / Sign Up - StudyMart</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{font-family:'Inter',sans-serif}
+body{background:linear-gradient(135deg,#EDF1FB 0%,#EAF2FB 45%,#E7F5EE 100%);min-height:100vh}
+.auth-input{width:100%;background:#F6F8FC;border:1px solid #E2E8F0;border-radius:12px;padding:13px 16px;font-size:14px;outline:none;transition:border-color .15s, box-shadow .15s;color:#0F2043}
+.auth-input::placeholder{color:#A9B4C7}
+.auth-input:focus{border-color:#2563EB;box-shadow:0 0 0 3px rgba(37,99,235,.12);background:#fff}
+.btn-grad{background:linear-gradient(90deg,#2563EB 0%,#6D28D9 100%);box-shadow:0 10px 24px rgba(59,70,246,.35);transition:transform .12s, box-shadow .12s}
+.btn-grad:hover{box-shadow:0 12px 28px rgba(59,70,246,.45)}
+.btn-grad:active{transform:scale(.99)}
+.btn-grad:disabled{opacity:.7;cursor:wait}
+.tab-active{background:linear-gradient(90deg,#2563EB 0%,#6D28D9 100%);color:#fff;box-shadow:0 6px 16px rgba(59,70,246,.35)}
+.tab-idle{color:#64748B}
+.tab-idle:hover{color:#0F2043}
+</style>
+</head>
+<body class="antialiased">
+
+<!-- Back -->
+<button onclick="goBack()" class="fixed top-4 left-4 sm:top-6 sm:left-8 z-20 flex items-center gap-2 bg-white rounded-full pl-3 pr-5 py-2.5 text-[14px] font-bold text-[#0F2043] shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:shadow-lg transition">
+  <i class="fa-solid fa-arrow-left"></i> Back
+</button>
+
+<main class="min-h-screen flex items-center justify-center px-4 py-16 sm:py-10">
+  <div class="w-full max-w-[1080px] bg-white rounded-[24px] shadow-[0_20px_60px_rgba(30,58,138,0.12)] overflow-hidden grid grid-cols-1 lg:grid-cols-2">
+
+    <!-- Illustration (Mobile: top, Desktop: left) -->
+    <div class="order-1 lg:order-1 flex items-center justify-center bg-gradient-to-b from-white to-[#F4F7FE] p-6 lg:p-10">
+      <!-- Sign up art -->
+      <img id="artSignup" src="img/register.png" alt="Sign Up Illustration" class="w-full max-w-[420px] h-auto">
+      <!-- Login art -->
+      <img id="artLogin" class="hidden w-full max-w-[420px] h-auto" src="img/login.jpg" alt="Login Illustration">
+    </div>
+
+    <!-- Form (Mobile: bottom, Desktop: right) -->
+    <div class="order-2 lg:order-2 p-6 sm:p-10 lg:p-12">
+      <!-- Toggle -->
+      <div class="flex bg-[#F1F5F9] rounded-full p-1.5 mb-7">
+        <button id="tabLogin" onclick="switchTab('login')" class="flex-1 py-2.5 rounded-full text-[14px] font-bold tab-idle transition">Login</button>
+        <button id="tabSignup" onclick="switchTab('signup')" class="flex-1 py-2.5 rounded-full text-[14px] font-bold tab-idle transition">Sign Up</button>
+      </div>
+
+      <!-- SIGN UP -->
+      <div id="viewSignup">
+        <h2 class="text-[24px] sm:text-[26px] font-extrabold text-[#0F2043]">Create a free account ✨</h2>
+        <div class="mt-5 space-y-4">
+          <div>
+            <label class="text-[13px] font-bold text-[#0F2043]">Your Name</label>
+            <input id="suName" class="auth-input mt-1.5" placeholder="e.g. Rahim Uddin" autocomplete="name">
+          </div>
+          <div>
+            <label class="text-[13px] font-bold text-[#0F2043]">Email or Mobile Number</label>
+            <input id="suIdent" class="auth-input mt-1.5" placeholder="you@email.com / 01XXXXXXXXX" autocomplete="username">
+          </div>
+          <div>
+            <label class="text-[13px] font-bold text-[#0F2043]">Password (min. 4 characters)</label>
+            <div class="relative mt-1.5">
+              <input id="suPass" type="password" minlength="4" class="auth-input pr-11" placeholder="••••••••" autocomplete="new-password">
+              <button onclick="togglePw('suPass', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"><i class="fa-regular fa-eye"></i></button>
+            </div>
+          </div>
+        </div>
+        <p id="suErr" class="hidden mt-3 text-[12px] font-semibold text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2"></p>
+        <button id="suBtn" onclick="doSignup()" class="btn-grad mt-5 w-full py-3.5 rounded-xl text-white text-[15px] font-bold">Sign Up <i class="fa-solid fa-arrow-right ml-1 text-[13px]"></i></button>
+        <div id="googleSignupZone" class="hidden">
+          <div class="flex items-center gap-3 my-5">
+            <div class="flex-1 h-px bg-slate-200"></div><span class="text-[12px] text-slate-400 font-medium">or</span><div class="flex-1 h-px bg-slate-200"></div>
+          </div>
+          <div id="gsiSignup" class="flex justify-center"></div>
+        </div>
+        <p class="text-center text-[13px] text-slate-500 mt-5">Already have an account? <button onclick="switchTab('login')" class="text-[#2563EB] font-bold hover:underline">Login</button></p>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="viewLogin" class="hidden">
+        <h2 class="text-[24px] sm:text-[26px] font-extrabold text-[#0F2043]">Welcome back! 👋</h2>
+        <p class="text-[13.5px] text-slate-500 mt-1">Log in with your email or mobile + password.</p>
+        <div class="mt-5 space-y-4">
+          <div>
+            <label class="text-[13px] font-bold text-[#0F2043]">Email or Mobile Number</label>
+            <input id="liIdent" class="auth-input mt-1.5" placeholder="you@email.com / 01XXXXXXXXX" autocomplete="username">
+          </div>
+          <div>
+            <label class="text-[13px] font-bold text-[#0F2043]">Password</label>
+            <div class="relative mt-1.5">
+              <input id="liPass" type="password" class="auth-input pr-11" placeholder="••••••••" autocomplete="current-password">
+              <button onclick="togglePw('liPass', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"><i class="fa-regular fa-eye"></i></button>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between mt-3">
+          <label class="flex items-center gap-2 text-[13px] font-semibold text-slate-600 cursor-pointer">
+            <input id="liRemember" type="checkbox" checked class="w-4 h-4 rounded accent-[#2563EB]"> Remember me
+          </label>
+          <button onclick="forgotSoon()" class="text-[13px] font-bold text-[#2563EB] hover:underline">Forgot password?</button>
+        </div>
+        <p id="liErr" class="hidden mt-3 text-[12px] font-semibold text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2"></p>
+        <button id="liBtn" onclick="doLogin()" class="btn-grad mt-4 w-full py-3.5 rounded-xl text-white text-[15px] font-bold">Login <i class="fa-solid fa-arrow-right ml-1 text-[13px]"></i></button>
+        <div id="googleLoginZone" class="hidden">
+          <div class="flex items-center gap-3 my-5">
+            <div class="flex-1 h-px bg-slate-200"></div><span class="text-[12px] text-slate-400 font-medium">or</span><div class="flex-1 h-px bg-slate-200"></div>
+          </div>
+          <div id="gsiLogin" class="flex justify-center"></div>
+        </div>
+        <p class="text-center text-[13px] text-slate-500 mt-5">No account yet? <button onclick="switchTab('signup')" class="text-[#2563EB] font-bold hover:underline">Sign up for free</button></p>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#0F2043] text-white px-5 py-3 rounded-full text-[13px] font-semibold shadow-xl z-50"></div>
+
+<script>
+const nextUrl = new URLSearchParams(window.location.search).get('next') || 'dashboard.html';
+
+function goBack() {
+  if (document.referrer && new URL(document.referrer).origin === location.origin) history.back();
+  else window.location.href = 'index.html';
+}
+
+function switchTab(which) {
+  const login = which === 'login';
+  document.getElementById('viewLogin').classList.toggle('hidden', !login);
+  document.getElementById('viewSignup').classList.toggle('hidden', login);
+  document.getElementById('artLogin').classList.toggle('hidden', !login);
+  document.getElementById('artSignup').classList.toggle('hidden', login);
+  const tl = document.getElementById('tabLogin'), ts = document.getElementById('tabSignup');
+  tl.className = 'flex-1 py-2.5 rounded-full text-[14px] font-bold transition ' + (login ? 'tab-active' : 'tab-idle');
+  ts.className = 'flex-1 py-2.5 rounded-full text-[14px] font-bold transition ' + (!login ? 'tab-active' : 'tab-idle');
+  document.title = (login ? 'Login' : 'Sign Up') + ' - StudyMart';
+}
+
+function togglePw(id, btn) {
+  const inp = document.getElementById(id);
+  const show = inp.type === 'password';
+  inp.type = show ? 'text' : 'password';
+  btn.innerHTML = '<i class="fa-regular ' + (show ? 'fa-eye-slash' : 'fa-eye') + '"></i>';
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.classList.add('hidden'), 2500);
+}
+function forgotSoon() { toast('Password reset-এর জন্য Telegram-এ মেসেজ করুন'); }
+
+/* ---------- Real Google Sign-In (Client ID comes from Admin → Settings) ---------- */
+function loadGsiScript() {
+  return new Promise((resolve, reject) => {
+    if (window.google && window.google.accounts && window.google.accounts.id) return resolve();
+    const s = document.createElement('script');
+    s.src = 'https://accounts.google.com/gsi/client';
+    s.async = true; s.defer = true;
+    s.onload = resolve;
+    s.onerror = () => reject(new Error('Google script blocked'));
+    document.head.appendChild(s);
+  });
+}
+
+async function onGoogleCredential(resp) {
+  try {
+    const r = await fetch('/api/public/auth/google', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential: resp.credential })
+    });
+    const j = await r.json();
+    if (!j.success) throw new Error(j.message);
+    const remember = document.getElementById('viewLogin').classList.contains('hidden')
+      ? true : document.getElementById('liRemember').checked;
+    saveToken(j.token, remember);
+    toast(j.message || 'Logged in with Google!');
+    setTimeout(() => window.location.href = nextUrl, 700);
+  } catch (e) {
+    toast(e.message);
+  }
+}
+
+async function initGoogle() {
+  try {
+    const r = await fetch('/api/public/settings');
+    const j = await r.json();
+    const s = (j.success && j.data) || {};
+    if (!s.googleLoginEnabled || !s.googleClientId) return; // admin hasn't enabled it -> zones stay hidden
+    await loadGsiScript();
+    window.google.accounts.id.initialize({
+      client_id: String(s.googleClientId).trim(),
+      callback: onGoogleCredential,
+      auto_select: false
+    });
+    const w = Math.min(320, document.getElementById('gsiSignup').parentElement.clientWidth || 320);
+    window.google.accounts.id.renderButton(document.getElementById('gsiSignup'), {
+      theme: 'outline', size: 'large', width: w, text: 'signup_with', shape: 'rectangular'
+    });
+    window.google.accounts.id.renderButton(document.getElementById('gsiLogin'), {
+      theme: 'outline', size: 'large', width: w, text: 'continue_with', shape: 'rectangular'
+    });
+    document.getElementById('googleSignupZone').classList.remove('hidden');
+    document.getElementById('googleLoginZone').classList.remove('hidden');
+  } catch (e) { /* offline / blocked / not configured -> no Google buttons */ }
+}
+
+function showErr(id, msg) {
+  const box = document.getElementById(id);
+  if (!msg) { box.classList.add('hidden'); return; }
+  box.textContent = msg;
+  box.classList.remove('hidden');
+}
+
+function saveToken(token, remember) {
+  try {
+    if (remember) { localStorage.setItem('sm_user_token', token); sessionStorage.removeItem('sm_user_token'); }
+    else { sessionStorage.setItem('sm_user_token', token); localStorage.removeItem('sm_user_token'); }
+  } catch (e) {}
+}
+
+async function doSignup() {
+  const name = document.getElementById('suName').value.trim();
+  const identifier = document.getElementById('suIdent').value.trim();
+  const password = document.getElementById('suPass').value;
+  if (!name) return showErr('suErr', 'Please enter your name');
+  if (!identifier) return showErr('suErr', 'Please enter email or mobile number');
+  if (password.length < 4) return showErr('suErr', 'Password must be at least 4 characters');
+  const btn = document.getElementById('suBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Creating account...';
+  showErr('suErr', '');
+  try {
+    const r = await fetch('/api/public/auth/register', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, identifier, password })
+    });
+    const j = await r.json();
+    if (!j.success) throw new Error(j.message);
+    saveToken(j.token, true);
+    toast(j.message || 'Account created!');
+    setTimeout(() => window.location.href = nextUrl, 700);
+  } catch (e) {
+    showErr('suErr', e.message);
+    btn.disabled = false;
+    btn.innerHTML = 'Sign Up <i class="fa-solid fa-arrow-right ml-1 text-[13px]"></i>';
+  }
+}
+
+async function doLogin() {
+  const identifier = document.getElementById('liIdent').value.trim();
+  const password = document.getElementById('liPass').value;
+  const remember = document.getElementById('liRemember').checked;
+  if (!identifier) return showErr('liErr', 'Please enter email or mobile number');
+  if (!password) return showErr('liErr', 'Please enter your password');
+  const btn = document.getElementById('liBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Logging in...';
+  showErr('liErr', '');
+  try {
+    const r = await fetch('/api/public/auth/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identifier, password })
+    });
+    const j = await r.json();
+    if (!j.success) throw new Error(j.message);
+    saveToken(j.token, remember);
+    toast(j.message || 'Logged in!');
+    setTimeout(() => window.location.href = nextUrl, 700);
+  } catch (e) {
+    showErr('liErr', e.message);
+    btn.disabled = false;
+    btn.innerHTML = 'Login <i class="fa-solid fa-arrow-right ml-1 text-[13px]"></i>';
+  }
+}
+
+// Enter key submits
+['suName', 'suIdent', 'suPass'].forEach(id => document.getElementById(id).addEventListener('keypress', e => { if (e.key === 'Enter') doSignup(); }));
+['liIdent', 'liPass'].forEach(id => document.getElementById(id).addEventListener('keypress', e => { if (e.key === 'Enter') doLogin(); }));
+
+// init: ?mode=login shows login, default signup (per design)
+(function init() {
+  const mode = new URLSearchParams(window.location.search).get('mode');
+  switchTab(mode === 'login' ? 'login' : 'signup');
+  initGoogle();
+  // already logged in? skip this page
+  let token = '';
+  try { token = localStorage.getItem('sm_user_token') || sessionStorage.getItem('sm_user_token') || ''; } catch (e) {}
+  if (!token) return;
+  fetch('/api/public/auth/me', { headers: { 'Authorization': 'Bearer ' + token } })
+    .then(r => r.json())
+    .then(j => { if (j.success) window.location.href = nextUrl; })
+    .catch(() => {});
+})();
+</script>
+</body>
+</html>

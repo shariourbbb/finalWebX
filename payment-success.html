@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment Status - StudyMart</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>*{font-family:'Inter',sans-serif}</style>
+</head>
+<body class="bg-[#F8F9FD] text-slate-900 antialiased">
+
+<link rel="stylesheet" href="assets/navbar.css">
+<header class="sticky top-0 z-50 bg-white border-b border-slate-100 shadow-sm">
+  <div class="hidden lg:block border-b border-slate-100">
+    <div class="max-w-[1400px] mx-auto px-6 h-[68px] flex items-center gap-4">
+      <button data-sm-desk-menu-btn class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-100 transition flex-shrink-0" aria-label="Menu"><i class="fa-solid fa-bars text-[20px] text-[#0F2043]"></i></button>
+      <a href="index.html" class="flex items-center gap-2 flex-shrink-0">
+        <img data-sm-desk-logo src="" alt="Logo" class="hidden w-10 h-10 object-contain rounded-lg">
+        <div data-sm-desk-logo-fb class="w-10 h-10 flex items-center justify-center"><svg width="40" height="40" viewBox="0 0 44 44" fill="none"><path d="M22 6 C16 10 8 12 8 20 C8 28 16 30 22 34 C28 30 36 28 36 20 C36 12 28 10 22 6Z" fill="#1A56FF"/><path d="M12 28 L22 38 L32 28" stroke="#1A56FF" stroke-width="2.5" fill="none" opacity="0.9"/><g><path d="M22 2 L32 7 L22 12 L12 7 Z" fill="#0F2043"/><rect x="21" y="7" width="2" height="8" fill="#FACC15"/></g></svg></div>
+        <span class="text-[22px] font-extrabold tracking-tight leading-none"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span>
+      </a>
+      <nav class="flex items-center gap-6 text-[14px] font-semibold flex-shrink-0 ml-2">
+        <a data-sm-nav="home" href="index.html" class="sm-desk-nav-link" data-i18n="home">Home</a>
+        <a data-sm-nav="courses" href="courses.html" class="sm-desk-nav-link" data-i18n="courses">Courses</a>
+        <a data-sm-nav="ebooks" href="index.html#secEbooks" class="sm-desk-nav-link" data-i18n="ebooks">Ebooks</a>
+        <a data-sm-nav="free" href="courses.html?q=" class="sm-desk-nav-link" data-i18n="free">Free Resources</a>
+        <a data-sm-nav="telegram" href="#" data-sm-telegram class="sm-desk-nav-link" data-i18n="telegram">Telegram</a>
+      </nav>
+      <div class="flex-1"></div>
+      <div class="sm-desk-search w-[280px] xl:w-[320px] flex-shrink-0"><i class="fa-solid fa-magnifying-glass text-slate-400 text-[14px]"></i><input data-sm-desk-search data-i18n-ph="searchPh" type="text" placeholder="Search courses, subjects, ebooks..."><button data-sm-desk-search-btn class="text-slate-400 hover:text-[#1A56FF]" aria-label="Search"><i class="fa-solid fa-arrow-right text-[12px]"></i></button></div>
+      <div class="sm-desk-drop flex-shrink-0"><button data-sm-desk-lang-btn class="sm-desk-pill"><i class="fa-solid fa-globe text-[15px] text-slate-500"></i><span data-i18n="lang">বাংলা/English</span><i class="fa-solid fa-chevron-down text-[11px] text-slate-400"></i></button><div data-sm-desk-lang-menu class="sm-desk-menu hidden"><button type="button" class="sm-mi" data-sm-lang-pick="bn">বাংলা (Bangla)</button><button type="button" class="sm-mi" data-sm-lang-pick="en">English</button></div></div>
+      <button data-sm-theme-btn class="sm-desk-pill flex-shrink-0"><i data-sm-theme-icon class="fa-solid fa-sun text-[15px] text-[#F59E0B]"></i><span data-i18n="theme">Theme</span></button>
+      <div class="sm-desk-drop flex-shrink-0"><button data-sm-desk-account-btn class="sm-desk-pill"><i class="fa-regular fa-user text-[15px] text-slate-600"></i><span data-i18n="account">Account</span><i class="fa-solid fa-chevron-down text-[11px] text-slate-400"></i></button><div data-sm-desk-account-menu class="sm-desk-menu hidden"></div></div>
+    </div>
+  </div>
+  <div id="smDeskDrawer" class="hidden"><div class="sm-backdrop"></div><div class="sm-panel"><div class="flex items-center justify-between mb-3"><span class="text-[18px] font-extrabold"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span><button data-sm-drawer-close class="w-9 h-9 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-xmark"></i></button></div><nav class="flex flex-col gap-1 text-[14px] font-semibold"><a href="index.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Home</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Courses</a><a href="index.html#secEbooks" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Ebooks</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Free Resources</a><a href="#" data-sm-telegram class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Telegram</a><a href="dashboard.html" data-account-link class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Account / Dashboard</a><a href="cart.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Cart (<span data-sm-cart-count>0</span>)</a></nav></div></div>
+  <!-- phone bar (unchanged) -->
+  <div class="lg:hidden max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 h-[60px] flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2">
+      <img id="siteLogoImg" src="" alt="Logo" class="hidden w-10 h-10 object-contain rounded-lg">
+      <div id="siteLogoFallback" class="w-10 h-10 flex items-center justify-center">
+        <svg width="40" height="40" viewBox="0 0 44 44" fill="none">
+          <path d="M22 6 C16 10 8 12 8 20 C8 28 16 30 22 34 C28 30 36 28 36 20 C36 12 28 10 22 6Z" fill="url(#g1)" />
+          <path d="M12 28 L22 38 L32 28" stroke="#1A56FF" stroke-width="2.5" fill="none" opacity="0.9"/>
+          <defs><linearGradient id="g1" x1="8" y1="6" x2="36" y2="34" gradientUnits="userSpaceOnUse"><stop stop-color="#1A56FF"/><stop offset="1" stop-color="#7C3AED"/></linearGradient></defs>
+        </svg>
+      </div>
+      <span id="siteNameDisplay" class="text-[21px] font-extrabold tracking-tight"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span>
+    </a>
+    <a href="dashboard.html" class="flex flex-col items-center gap-0.5 text-slate-700 hover:text-[#1A56FF]">
+      <i class="fa-regular fa-circle-user text-[22px]"></i><span class="hidden sm:block text-[11px] font-medium">Dashboard</span>
+    </a>
+  </div>
+</header>
+
+<main class="max-w-[640px] mx-auto px-4 pb-24">
+  <div class="mt-8 bg-white rounded-[16px] border border-slate-100 shadow-sm p-8 sm:p-10 text-center">
+
+    <!-- verifying -->
+    <div id="stVerifying">
+      <div class="w-16 h-16 mx-auto rounded-full bg-[#EEF2FF] flex items-center justify-center"><i class="fa-solid fa-spinner fa-spin text-[#1A56FF] text-[26px]"></i></div>
+      <h2 class="mt-4 text-[19px] font-extrabold text-[#0F2043]">Verifying your payment...</h2>
+      <p class="mt-1 text-[13px] text-slate-500">একটু অপেক্ষা করুন, পেমেন্ট চেক করা হচ্ছে।</p>
+    </div>
+
+    <!-- success -->
+    <div id="stSuccess" class="hidden">
+      <div class="w-16 h-16 mx-auto rounded-full bg-[#E6F4EA] flex items-center justify-center"><i class="fa-solid fa-check text-[#16A34A] text-[26px]"></i></div>
+      <h2 class="mt-4 text-[20px] font-extrabold text-[#0F2043]">Payment Successful!</h2>
+      <p class="mt-1 text-[13px] text-slate-500">Order No: <b id="okOrderNo" class="text-[#1A56FF]"></b></p>
+      <p class="mt-1 text-[13px] text-slate-500">আপনার কোর্স শীঘ্রই Dashboard-এ পেয়ে যাবেন।</p>
+      <div class="mt-5 flex flex-wrap justify-center gap-2">
+        <a href="dashboard.html" class="px-5 py-2.5 rounded-[10px] bg-[#1A56FF] text-white font-bold text-[13px]">Go to Dashboard</a>
+        <a href="courses.html" class="px-5 py-2.5 rounded-[10px] bg-slate-100 text-slate-700 font-bold text-[13px]">Browse More</a>
+      </div>
+    </div>
+
+    <!-- failed -->
+    <div id="stFailed" class="hidden">
+      <div class="w-16 h-16 mx-auto rounded-full bg-red-50 flex items-center justify-center"><i class="fa-solid fa-xmark text-red-500 text-[26px]"></i></div>
+      <h2 class="mt-4 text-[20px] font-extrabold text-[#0F2043]">Payment Not Completed</h2>
+      <p id="failMsg" class="mt-1 text-[13px] text-slate-500">পেমেন্ট সম্পন্ন হয়নি। আবার চেষ্টা করুন।</p>
+      <p id="failOrder" class="mt-1 text-[12px] text-slate-400"></p>
+      <div class="mt-5 flex flex-wrap justify-center gap-2">
+        <a href="cart.html" class="px-5 py-2.5 rounded-[10px] bg-[#1A56FF] text-white font-bold text-[13px]">Back to Cart</a>
+        <a href="index.html" class="px-5 py-2.5 rounded-[10px] bg-slate-100 text-slate-700 font-bold text-[13px]">Home</a>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script src="assets/navbar.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(function(){
+  'use strict';
+  function show(id){
+    ['stVerifying','stSuccess','stFailed'].forEach(x=>document.getElementById(x).classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+  }
+  async function init(){
+    const q=new URLSearchParams(window.location.search);
+    // PipaPay sends pp_id via GET (return_type=GET) or POST; also accept order param
+    const ppId=q.get('pp_id')||q.get('ppId')||q.get('pp-id')||'';
+    let orderNo=q.get('order')||q.get('orderNo')||q.get('invoice')||'';
+    if(!orderNo){try{orderNo=sessionStorage.getItem('sm_pending_order')||''}catch(e){}}
+    if(!ppId&&!orderNo){
+      document.getElementById('failMsg').textContent='কোনো পেমেন্ট তথ্য পাওয়া যায়নি।';
+      show('stFailed');
+      return;
+    }
+    try{
+      const r=await fetch('/api/public/payments/piprapay/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderNo:orderNo,pp_id:ppId})});
+      const j=await r.json();
+      if(r.ok&&j.success){
+        const o=(j.data&&j.data.order)||{};
+        document.getElementById('okOrderNo').textContent=o.orderNo||orderNo||'';
+        try{sessionStorage.removeItem('sm_pending_order')}catch(e){}
+        show('stSuccess');
+      }else{
+        document.getElementById('failMsg').textContent=j.message||'পেমেন্ট সম্পন্ন হয়নি।';
+        if(orderNo)document.getElementById('failOrder').textContent='Order No: '+orderNo;
+        show('stFailed');
+      }
+    }catch(e){
+      document.getElementById('failMsg').textContent=e.message||'Verification failed';
+      show('stFailed');
+    }
+  }
+  document.addEventListener('DOMContentLoaded',init);
+})();
+</script>
+</body>
+</html>

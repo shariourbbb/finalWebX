@@ -1,0 +1,82 @@
+/* StudyMart - Desktop navbar (pic-like). Phone view untouched (lg:hidden mobile stays). */
+.sm-desk-nav-link { position: relative; padding: 6px 2px; color: #334155; transition: color .15s; white-space: nowrap; }
+.sm-desk-nav-link:hover { color: #1A56FF; }
+.sm-desk-nav-link.sm-active { color: #1A56FF; }
+.sm-desk-nav-link.sm-active::after { content: ''; position: absolute; left: 0; right: 0; bottom: -4px; height: 2.5px; border-radius: 9999px; background: #1A56FF; }
+
+.sm-desk-pill { display: inline-flex; align-items: center; gap: 7px; border: 1px solid #E2E8F0; background: #fff; border-radius: 10px; padding: 8px 14px; font-size: 13px; font-weight: 600; color: #0F2043; transition: border-color .15s, background .15s; white-space: nowrap; }
+.sm-desk-pill:hover { border-color: #1A56FF; background: #F8FAFF; }
+.sm-desk-search { display: flex; align-items: center; gap: 8px; border: 1px solid #E2E8F0; background: #fff; border-radius: 10px; padding: 8px 12px; min-width: 0; transition: border-color .15s, box-shadow .15s; }
+.sm-desk-search:focus-within { border-color: #1A56FF; box-shadow: 0 0 0 3px rgba(26,86,255,.1); }
+.sm-desk-search input { flex: 1; min-width: 0; outline: none; border: 0; font-size: 13px; background: transparent; color: #0F2043; }
+.sm-desk-search input::placeholder { color: #94A3B8; }
+
+/* ===== Live search suggestions (matching courses + ebooks) ===== */
+.sm-desk-search { position: relative; }
+.sm-search-suggest { position: absolute; left: 0; right: 0; top: calc(100% + 8px); background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 16px 40px rgba(15,32,67,.16); overflow: hidden; z-index: 80; max-height: 340px; overflow-y: auto; }
+.sm-sug-group { padding: 7px 12px 3px; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #94A3B8; }
+.sm-sug-row { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 8px 12px; cursor: pointer; }
+.sm-sug-row:hover, .sm-sug-row.sug-active { background: #F1F5FF; }
+.sm-sug-thumb { width: 34px; height: 34px; border-radius: 9px; overflow: hidden; flex-shrink: 0; background: #EEF2FF; display: flex; align-items: center; justify-content: center; color: #1A56FF; font-size: 14px; }
+.sm-sug-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.sm-sug-meta { flex: 1; min-width: 0; }
+.sm-sug-title { font-size: 12.5px; font-weight: 700; color: #0F2043; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sm-sug-sub { font-size: 11px; color: #64748B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sm-sug-price { font-size: 12px; font-weight: 800; color: #1A56FF; flex-shrink: 0; }
+.sm-sug-price.free { color: #16A34A; }
+.sm-sug-all { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 10px; font-size: 12.5px; font-weight: 800; color: #1A56FF; background: #F8FAFF; border-top: 1px solid #EDF1F7; cursor: pointer; }
+.sm-sug-all:hover { background: #EEF2FF; }
+.sm-sug-empty { padding: 14px; text-align: center; font-size: 12.5px; color: #64748B; }
+html.sm-dark .sm-search-suggest { background: #16213D; border-color: #2A3A63; }
+html.sm-dark .sm-sug-title { color: #E2E8F0; }
+html.sm-dark .sm-sug-row:hover, html.sm-dark .sm-sug-row.sug-active { background: #1E2C52; }
+html.sm-dark .sm-sug-all { background: #1E2C52; border-color: #2A3A63; }
+
+.sm-desk-drop { position: relative; }
+.sm-desk-menu { position: absolute; right: 0; top: calc(100% + 8px); min-width: 190px; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 16px 40px rgba(15,32,67,.14); padding: 6px; z-index: 80; }
+.sm-desk-menu a, .sm-desk-menu button.sm-mi { display: flex; align-items: center; gap: 9px; width: 100%; text-align: left; padding: 9px 11px; border-radius: 9px; font-size: 13px; font-weight: 600; color: #334155; }
+.sm-desk-menu a:hover, .sm-desk-menu button.sm-mi:hover { background: #F1F5FF; color: #1A56FF; }
+
+/* ===== Compact responsive desktop bar (no Language pill, icon-only Telegram) ===== */
+.sm-desk-bar{ gap:.6rem !important; flex-wrap:nowrap !important; }
+.sm-desk-bar .sm-desk-logo-txt{ font-size:20px !important; }
+.sm-desk-links{ gap:.9rem !important; font-size:13px !important; margin-left:auto !important; margin-right:auto !important; }
+/* spacer div Flex-1 hide -> links exactly middle e thakbe (logo left, search/buttons right) */
+.sm-desk-bar > .flex-1{ display:none !important; }
+.sm-desk-searchflex{ flex:1 1 auto !important; width:auto !important; min-width:110px !important; max-width:300px !important; }
+.sm-desk-searchflex input{ min-width:0 !important; }
+.sm-desk-tg-icon{ width:36px; height:36px; border-radius:9999px; background:#E6F0FF; display:inline-flex; align-items:center; justify-content:center; color:#1A56FF; flex-shrink:0; transition:background .15s; }
+.sm-desk-tg-icon:hover{ background:#D6E4FF; }
+/* Cart icon next to Theme (badge count auto-syncs via [data-sm-cart-count]) */
+a.sm-desk-cart{ position:relative; }
+.sm-desk-cart-badge{ position:absolute; top:-6px; right:-6px; min-width:18px; height:18px; padding:0 4px; background:#EF4444; color:#fff; font-size:10px; font-weight:800; border-radius:9999px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; line-height:1; }
+html.sm-dark .sm-desk-cart-badge{ border-color:#0F1A33; }
+@media (min-width:1280px){
+  .sm-desk-bar{ gap:1rem !important; }
+  .sm-desk-bar .sm-desk-logo-txt{ font-size:22px !important; }
+  .sm-desk-links{ gap:1.5rem !important; font-size:14px !important; }
+  .sm-desk-searchflex{ max-width:340px !important; }
+}
+@media (min-width:1024px) and (max-width:1139px){
+  .sm-desk-pill{ padding:7px 9px !important; font-size:12px !important; gap:6px !important; }
+  .sm-desk-search{ padding:7px 10px !important; }
+  .sm-desk-links{ gap:.7rem !important; font-size:12.5px !important; }
+  .sm-desk-searchflex{ min-width:90px !important; }
+}
+
+/* Desktop side drawer (hamburger) */
+#smDeskDrawer { position: fixed; inset: 0; z-index: 90; }
+#smDeskDrawer .sm-backdrop { position: absolute; inset: 0; background: rgba(15,32,67,.45); }
+#smDeskDrawer .sm-panel { position: absolute; left: 0; top: 0; bottom: 0; width: 300px; max-width: 85vw; background: #fff; box-shadow: 8px 0 40px rgba(0,0,0,.15); padding: 18px 14px; overflow-y: auto; }
+
+/* ---- Simple dark theme (desktop toggle, persists) ---- */
+html.sm-dark body { background: #0B1226 !important; color: #E2E8F0 !important; }
+html.sm-dark header { background: #0F1A33 !important; border-color: #1E2A4A !important; }
+html.sm-dark .sm-desk-nav-link { color: #CBD5E1 !important; }
+html.sm-dark .sm-desk-nav-link.sm-active, html.sm-dark .sm-desk-nav-link:hover { color: #7AA2FF !important; }
+html.sm-dark .sm-desk-pill, html.sm-dark .sm-desk-search { background: #16213D !important; border-color: #2A3A63 !important; color: #E2E8F0 !important; }
+html.sm-dark .sm-desk-search input { color: #E2E8F0 !important; }
+html.sm-dark .sm-desk-menu { background: #16213D !important; border-color: #2A3A63 !important; }
+html.sm-dark .sm-desk-menu a, html.sm-dark .sm-desk-menu button.sm-mi { color: #CBD5E1 !important; }
+html.sm-dark .sm-desk-menu a:hover, html.sm-dark .sm-desk-menu button.sm-mi:hover { background: #1E2C52 !important; color: #fff !important; }
+html.sm-dark main, html.sm-dark footer { filter: none; }

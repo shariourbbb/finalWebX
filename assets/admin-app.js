@@ -11,7 +11,8 @@
     token: sessionStorage.getItem('sm_admin_token') || '',
     admin: null,
     meta: { batches: [], ebookBatches: [], categories: [], platforms: [] },
-    lists: {}
+    lists: {},
+    pendingOrders: 0
   };
 
   /* ---------------- helpers ---------------- */
@@ -34,6 +35,29 @@
     t.classList.remove('hidden');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => t.classList.add('hidden'), 2800);
+  }
+
+  function fallbackCopy(txt, done) {
+    const ta = document.createElement('textarea');
+    ta.value = txt;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) { toast('Copy failed', false); }
+    document.body.removeChild(ta);
+  }
+  function copyText(txt, msg) {
+    const done = () => toast(msg || 'Copied');
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done).catch(() => fallbackCopy(txt, done));
+    else fallbackCopy(txt, done);
+  }
+
+  function inviteExpiryText(ms) {
+    const h = Math.floor(ms / 3600000);
+    const m = Math.max(1, Math.round((ms % 3600000) / 60000));
+    if (h >= 1) return 'Expires in ' + h + 'h ' + m + 'm';
+    return 'Expires in ' + m + 'm';
   }
 
   async function api(path, opts) {
@@ -149,34 +173,89 @@
 
   /* ---------------- navigation ---------------- */
   const NAV = [
-    { key: 'dashboard', label: 'Dashboard', icon: 'fa-chart-line', sub: 'Overview of your platform' },
-    { key: 'homepage', label: 'Home Page', icon: 'fa-house-chimney', sub: 'Edit / Modify hero & sections' },
-    { key: 'courses', label: 'Course List', icon: 'fa-book-open', sub: 'Add / edit / delete courses' },
-    { key: 'batches', label: 'Batch Manage', icon: 'fa-layer-group', sub: 'HSC, SSC & Admission batches' },
-    { key: 'ebookBatches', label: 'E-Book Batch', icon: 'fa-book-open', sub: 'Alada E-Book batch create korun' },
-    { key: 'categories', label: 'Category Manage', icon: 'fa-tags', sub: 'Course categories' },
-    { key: 'platforms', label: 'Platform Manage', icon: 'fa-share-nodes', sub: 'Where courses are delivered' },
-    { key: 'ebooks', label: 'E-Book Manage', icon: 'fa-book', sub: 'PDF books students can download' },
-    { key: 'coupons', label: 'Coupon Manage', icon: 'fa-ticket', sub: 'Discount coupons' },
-    { key: 'users', label: 'User List', icon: 'fa-users', sub: 'All registered students' },
-    { key: 'orders', label: 'Orders', icon: 'fa-cart-shopping', sub: 'All orders & payments' },
-    { key: 'settings', label: 'Settings', icon: 'fa-gear', sub: 'Site settings & admin password' }
+    { key: 'dashboard', label: 'Dashboard', icon: 'fa-chart-line', sub: 'Overview of your platform', perm: 'dashboard' },
+    { key: 'orders', label: 'Orders', icon: 'fa-cart-shopping', sub: 'All orders & payments', perm: 'orders' },
+    { key: 'homepage', label: 'Home Page', icon: 'fa-house-chimney', sub: 'Edit / Modify hero & sections', perm: 'homepage' },
+    { key: 'courses', label: 'Course List', icon: 'fa-book-open', sub: 'Add / edit / delete courses', perm: 'courses' },
+    { key: 'batches', label: 'Batch Manage', icon: 'fa-layer-group', sub: 'HSC, SSC & Admission batches', perm: 'batches' },
+    { key: 'ebookBatches', label: 'E-Book Batch', icon: 'fa-book-open', sub: 'Alada E-Book batch create korun', perm: 'ebookBatches' },
+    { key: 'categories', label: 'Category Manage', icon: 'fa-tags', sub: 'Course categories', perm: 'categories' },
+    { key: 'platforms', label: 'Platform Manage', icon: 'fa-share-nodes', sub: 'Where courses are delivered', perm: 'platforms' },
+    { key: 'ebooks', label: 'E-Book Manage', icon: 'fa-book', sub: 'PDF books students can download', perm: 'ebooks' },
+    { key: 'coupons', label: 'Coupon Manage', icon: 'fa-ticket', sub: 'Discount coupons', perm: 'coupons' },
+    { key: 'users', label: 'User List', icon: 'fa-users', sub: 'All registered students', perm: 'users' },
+    { key: 'admins', label: 'Admins', icon: 'fa-user-shield', sub: 'Add / invite admin team', perm: 'admins' },
+    { key: 'notify', label: 'Notifications', icon: 'fa-envelope', sub: 'Brevo diye student ke mail pathan', perm: 'notify' },
+    { key: 'notice', label: 'Notice', icon: 'fa-bullhorn', sub: 'Order mail alert + template setup', perm: 'notify' },
+    { key: 'settings', label: 'Settings', icon: 'fa-gear', sub: 'Site settings & admin password', perm: 'settings' }
   ];
+
+  // Logged-in admin-er permission check (superadmin / purono admin = sob access)
+  function hasPerm(perm) {
+    if (!perm || perm === 'dashboard') return true;
+    const a = state.admin;
+    if (!a) return false;
+    if (a.role === 'superadmin') return true;
+    if (!Array.isArray(a.permissions)) return true; // legacy full access
+    return a.permissions.includes(perm);
+  }
+
+  const PERM_LABELS = {
+    dashboard: 'Dashboard', homepage: 'Home Page', courses: 'Courses', batches: 'Batches',
+    ebookBatches: 'E-Book Batch', categories: 'Categories', platforms: 'Platforms',
+    ebooks: 'E-Books', coupons: 'Coupons', orders: 'Orders', users: 'Users',
+    admins: 'Admin Manage', notify: 'Notifications + Notice', settings: 'Settings'
+  };
 
   function renderNav(active) {
     const pagesHeader = '<div class="px-3 pt-3 pb-1 text-[10px] font-black tracking-[0.14em] text-white/40 uppercase">Pages</div>';
     let html = '';
-    NAV.forEach(n => {
+    NAV.filter(n => hasPerm(n.perm)).forEach(n => {
       if (n.key === 'homepage') html += pagesHeader;
-      html += `<a href="#/${n.key}" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-slate-300 hover:bg-white/10 transition ${n.key === active ? 'active' : ''}"><i class="fa-solid ${n.icon} w-5 text-center text-[14px]"></i> ${esc(n.label)}</a>`;
+      const badge = (n.key === 'orders' && state.pendingOrders > 0)
+        ? `<span id="navOrdersBadge" class="ml-auto min-w-[22px] h-[22px] px-1.5 rounded-full bg-red-500 text-white text-[11px] font-extrabold flex items-center justify-center">${state.pendingOrders > 99 ? '99+' : state.pendingOrders}</span>`
+        : (n.key === 'orders' ? '<span id="navOrdersBadge" class="ml-auto hidden"></span>' : '');
+      html += `<a href="#/${n.key}" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-slate-300 hover:bg-white/10 transition ${n.key === active ? 'active' : ''}"><i class="fa-solid ${n.icon} w-5 text-center text-[14px]"></i> <span>${esc(n.label)}</span>${badge}</a>`;
     });
     $('sideNav').innerHTML = html;
+  }
+
+  // Sidebar Orders badge-e pending count update (na thakle hide)
+  function paintOrdersBadge() {
+    const el = $('navOrdersBadge');
+    if (!el) return;
+    if (state.pendingOrders > 0) {
+      el.textContent = state.pendingOrders > 99 ? '99+' : state.pendingOrders;
+      el.className = 'ml-auto min-w-[22px] h-[22px] px-1.5 rounded-full bg-red-500 text-white text-[11px] font-extrabold flex items-center justify-center';
+    } else {
+      el.textContent = '';
+      el.className = 'ml-auto hidden';
+    }
+  }
+
+  // Stats theke pending order count ene badge refresh kore
+  async function refreshOrdersBadge() {
+    if (!hasPerm('orders')) return;
+    try {
+      const json = await api('/api/admin/stats');
+      const n = Number(json.data && json.data.totals && json.data.totals.pendingOrders) || 0;
+      state.pendingOrders = n;
+      paintOrdersBadge();
+    } catch (e) {}
   }
 
   function route() {
     const key = (location.hash.replace('#/', '') || 'dashboard').split('?')[0];
     const page = NAV.find(n => n.key === key) || NAV[0];
     renderNav(page.key);
+    refreshOrdersBadge();
+    // permission nai — direct link diyeo dhukte parbe na
+    if (!hasPerm(page.perm)) {
+      $('pageTitle').textContent = page.label;
+      $('pageSub').textContent = page.sub;
+      $('view').innerHTML = errorBox('Access denied — "' + page.label + '" section-er permission nai. Super Admin-er sathe contact koro.');
+      return;
+    }
     $('pageTitle').textContent = page.label;
     $('pageSub').textContent = page.sub;
     $('view').classList.remove('fade');
@@ -188,6 +267,9 @@
     if (page.key === 'homepage') return renderHomePage();
     if (page.key === 'users') return renderUsers();
     if (page.key === 'orders') return renderOrders();
+    if (page.key === 'admins') return renderAdmins();
+    if (page.key === 'notify') return renderNotify();
+    if (page.key === 'notice') return renderNotice();
     if (page.key === 'settings') return renderSettings();
     return renderResource(page.key);
   }
@@ -242,6 +324,11 @@
     view.innerHTML = `<div class="text-center py-20 text-slate-400"><i class="fa-solid fa-spinner fa-spin text-[22px]"></i><p class="text-[13px] mt-2">Loading dashboard...</p></div>`;
     try {
       const json = await api('/api/admin/stats');
+      let maintOn = false;
+      try {
+        const sj = await api('/api/admin/settings');
+        maintOn = !!(sj.data && sj.data.maintenanceEnabled);
+      } catch (e) {}
       const d = json.data;
       const t = d.totals;
       const v = d.todayVisitors || { total: 0, pc: 0, phone: 0, pcPercent: 0, phonePercent: 0, views: 0, pcViews: 0, phoneViews: 0 };
@@ -249,6 +336,10 @@
       const maxOrders = Math.max(1, ...d.last7Days.map(x => x.orders));
 
       view.innerHTML = `
+        ${maintOn ? `<a href="#/settings" class="mb-4 flex items-center gap-3 bg-[#FFF7ED] border border-[#FED7AA] rounded-[14px] px-4 py-3 hover:bg-[#FFEDD5] transition">
+          <span class="w-9 h-9 rounded-full bg-[#EA580C] text-white flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-screwdriver-wrench text-[14px]"></i></span>
+          <span><b class="text-[13px] text-[#9A3412]">Maintenance Mode ON</b><span class="block text-[11.5px] text-[#C2410C]">Public site ekhon maintenance page dekhacche — off korte Settings-e jan</span></span>
+        </a>` : ''}
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           ${statCard('fa-sack-dollar', 'Total Revenue', cur(t.revenue), '#16A34A', '#E6F4EA', 'paid orders')}
           ${statCard('fa-cart-shopping', 'Total Orders', t.orders, '#1A56FF', '#E6F0FF', t.pendingOrders + ' pending')}
@@ -478,6 +569,18 @@
             <div class="text-[14px] font-extrabold mt-3 text-[#0F2043]">Site Settings</div>
             <p class="text-[11.5px] text-slate-500">Telegram, phone, currency &amp; more</p>
           </a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+          <a href="#/admins" class="bg-white rounded-[14px] border border-slate-100 shadow-sm p-5 hover:shadow-md transition">
+            <i class="fa-solid fa-user-shield text-[22px] text-[#1A56FF]"></i>
+            <div class="text-[14px] font-extrabold mt-3 text-[#0F2043]">Admin Team</div>
+            <p class="text-[11.5px] text-slate-500">Notun admin add / remove korun</p>
+          </a>
+          <a href="#/notify" class="bg-white rounded-[14px] border border-slate-100 shadow-sm p-5 hover:shadow-md transition">
+            <i class="fa-solid fa-envelope text-[22px] text-[#16A34A]"></i>
+            <div class="text-[14px] font-extrabold mt-3 text-[#0F2043]">Send Notification</div>
+            <p class="text-[11.5px] text-slate-500">Gmail diye student ke mail pathan</p>
+          </a>
         </div>`;
   }
 
@@ -532,7 +635,7 @@
         { name: 'title', label: 'Course Title', type: 'text', required: true, span: 2 },
         { name: 'teacher', label: 'Teacher Name', type: 'text' },
         { name: 'batchId', label: 'Batch', type: 'select', options: REL.batch, required: true },
-        { name: 'categoryId', label: 'Category', type: 'select', options: REL.category, required: true },
+        { name: 'categoryId', label: 'Category (optional)', type: 'select', options: REL.category },
         { name: 'platformId', label: 'Platform', type: 'select', options: REL.platform },
         { name: 'price', label: 'Price (৳)', type: 'number' },
         { name: 'oldPrice', label: 'Old Price (৳)', type: 'number' },
@@ -649,7 +752,7 @@
         { key: 'title', label: 'E-Book', cell: r => `
           <div class="flex items-center gap-2.5">
             <div class="w-10 h-12 rounded-[6px] bg-[#F8F9FD] border border-slate-200 overflow-hidden flex-shrink-0 flex items-center justify-center">
-              ${r.cover ? `<img src="${esc(r.cover)}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-book text-slate-300"></i>`}
+              ${r.cover ? `<img src="${esc(r.cover)}" class="w-full h-full object-contain">` : `<i class="fa-solid fa-book text-slate-300"></i>`}
             </div>
             <div class="min-w-0">
               <div class="font-bold text-[#0F2043] truncate max-w-[220px]">${esc(r.title)}</div>
@@ -676,9 +779,25 @@
       columns: [
         { key: 'code', label: 'Code', cell: r => `<span class="px-2 py-1 rounded-[6px] bg-[#0F2043] text-white text-[12px] font-extrabold tracking-wider">${esc(r.code)}</span>` },
         { key: 'type', label: 'Discount', cell: r => `<span class="font-bold text-[#0F2043]">${r.type === 'percent' ? esc(r.value) + '%' : cur(r.value)}</span> <span class="text-slate-500 text-[11px]">off</span>` },
-        { key: 'courseIds', label: 'Applies To', cell: r => (!Array.isArray(r.courseIds) || !r.courseIds.length
-          ? '<span class="px-2 py-0.5 rounded-full bg-[#EDE9FF] text-[#4F46E5] text-[11px] font-bold">All Courses</span>'
-          : `<span class="px-2 py-0.5 rounded-full bg-[#E6F4EA] text-[#16A34A] text-[11px] font-bold">${r.courseIds.length === 1 ? '1 Course' : r.courseIds.length + ' Courses'}</span>`) },
+        { key: 'courseIds', label: 'Applies To', cell: r => {
+          const nc = Array.isArray(r.courseIds) ? r.courseIds.length : 0;
+          const nb = Array.isArray(r.batchIds) ? r.batchIds.length : 0;
+          const ng = Array.isArray(r.categoryIds) ? r.categoryIds.length : 0;
+          if (!nc && !nb && !ng) return '<span class="px-2 py-0.5 rounded-full bg-[#EDE9FF] text-[#4F46E5] text-[11px] font-bold">All Courses</span>';
+          const parts = [];
+          if (nb) parts.push(nb === 1 ? '1 Batch' : nb + ' Batches');
+          if (ng) parts.push(ng === 1 ? '1 Category' : ng + ' Categories');
+          if (nc) parts.push(nc === 1 ? '1 Course' : nc + ' Courses');
+          return `<span class="px-2 py-0.5 rounded-full bg-[#E6F4EA] text-[#16A34A] text-[11px] font-bold">${esc(parts.join(' • '))}</span>`;
+        } },
+        { key: 'userIds', label: 'Users', cell: r => {
+          const nu = Array.isArray(r.userIds) ? r.userIds.length : 0;
+          const ne = Array.isArray(r.allowedEmails) ? r.allowedEmails.length : 0;
+          const np = Array.isArray(r.allowedPhones) ? r.allowedPhones.length : 0;
+          const total = nu + ne + np;
+          if (!total) return '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[11px] font-bold">All Users</span>';
+          return `<span class="px-2 py-0.5 rounded-full bg-[#FEF3C7] text-[#B45309] text-[11px] font-bold"><i class="fa-solid fa-user-lock mr-0.5"></i>${total} User${total > 1 ? 's' : ''}</span>`;
+        } },
         { key: 'minOrder', label: 'Min Order', cell: r => cur(r.minOrder) },
         { key: 'maxDiscount', label: 'Max Discount', cell: r => cur(r.maxDiscount) },
         { key: 'used', label: 'Used', cell: r => `<span class="font-bold text-[#0F2043]">${Number(r.used || 0)}</span><span class="text-slate-400"> / ${Number(r.usageLimit || 0)}</span>` },
@@ -694,7 +813,9 @@
         { name: 'usageLimit', label: 'Usage Limit', type: 'number' },
         { name: 'expiresAt', label: 'Expiry Date', type: 'date' },
         { name: 'status', label: 'Status', type: 'select', options: REL.status },
-        { name: 'courseIds', label: 'Applies To — Single / Multi Course (tick na dile SOB course-e cholbe)', type: 'courses' }
+        { name: 'batchIds', label: 'Batches (empty = all)', type: 'batches' },
+        { name: 'categoryIds', label: 'Categories (empty = all)', type: 'categories' },
+        { name: 'courseIds', label: 'Courses (empty = all)', type: 'courses' }
       ]
     }
   };
@@ -772,7 +893,7 @@
       const editBtn = e.target.closest('[data-edit]');
       const delBtn = e.target.closest('[data-del]');
       const dupBtn = e.target.closest('[data-dup]');
-      if (editBtn) { if (key === 'courses') openCourseWizard(editBtn.dataset.edit); else if (key === 'ebooks') openEbookForm(editBtn.dataset.edit); else openForm(key, editBtn.dataset.edit); return; }
+      if (editBtn) { if (key === 'courses') openCourseWizard(editBtn.dataset.edit); else if (key === 'ebooks') openEbookForm(editBtn.dataset.edit); else if (key === 'coupons') openCouponForm(editBtn.dataset.edit); else openForm(key, editBtn.dataset.edit); return; }
       if (dupBtn && key === 'courses') { openCourseDuplicate(dupBtn.dataset.dup); return; }
       if (delBtn) {
         const item = state.lists[key].find(x => String(x.id) === String(delBtn.dataset.del));
@@ -814,7 +935,7 @@
       applyFilters();
     });
 
-    $('resAdd').addEventListener('click', function () { if (key === 'courses') openCourseWizard(null); else if (key === 'ebooks') openEbookForm(null); else openForm(key, null); });
+    $('resAdd').addEventListener('click', function () { if (key === 'courses') openCourseWizard(null); else if (key === 'ebooks') openEbookForm(null); else if (key === 'coupons') openCouponForm(null); else openForm(key, null); });
     paint(state.lists[key]);
   }
 
@@ -838,11 +959,23 @@
           <span class="text-[12.5px] font-semibold text-slate-700">${esc(f.label)}</span>
         </div>`;
     }
+    if (f.type === 'batches') {
+      // batch target — checkbox list from meta (see openForm fillBatchBox)
+      return `<div class="sm:col-span-3">${lbl}<div data-batchbox class="mt-1 bg-[#F8F9FD] rounded-[8px] border border-slate-200 p-3 space-y-1.5 max-h-[180px] overflow-y-auto">
+          <p class="text-[12px] text-slate-400 py-2 text-center"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading batches...</p>
+        </div><p class="text-[10px] text-slate-400 mt-1">Empty = all batches</p></div>`;
+    }
+    if (f.type === 'categories') {
+      // category target — checkbox list from meta (see openForm fillCategoryBox)
+      return `<div class="sm:col-span-3">${lbl}<div data-categorybox class="mt-1 bg-[#F8F9FD] rounded-[8px] border border-slate-200 p-3 space-y-1.5 max-h-[180px] overflow-y-auto">
+          <p class="text-[12px] text-slate-400 py-2 text-center"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading categories...</p>
+        </div><p class="text-[10px] text-slate-400 mt-1">Empty = all categories</p></div>`;
+    }
     if (f.type === 'courses') {
       // single/multi course target — checkbox list, async load (see openForm)
       return `<div class="sm:col-span-3">${lbl}<div data-coursebox class="mt-1 bg-[#F8F9FD] rounded-[8px] border border-slate-200 p-3 space-y-1.5 max-h-[220px] overflow-y-auto">
           <p class="text-[12px] text-slate-400 py-2 text-center"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading courses...</p>
-        </div><p class="text-[10px] text-slate-400 mt-1">1 ta tick = single course, onek gula = multi course, kichu na = sob course-e cholbe</p></div>`;
+        </div><p class="text-[10px] text-slate-400 mt-1">Empty = all courses</p></div>`;
     }
     if (f.type === 'color') {
       return `<div class="${span}">${lbl}<div class="flex items-center gap-2 mt-1">
@@ -923,7 +1056,32 @@
       });
     });
 
-    // course targeting checkboxes (coupons) — async fill
+    // coupon targeting checkboxes (batch / category / course) — async fill
+    (function fillBatchBox() {
+      const box = $('resForm').querySelector('[data-batchbox]');
+      if (!box) return;
+      const sel = (Array.isArray(data.batchIds) ? data.batchIds : []).map(String);
+      const list = (state.meta.batches || []).filter(b => (b.status || 'active') === 'active');
+      if (!list.length) { box.innerHTML = '<p class="text-[12px] text-slate-400 py-2 text-center">No batches yet</p>'; return; }
+      box.innerHTML = list.map(b =>
+        `<label class="flex items-center gap-2 bg-white rounded-[8px] border border-slate-100 px-3 py-2 hover:border-[#1A56FF] cursor-pointer">
+          <input type="checkbox" data-batch-pick="${esc(b.id)}" ${sel.includes(String(b.id)) ? 'checked' : ''} class="w-4 h-4 accent-[#1A56FF] flex-shrink-0">
+          <span class="w-3 h-3 rounded-full flex-shrink-0" style="background:${esc(b.color || '#4F46E5')}"></span>
+          <span class="text-[12.5px] font-bold text-[#0F2043] truncate">${esc(b.name)}</span>
+        </label>`).join('');
+    })();
+    (function fillCategoryBox() {
+      const box = $('resForm').querySelector('[data-categorybox]');
+      if (!box) return;
+      const sel = (Array.isArray(data.categoryIds) ? data.categoryIds : []).map(String);
+      const list = (state.meta.categories || []).filter(c => (c.status || 'active') === 'active');
+      if (!list.length) { box.innerHTML = '<p class="text-[12px] text-slate-400 py-2 text-center">No categories yet</p>'; return; }
+      box.innerHTML = list.map(c =>
+        `<label class="flex items-center gap-2 bg-white rounded-[8px] border border-slate-100 px-3 py-2 hover:border-[#1A56FF] cursor-pointer">
+          <input type="checkbox" data-category-pick="${esc(c.id)}" ${sel.includes(String(c.id)) ? 'checked' : ''} class="w-4 h-4 accent-[#1A56FF] flex-shrink-0">
+          <span class="text-[12.5px] font-bold text-[#0F2043] truncate">${esc(c.name)}</span>
+        </label>`).join('');
+    })();
     (function fillCourseBox() {
       const box = $('resForm').querySelector('[data-coursebox]');
       if (!box) return;
@@ -944,12 +1102,18 @@
       e.preventDefault();
       const payload = {};
       cfg.fields.forEach(f => {
-        if (f.type === 'courses') return; // alada kore collect hobe
+        if (f.type === 'courses' || f.type === 'batches' || f.type === 'categories') return; // alada kore collect hobe
         const el = $('resForm').querySelector('[data-field="' + f.name + '"]');
         if (!el) return;
         if (f.type === 'checkbox') payload[f.name] = el.checked;
         else payload[f.name] = el.value;
       });
+      if ($('resForm').querySelector('[data-batchbox]')) {
+        payload.batchIds = Array.from($('resForm').querySelectorAll('[data-batch-pick]:checked')).map(el => el.dataset.batchPick);
+      }
+      if ($('resForm').querySelector('[data-categorybox]')) {
+        payload.categoryIds = Array.from($('resForm').querySelectorAll('[data-category-pick]:checked')).map(el => el.dataset.categoryPick);
+      }
       if ($('resForm').querySelector('[data-coursebox]')) {
         payload.courseIds = Array.from($('resForm').querySelectorAll('[data-course-pick]:checked')).map(el => el.dataset.coursePick);
       }
@@ -974,6 +1138,401 @@
         box.textContent = err.message;
         box.classList.remove('hidden');
       }
+    });
+  }
+
+  /* ---------------- Coupon form ----------------
+   * Cascading dropdowns: Batch -> Category (filtered by batch courses) -> Courses (filtered).
+   * User targeting: multi-select users by search + manual email/phone. Empty = all users. */
+  async function openCouponForm(id) {
+    const item = id ? ((state.lists.coupons || []).find(x => String(x.id) === String(id)) || null) : null;
+    const data = Object.assign({ status: 'active', type: 'percent', code: '', value: '', minOrder: '', maxDiscount: '', usageLimit: '', expiresAt: '' }, item || {});
+    const selBatches = new Set((data.batchIds || []).map(String));
+    const selCats = new Set((data.categoryIds || []).map(String));
+    const selCourses = new Set((data.courseIds || []).map(String));
+    const selUsers = new Map();
+    const selEmails = new Set((data.allowedEmails || []).map(e => String(e).toLowerCase()));
+    const selPhones = new Set((data.allowedPhones || []).map(String));
+    const preUserIds = (data.userIds || []).map(String);
+
+    const ddRow = (key, title, icon) => `
+      <div class="border border-slate-200 rounded-[10px] overflow-hidden bg-white">
+        <button type="button" data-dd-btn="${key}" class="w-full flex items-center gap-2 px-3 py-2.5 hover:bg-slate-50 text-left">
+          <i class="fa-solid ${icon} text-[#1A56FF] text-[13px]"></i>
+          <span class="flex-1 min-w-0">
+            <span class="block text-[10px] font-bold text-slate-400 uppercase">${title}</span>
+            <span class="block text-[12.5px] font-bold text-[#0F2043] truncate" data-dd-label="${key}">All</span>
+          </span>
+          <i class="fa-solid fa-chevron-down text-slate-400 text-[11px]"></i>
+        </button>
+        <div data-dd-panel="${key}" class="hidden border-t border-slate-100">
+          <div class="p-2 flex items-center gap-2">
+            <input data-dd-search="${key}" placeholder="Search..." class="flex-1 min-w-0 border border-slate-200 rounded-[8px] px-2.5 py-1.5 text-[12px] outline-none focus:border-[#1A56FF]">
+            <button type="button" data-dd-clear="${key}" class="text-[11px] font-bold text-slate-400 hover:text-red-600 px-1 flex-shrink-0">Clear</button>
+          </div>
+          <div data-dd-list="${key}" class="max-h-[190px] overflow-y-auto p-2 pt-0 space-y-1.5">
+            <p class="text-[12px] text-slate-400 py-3 text-center"><i class="fa-solid fa-spinner fa-spin mr-1"></i>Loading...</p>
+          </div>
+        </div>
+      </div>`;
+
+    const base = 'w-full border border-slate-200 rounded-[8px] px-3 py-2 text-[13px] outline-none focus:border-[#1A56FF] bg-white';
+    const lbl = t => `<label class="text-[11px] font-bold text-slate-600 uppercase">${t}</label>`;
+
+    openModal(`
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 sticky top-0 bg-white rounded-t-[16px] z-10">
+        <div>
+          <h3 class="text-[16px] font-extrabold text-[#0F2043]">
+            <i class="fa-solid ${item ? 'fa-pen' : 'fa-ticket'} text-[#1A56FF] mr-1"></i>
+            ${item ? 'Edit Coupon' : 'Create Coupon'}
+          </h3>
+          <p class="text-[11px] text-slate-500">${item ? 'Update coupon settings' : 'Discount code for students'}</p>
+        </div>
+        <button onclick="closeModal()" class="w-9 h-9 rounded-full hover:bg-slate-100 text-slate-500"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="cpForm" class="p-6 space-y-5">
+        <div class="bg-[#F8F9FD] border border-slate-200 rounded-[12px] p-4">
+          <h4 class="text-[12px] font-extrabold text-[#0F2043] uppercase tracking-wide mb-3"><i class="fa-solid fa-circle-info text-[#1A56FF] mr-1"></i>Coupon Details</h4>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="col-span-2">${lbl('Coupon Code *')}<input data-cp="code" value="${esc(data.code || '')}" placeholder="SAVE10" class="${base} mt-1 uppercase font-extrabold tracking-wider"></div>
+            <div>${lbl('Type')}<select data-cp="type" class="${base} mt-1">
+              <option value="percent" ${data.type === 'percent' ? 'selected' : ''}>Percent (%)</option>
+              <option value="fixed" ${data.type === 'fixed' ? 'selected' : ''}>Fixed Amount</option>
+            </select></div>
+            <div>${lbl('Value *')}<input data-cp="value" type="number" min="0" value="${esc(data.value)}" placeholder="10" class="${base} mt-1"></div>
+            <div>${lbl('Min Order')}<input data-cp="minOrder" type="number" min="0" value="${esc(data.minOrder)}" placeholder="0" class="${base} mt-1"></div>
+            <div>${lbl('Max Discount')}<input data-cp="maxDiscount" type="number" min="0" value="${esc(data.maxDiscount)}" placeholder="0" class="${base} mt-1"></div>
+            <div>${lbl('Usage Limit')}<input data-cp="usageLimit" type="number" min="0" value="${esc(data.usageLimit)}" placeholder="0 = unlimited" class="${base} mt-1"></div>
+            <div>${lbl('Expiry Date')}<input data-cp="expiresAt" type="date" value="${esc(data.expiresAt || '')}" class="${base} mt-1"></div>
+            <div class="col-span-2 sm:col-span-4">${lbl('Status')}<select data-cp="status" class="${base} mt-1 max-w-[220px]">
+              <option value="active" ${(data.status || 'active') === 'active' ? 'selected' : ''}>Active</option>
+              <option value="inactive" ${data.status === 'inactive' ? 'selected' : ''}>Inactive</option>
+            </select></div>
+          </div>
+        </div>
+
+        <div class="bg-[#F8F9FD] border border-slate-200 rounded-[12px] p-4">
+          <h4 class="text-[12px] font-extrabold text-[#0F2043] uppercase tracking-wide"><i class="fa-solid fa-filter text-[#1A56FF] mr-1"></i>Applies To</h4>
+          <div id="cpScopeSummary" class="flex flex-wrap gap-1.5 mt-2 mb-3"></div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            ${ddRow('batch', 'Batch', 'fa-layer-group')}
+            ${ddRow('category', 'Category', 'fa-tags')}
+            ${ddRow('course', 'Course', 'fa-book-open')}
+          </div>
+          <div id="cpCourseChips" class="flex flex-wrap gap-1.5 mt-3"></div>
+        </div>
+
+        <div class="bg-[#FFFBEB] border border-[#FDE68A] rounded-[12px] p-4">
+          <div class="flex items-center justify-between">
+            <h4 class="text-[12px] font-extrabold text-[#0F2043] uppercase tracking-wide"><i class="fa-solid fa-user-lock text-[#B45309] mr-1"></i>Specific Users <span id="cpUserCount" class="ml-1 px-1.5 py-0.5 rounded-full bg-[#B45309] text-white text-[10px] font-extrabold hidden"></span></h4>
+            <button type="button" id="cpUserReset" class="text-[11px] font-bold text-slate-400 hover:text-red-600">Reset</button>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1">Empty = all users can use this coupon.</p>
+          <div class="relative mt-3">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[12px]"></i>
+            <input id="cpUserSearch" placeholder="Search by name, email or phone..." class="w-full bg-white border border-slate-200 rounded-[10px] pl-9 pr-3 py-2.5 text-[13px] outline-none focus:border-[#1A56FF]">
+          </div>
+          <div id="cpUserResults" class="mt-2 space-y-1.5 max-h-[180px] overflow-y-auto"></div>
+          <div id="cpUserChips" class="flex flex-wrap gap-1.5 mt-3"></div>
+          <p id="cpUserNote" class="hidden mt-2 text-[11px] font-semibold text-amber-700"></p>
+        </div>
+
+        <p id="cpError" class="hidden text-[12px] font-semibold text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2"></p>
+        <div class="flex justify-end gap-2">
+          <button type="button" onclick="closeModal()" class="px-4 py-2.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 font-bold text-[13px] text-slate-700">Cancel</button>
+          <button type="submit" class="px-5 py-2.5 rounded-[10px] bg-[#1A56FF] hover:bg-[#1445D6] text-white font-bold text-[13px]">
+            <i class="fa-solid fa-floppy-disk mr-1"></i> ${item ? 'Update' : 'Create'}
+          </button>
+        </div>
+      </form>`);
+
+    const form = $('cpForm');
+    const inp = n => form.querySelector('[data-cp="' + n + '"]');
+    const fail = msg => { const b = $('cpError'); b.textContent = msg; b.classList.remove('hidden'); };
+
+    form.querySelectorAll('[data-dd-btn]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const k = btn.dataset.ddBtn;
+        const panel = form.querySelector('[data-dd-panel="' + k + '"]');
+        const willOpen = panel.classList.contains('hidden');
+        form.querySelectorAll('[data-dd-panel]').forEach(p => p.classList.add('hidden'));
+        if (willOpen) panel.classList.remove('hidden');
+      });
+    });
+
+    let allCourses = [];
+    let allUsers = [];
+    let userSearchOK = true;
+    try {
+      const cj = await api('/api/admin/courses?limit=200');
+      allCourses = cj.data || [];
+    } catch (e) { allCourses = []; }
+    try {
+      const uj = await api('/api/admin/users?limit=200');
+      allUsers = uj.data || [];
+    } catch (e) { userSearchOK = false; }
+
+    const userById = new Map(allUsers.map(u => [String(u.id), u]));
+    preUserIds.forEach(uid => {
+      const u = userById.get(String(uid));
+      selUsers.set(String(uid), u
+        ? { id: String(u.id), name: u.name || '', email: u.email || '', phone: u.phone || '' }
+        : { id: String(uid), name: 'User #' + uid, email: '', phone: '' });
+    });
+
+    const batchList = () => (state.meta.batches || []).slice().sort((a, b) => ((Number(a.order) || 999) - (Number(b.order) || 999)));
+    const catList = () => (state.meta.categories || []).slice();
+    const batchMap = new Map(batchList().map(b => [String(b.id), b]));
+    const catMap = new Map(catList().map(c => [String(c.id), c]));
+    const courseMap = new Map(allCourses.map(c => [String(c.id), c]));
+
+    // Categories that have at least one course inside the selected batches
+    const catsAvailable = () => {
+      if (!selBatches.size) return catList();
+      const ids = new Set();
+      allCourses.forEach(c => { if (selBatches.has(String(c.batchId))) ids.add(String(c.categoryId)); });
+      return catList().filter(c => ids.has(String(c.id)));
+    };
+    const coursesAvailable = () => allCourses.filter(c =>
+      (!selBatches.size || selBatches.has(String(c.batchId))) &&
+      (!selCats.size || selCats.has(String(c.categoryId))));
+
+    const checkRow = (pickKey, val, checked, main, sub, color) => `
+      <label class="flex items-center gap-2 bg-white rounded-[8px] border border-slate-100 px-3 py-2 hover:border-[#1A56FF] cursor-pointer">
+        <input type="checkbox" data-pick="${pickKey}" value="${esc(val)}" ${checked ? 'checked' : ''} class="w-4 h-4 accent-[#1A56FF] flex-shrink-0">
+        ${color ? `<span class="w-3 h-3 rounded-full flex-shrink-0" style="background:${esc(color)}"></span>` : ''}
+        <span class="min-w-0 flex-1">
+          <span class="block text-[12.5px] font-bold text-[#0F2043] truncate">${esc(main)}</span>
+          ${sub ? `<span class="block text-[10.5px] text-slate-400 truncate">${esc(sub)}</span>` : ''}
+        </span>
+      </label>`;
+
+    function paintBatchList(term) {
+      const box = form.querySelector('[data-dd-list="batch"]');
+      const t = (term || '').toLowerCase();
+      const list = batchList().filter(b => !t || (b.name || '').toLowerCase().includes(t));
+      box.innerHTML = list.length ? list.map(b =>
+        checkRow('batch', b.id, selBatches.has(String(b.id)), b.name, null, b.color || '#4F46E5')).join('')
+        : '<p class="text-[12px] text-slate-400 py-3 text-center">No batches found</p>';
+    }
+    function paintCatList(term) {
+      const box = form.querySelector('[data-dd-list="category"]');
+      const t = (term || '').toLowerCase();
+      const avail = catsAvailable();
+      const availIds = new Set(avail.map(c => String(c.id)));
+      const list = avail.filter(c => !t || (c.name || '').toLowerCase().includes(t));
+      let html = '';
+      if (selBatches.size) html += `<p class="text-[10.5px] font-bold text-[#4F46E5] px-1">${avail.length} categor${avail.length === 1 ? 'y' : 'ies'} in selected batches</p>`;
+      html += list.length ? list.map(c => {
+        const n = allCourses.filter(x => String(x.categoryId) === String(c.id) && (!selBatches.size || selBatches.has(String(x.batchId)))).length;
+        return checkRow('category', c.id, selCats.has(String(c.id)), c.name, n + (n === 1 ? ' course' : ' courses'), null);
+      }).join('') : '<p class="text-[12px] text-slate-400 py-3 text-center">No categories found</p>';
+      // keep selected-but-unavailable visible so nothing is lost silently
+      const missing = [...selCats].filter(id => !availIds.has(id) && catMap.has(id));
+      if (missing.length) html += '<p class="text-[10.5px] font-bold text-slate-400 px-1 pt-1">Selected elsewhere</p>' +
+        missing.map(id => checkRow('category', id, true, catMap.get(id).name, 'Outside selected batches', null)).join('');
+      box.innerHTML = html;
+    }
+    function paintCourseList(term) {
+      const box = form.querySelector('[data-dd-list="course"]');
+      const t = (term || '').toLowerCase();
+      const avail = coursesAvailable();
+      const list = avail.filter(c => !t || (c.title || '').toLowerCase().includes(t)).slice(0, 100);
+      let html = `<p class="text-[10.5px] font-bold text-[#4F46E5] px-1">${avail.length} course${avail.length === 1 ? '' : 's'} match filters</p>`;
+      html += list.length ? list.map(c => {
+        const b = batchMap.get(String(c.batchId));
+        return checkRow('course', c.id, selCourses.has(String(c.id)), c.title,
+          (b ? b.name + ' • ' : '') + cur(c.price), null);
+      }).join('') : '<p class="text-[12px] text-slate-400 py-3 text-center">No courses found</p>';
+      const missing = [...selCourses].filter(id => !avail.some(c => String(c.id) === id) && courseMap.has(id));
+      if (missing.length) html += '<p class="text-[10.5px] font-bold text-slate-400 px-1 pt-1">Selected elsewhere</p>' +
+        missing.map(id => checkRow('course', id, true, courseMap.get(id).title, 'Outside current filters', null)).join('');
+      box.innerHTML = html;
+    }
+
+    function paintLabels() {
+      const set = (k, txt) => { form.querySelector('[data-dd-label="' + k + '"]').textContent = txt; };
+      set('batch', selBatches.size ? selBatches.size + (selBatches.size > 1 ? ' Batches' : ' Batch') : 'All Batches');
+      set('category', selCats.size ? selCats.size + (selCats.size > 1 ? ' Categories' : ' Category') : 'All Categories');
+      set('course', selCourses.size ? selCourses.size + (selCourses.size > 1 ? ' Courses' : ' Course') : 'All Courses');
+    }
+    function paintSummary() {
+      const box = $('cpScopeSummary');
+      if (!selBatches.size && !selCats.size && !selCourses.size) {
+        box.innerHTML = '<span class="px-2 py-0.5 rounded-full bg-[#EDE9FF] text-[#4F46E5] text-[11px] font-bold">All Courses</span>';
+        return;
+      }
+      const pills = [];
+      if (selBatches.size) pills.push(selBatches.size + (selBatches.size > 1 ? ' Batches' : ' Batch'));
+      if (selCats.size) pills.push(selCats.size + (selCats.size > 1 ? ' Categories' : ' Category'));
+      if (selCourses.size) pills.push(selCourses.size + (selCourses.size > 1 ? ' Courses' : ' Course'));
+      const cover = selCourses.size ? selCourses.size : coursesAvailable().length;
+      box.innerHTML = pills.map(p => `<span class="px-2 py-0.5 rounded-full bg-[#E6F4EA] text-[#16A34A] text-[11px] font-bold">${esc(p)}</span>`).join('') +
+        `<span class="px-2 py-0.5 rounded-full bg-[#E6F0FF] text-[#1A56FF] text-[11px] font-bold">Covers ~${cover} course${cover === 1 ? '' : 's'}</span>`;
+    }
+    function paintCourseChips() {
+      const box = $('cpCourseChips');
+      if (!selCourses.size) { box.innerHTML = ''; return; }
+      box.innerHTML = [...selCourses].map(id => {
+        const c = courseMap.get(id);
+        return `<span class="inline-flex items-center gap-1.5 pl-2 pr-1 py-0.5 rounded-full bg-white border border-slate-200 text-[11px] font-bold text-[#0F2043] max-w-[220px]">
+          <span class="truncate">${esc(c ? c.title : 'Course #' + id)}</span>
+          <button type="button" data-unchip-course="${esc(id)}" class="w-4 h-4 rounded-full bg-slate-100 hover:bg-red-100 hover:text-red-600 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-xmark text-[8px]"></i></button>
+        </span>`;
+      }).join('');
+    }
+    function paintAll() {
+      paintBatchList(form.querySelector('[data-dd-search="batch"]').value);
+      paintCatList(form.querySelector('[data-dd-search="category"]').value);
+      paintCourseList(form.querySelector('[data-dd-search="course"]').value);
+      paintLabels(); paintSummary(); paintCourseChips();
+    }
+
+    form.addEventListener('change', e => {
+      const pick = e.target.closest('[data-pick]');
+      if (!pick) return;
+      const id = String(pick.value);
+      if (pick.dataset.pick === 'batch') {
+        pick.checked ? selBatches.add(id) : selBatches.delete(id);
+        const availCatIds = new Set(catsAvailable().map(c => String(c.id)));
+        [...selCats].forEach(cid => { if (!availCatIds.has(cid)) selCats.delete(cid); });
+        const availCourseIds = new Set(coursesAvailable().map(c => String(c.id)));
+        [...selCourses].forEach(cid => { if (!availCourseIds.has(cid)) selCourses.delete(cid); });
+      } else if (pick.dataset.pick === 'category') {
+        pick.checked ? selCats.add(id) : selCats.delete(id);
+        const availCourseIds = new Set(coursesAvailable().map(c => String(c.id)));
+        [...selCourses].forEach(cid => { if (!availCourseIds.has(cid)) selCourses.delete(cid); });
+      } else if (pick.dataset.pick === 'course') {
+        pick.checked ? selCourses.add(id) : selCourses.delete(id);
+      }
+      paintAll();
+    });
+    // search inside dropdowns
+    ['batch', 'category', 'course'].forEach(k => {
+      form.querySelector('[data-dd-search="' + k + '"]').addEventListener('input', e => {
+        const v = e.target.value;
+        if (k === 'batch') paintBatchList(v);
+        else if (k === 'category') paintCatList(v);
+        else paintCourseList(v);
+      });
+      form.querySelector('[data-dd-clear="' + k + '"]').addEventListener('click', () => {
+        if (k === 'batch') selBatches.clear();
+        else if (k === 'category') selCats.clear();
+        else selCourses.clear();
+        form.querySelector('[data-dd-search="' + k + '"]').value = '';
+        paintAll();
+      });
+    });
+    form.addEventListener('click', e => {
+      const un = e.target.closest('[data-unchip-course]');
+      if (un) { selCourses.delete(String(un.dataset.unchipCourse)); paintAll(); }
+    });
+
+    /* ---------- users ---------- */
+    const userLine = u => [u.name, u.email, u.phone].filter(Boolean).join(' • ');
+    function paintUserChips() {
+      const box = $('cpUserChips');
+      const total = selUsers.size + selEmails.size + selPhones.size;
+      const cnt = $('cpUserCount');
+      cnt.textContent = total + (total > 1 ? ' selected' : ' selected');
+      cnt.classList.toggle('hidden', !total);
+      let html = '';
+      selUsers.forEach(u => {
+        html += `<span class="inline-flex items-center gap-1.5 pl-1 pr-1 py-0.5 rounded-full bg-white border border-[#FDE68A] text-[11px] font-bold text-[#0F2043] max-w-[240px]">
+          <span class="w-5 h-5 rounded-full bg-[#EDE9FF] text-[#4F46E5] text-[10px] font-extrabold flex items-center justify-center flex-shrink-0">${esc((u.name || 'U').charAt(0).toUpperCase())}</span>
+          <span class="truncate">${esc(u.name || u.email || u.phone || ('User #' + u.id))}</span>
+          <button type="button" data-unuser="${esc(u.id)}" class="w-4 h-4 rounded-full bg-slate-100 hover:bg-red-100 hover:text-red-600 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-xmark text-[8px]"></i></button>
+        </span>`;
+      });
+      selEmails.forEach(em => {
+        html += `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#E6F0FF] text-[#1A56FF] text-[11px] font-bold max-w-[240px]">
+          <i class="fa-solid fa-envelope text-[10px]"></i><span class="truncate">${esc(em)}</span>
+          <button type="button" data-unemail="${esc(em)}" class="w-4 h-4 rounded-full bg-white/60 hover:bg-red-100 hover:text-red-600 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-xmark text-[8px]"></i></button>
+        </span>`;
+      });
+      selPhones.forEach(ph => {
+        html += `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#E6F4EA] text-[#16A34A] text-[11px] font-bold">
+          <i class="fa-solid fa-phone text-[10px]"></i>${esc(ph)}
+          <button type="button" data-unphone="${esc(ph)}" class="w-4 h-4 rounded-full bg-white/60 hover:bg-red-100 hover:text-red-600 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-xmark text-[8px]"></i></button>
+        </span>`;
+      });
+      box.innerHTML = html || '<p class="text-[11px] text-slate-400">All users can use this coupon.</p>';
+    }
+    function paintUserResults(term) {
+      const box = $('cpUserResults');
+      const t = (term || '').trim().toLowerCase();
+      if (!t) { box.innerHTML = ''; return; }
+      const hits = allUsers.filter(u => !selUsers.has(String(u.id)) &&
+        ((u.name || '') + ' ' + (u.email || '') + ' ' + (u.phone || '')).toLowerCase().includes(t)).slice(0, 8);
+      box.innerHTML = hits.length ? hits.map(u => `
+        <div class="flex items-center gap-2 bg-white border border-slate-200 rounded-[10px] px-3 py-2">
+          <span class="w-7 h-7 rounded-full bg-[#EDE9FF] text-[#4F46E5] text-[11px] font-extrabold flex items-center justify-center flex-shrink-0">${esc((u.name || 'U').charAt(0).toUpperCase())}</span>
+          <span class="flex-1 min-w-0">
+            <span class="block text-[12.5px] font-bold text-[#0F2043] truncate">${esc(u.name || 'No name')}</span>
+            <span class="block text-[10.5px] text-slate-400 truncate">${esc([u.email, u.phone].filter(Boolean).join(' • ') || 'No contact')}</span>
+          </span>
+          <button type="button" data-adduser="${esc(u.id)}" class="px-3 py-1.5 rounded-[8px] bg-[#1A56FF] text-white text-[11px] font-bold flex-shrink-0">Add</button>
+        </div>`).join('')
+        : '<p class="text-[11.5px] text-slate-400 py-2 text-center">No users found.</p>';
+    }
+    if (!userSearchOK) {
+      $('cpUserSearch').disabled = true;
+      $('cpUserSearch').placeholder = 'User search unavailable';
+      const note = $('cpUserNote');
+      note.textContent = 'User search needs Users permission.';
+      note.classList.remove('hidden');
+    }
+    $('cpUserSearch').addEventListener('input', e => paintUserResults(e.target.value));
+    form.addEventListener('click', e => {
+      const add = e.target.closest('[data-adduser]');
+      if (add) {
+        const u = userById.get(String(add.dataset.adduser));
+        if (u) selUsers.set(String(u.id), { id: String(u.id), name: u.name || '', email: u.email || '', phone: u.phone || '' });
+        $('cpUserSearch').value = '';
+        paintUserResults(''); paintUserChips();
+        return;
+      }
+      const un = e.target.closest('[data-unuser]');
+      if (un) { selUsers.delete(String(un.dataset.unuser)); paintUserChips(); return; }
+      const ue = e.target.closest('[data-unemail]');
+      if (ue) { selEmails.delete(String(ue.dataset.unemail)); paintUserChips(); return; }
+      const up = e.target.closest('[data-unphone]');
+      if (up) { selPhones.delete(String(up.dataset.unphone)); paintUserChips(); return; }
+    });
+    $('cpUserReset').addEventListener('click', () => {
+      selUsers.clear(); selEmails.clear(); selPhones.clear();
+      $('cpUserSearch').value = ''; paintUserResults(''); paintUserChips();
+    });
+
+    paintAll();
+    paintUserChips();
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      $('cpError').classList.add('hidden');
+      const code = inp('code').value.trim().toUpperCase();
+      const value = Number(inp('value').value);
+      if (!code) { fail('Coupon code is required'); return; }
+      if (!(value > 0)) { fail('Discount value must be greater than 0'); return; }
+      const payload = {
+        code, type: inp('type').value, value,
+        minOrder: Number(inp('minOrder').value) || 0,
+        maxDiscount: Number(inp('maxDiscount').value) || 0,
+        usageLimit: Number(inp('usageLimit').value) || 0,
+        expiresAt: inp('expiresAt').value || '',
+        status: inp('status').value,
+        batchIds: [...selBatches], categoryIds: [...selCats], courseIds: [...selCourses],
+        userIds: [...selUsers.keys()], allowedEmails: [...selEmails], allowedPhones: [...selPhones]
+      };
+      try {
+        await api(item ? '/api/admin/coupons/' + item.id : '/api/admin/coupons', {
+          method: item ? 'PUT' : 'POST',
+          body: JSON.stringify(payload)
+        });
+        closeModal();
+        toast('Coupon ' + (item ? 'updated' : 'created'));
+        renderResource('coupons');
+      } catch (err) { fail(err.message); }
     });
   }
 
@@ -1075,7 +1634,11 @@
         const json = await api('/api/admin/courses/' + wiz.id + '/lessons');
         wiz.lessons = (json.data || []).map(l => ({
           lid: l.id, section: l.section || '', title: l.title || '',
-          youtube: '', hasVideo: true, duration: l.duration || '', isFree: !!l.isFree
+          youtube: '', hasVideo: !!(l.videoId || l.videoUrl),
+          src: l.videoUrl ? 'upload' : 'youtube',
+          videoUrl: l.videoUrl || '', videoName: l.videoName || '', videoSize: Number(l.videoSize) || 0,
+          _file: null, _fileName: '', _fileSize: 0,
+          duration: l.duration || '', isFree: !!l.isFree
         }));
       } catch (e) { wiz.lessons = []; }
     }
@@ -1110,7 +1673,7 @@
           <div>${lbl('Teacher Name')}<input id="wTeacher" value="${esc(c.teacher)}" placeholder="Apurbo Sir" class="${base} mt-1"></div>
           <div>${lbl('Duration')}<input id="wDuration" value="${esc(c.duration)}" placeholder="3 Months" class="${base} mt-1"></div>
           <div>${lbl('Batch <span class="text-red-500">*</span>')}<select id="wBatch" class="${base} mt-1">${selOpts(REL.batch(), c.batchId)}</select></div>
-          <div>${lbl('Category <span class="text-red-500">*</span>')}<select id="wCategory" class="${base} mt-1">${selOpts(REL.category(), c.categoryId)}</select></div>
+          <div>${lbl('Category <span class="text-slate-400 normal-case font-semibold">(optional)</span>')}<select id="wCategory" class="${base} mt-1">${selOpts(REL.category(), c.categoryId)}</select></div>
           <div>${lbl('Platform')}<select id="wPlatform" class="${base} mt-1">${selOpts(REL.platform(), c.platformId)}</select></div>
           <div>${lbl('Status')}<select id="wStatus" class="${base} mt-1">${selOpts(REL.status(), c.status)}</select></div>
           <div>${lbl('Price (৳)')}<input id="wPrice" type="number" min="0" value="${esc(c.price)}" placeholder="500" class="${base} mt-1"></div>
@@ -1127,7 +1690,7 @@
           <div class="sm:col-span-2">${lbl('Course Thumbnail / Image')}
             <div class="mt-1 bg-[#F8F9FD] rounded-[10px] border border-slate-200 p-3">
               <div class="aspect-[16/9] rounded-[8px] bg-white border border-slate-200 overflow-hidden flex items-center justify-center">
-                ${c.thumbnail ? `<img id="wThumbPrev" src="${esc(c.thumbnail)}" class="w-full h-full object-cover">` : `<div id="wThumbPrev" class="text-center text-slate-400"><i class="fa-solid fa-image text-[26px]"></i><p class="text-[11px] font-semibold mt-1">No image yet</p></div>`}
+                ${c.thumbnail ? `<img id="wThumbPrev" src="${esc(c.thumbnail)}" class="w-full h-full object-contain">` : `<div id="wThumbPrev" class="text-center text-slate-400"><i class="fa-solid fa-image text-[26px]"></i><p class="text-[11px] font-semibold mt-1">No image yet</p></div>`}
               </div>
               <div class="flex gap-2 mt-2">
                 <input id="wThumb" value="${esc(c.thumbnail)}" placeholder="Paste image URL or upload" class="${base} flex-1">
@@ -1183,7 +1746,7 @@
       // step 3: classes
       return `<div>
         <div class="flex items-center justify-between mb-3">
-          <p class="text-[12px] text-slate-500"><b class="text-[#0F2043]">${wiz.lessons.length}</b> class(es) — YouTube link is stored privately, students can't copy it.</p>
+          <p class="text-[12px] text-slate-500"><b class="text-[#0F2043]">${wiz.lessons.length}</b> class(es) — YouTube link BA direct video upload, students can't copy it.</p>
           <button id="wAddLesson" class="px-3 py-2 rounded-[8px] bg-[#E6F0FF] text-[#1A56FF] font-bold text-[12px] hover:bg-[#DDE8FF]"><i class="fa-solid fa-plus mr-1"></i> Add Class</button>
         </div>
         <div id="wLessonRows" class="space-y-3">
@@ -1192,7 +1755,32 @@
       </div>`;
     }
 
+    function fmtMB(n) {
+      n = Number(n) || 0;
+      if (!n) return '';
+      if (n >= 1024 * 1024) return (n / (1024 * 1024)).toFixed(1) + ' MB';
+      return Math.max(1, Math.round(n / 1024)) + ' KB';
+    }
+
     function lessonRow(l, i) {
+      const src = l.src || 'youtube';
+      const videoBadge = l.videoUrl
+        ? `<div class="sm:col-span-2 flex items-center gap-2 bg-[#E6F4EA] border border-[#C8E9D5] rounded-[8px] px-3 py-2">
+             <i class="fa-solid fa-file-video text-[#16A34A]"></i>
+             <span class="text-[12px] font-bold text-[#0F2043] truncate flex-1">${esc(l.videoName || 'Uploaded video')}${l.videoSize ? ' • ' + fmtMB(l.videoSize) : ''}</span>
+             <button type="button" data-up-rm="${i}" class="text-[11px] font-bold text-red-600 hover:underline flex-shrink-0">Remove</button>
+           </div>`
+        : (l._file
+          ? `<div class="sm:col-span-2 flex items-center gap-2 bg-[#E6F0FF] border border-[#BFDBFE] rounded-[8px] px-3 py-2">
+               <i class="fa-solid fa-circle-check text-[#1A56FF]"></i>
+               <span class="text-[12px] font-bold text-[#0F2043] truncate flex-1">Ready: ${esc(l._fileName)}${l._fileSize ? ' • ' + fmtMB(l._fileSize) : ''}</span>
+               <button type="button" data-up-rm="${i}" class="text-[11px] font-bold text-red-600 hover:underline flex-shrink-0">Remove</button>
+             </div>`
+          : `<label class="sm:col-span-2 flex items-center justify-center gap-2 border-2 border-dashed border-slate-200 rounded-[8px] px-3 py-3 cursor-pointer hover:border-[#1A56FF] hover:bg-[#F8FAFF] transition bg-white">
+               <i class="fa-solid fa-cloud-arrow-up text-[#1A56FF] text-[16px]"></i>
+               <span class="text-[12px] font-semibold text-slate-500">MP4 / WebM video select korun <span class="text-slate-400">(max 500MB)</span></span>
+               <input type="file" accept="video/mp4,video/webm,.mp4,.webm,.mov" class="hidden" data-up-file="${i}">
+             </label>`);
       return `<div class="border border-slate-200 rounded-[10px] p-3 bg-[#F8F9FD]" data-row="${i}">
         <div class="flex items-center justify-between mb-2">
           <span class="text-[11px] font-extrabold text-[#1A56FF]">CLASS ${i + 1}</span>
@@ -1202,7 +1790,17 @@
           <input data-l="section" value="${esc(l.section)}" placeholder="Section (e.g. ভৌতজগত ও পরিমাপ)" class="border border-slate-200 rounded-[8px] px-3 py-2 text-[13px] outline-none focus:border-[#1A56FF] bg-white">
           <input data-l="duration" value="${esc(l.duration)}" placeholder="Duration (e.g. 45 min)" class="border border-slate-200 rounded-[8px] px-3 py-2 text-[13px] outline-none focus:border-[#1A56FF] bg-white">
           <input data-l="title" value="${esc(l.title)}" placeholder="Class title *" class="sm:col-span-2 border border-slate-200 rounded-[8px] px-3 py-2 text-[13px] outline-none focus:border-[#1A56FF] bg-white font-semibold">
-          <input data-l="youtube" value="${esc(l.youtube)}" placeholder="${l.hasVideo ? '✓ Video saved — paste new link only to replace' : 'YouTube link * (paste watch / share link)'}" class="sm:col-span-2 border border-slate-200 rounded-[8px] px-3 py-2 text-[13px] outline-none focus:border-[#1A56FF] bg-white">
+          <div class="sm:col-span-2 flex gap-1.5 bg-slate-100 rounded-[8px] p-1">
+            <button type="button" data-src-tab="${i}:youtube" class="flex-1 py-1.5 rounded-[6px] text-[12px] font-bold transition ${src === 'youtube' ? 'bg-white text-[#1A56FF] shadow' : 'text-slate-500'}"><i class="fa-brands fa-youtube mr-1"></i>YouTube Link</button>
+            <button type="button" data-src-tab="${i}:upload" class="flex-1 py-1.5 rounded-[6px] text-[12px] font-bold transition ${src === 'upload' ? 'bg-white text-[#1A56FF] shadow' : 'text-slate-500'}"><i class="fa-solid fa-upload mr-1"></i>Upload Video</button>
+          </div>
+          ${src === 'youtube'
+            ? `<input data-l="youtube" value="${esc(l.youtube)}" placeholder="${l.hasVideo ? '✓ Video saved — paste new link only to replace' : 'YouTube link * (paste watch / share link)'}" class="sm:col-span-2 border border-slate-200 rounded-[8px] px-3 py-2 text-[13px] outline-none focus:border-[#1A56FF] bg-white">`
+            : videoBadge}
+          <div class="sm:col-span-2" data-up-prog-wrap="${i}" style="display:none">
+            <div class="h-2 rounded-full bg-slate-200 overflow-hidden"><div class="h-full bg-[#1A56FF] rounded-full transition-all" data-up-prog="${i}" style="width:0%"></div></div>
+            <p class="text-[11px] text-slate-500 mt-1" data-up-prog-txt="${i}">Uploading...</p>
+          </div>
           <label class="sm:col-span-2 flex items-center gap-2 text-[12px] font-semibold text-slate-600">
             <input data-l="isFree" type="checkbox" class="w-4 h-4 accent-[#16A34A]" ${l.isFree ? 'checked' : ''}> Free preview (anyone can watch this class)
           </label>
@@ -1252,7 +1850,6 @@
         });
         if (!wiz.course.title) return 'Course Title is required';
         if (!wiz.course.batchId) return 'Please select a Batch';
-        if (!wiz.course.categoryId) return 'Please select a Category';
       }
       if (wiz.step === 2) {
         // multi telegram collect (khali row auto bad, vul format bad, error khabe na)
@@ -1286,12 +1883,20 @@
       wiz.lessons = rows.map((row, idx) => {
         const g = n => row.querySelector('[data-l="' + n + '"]');
         const prev = wiz.lessons[idx] || {};
+        const ytEl = g('youtube');
         return {
           lid: prev.lid || null,
           hasVideo: prev.hasVideo || false,
+          src: prev.src || 'youtube',
+          videoUrl: prev.videoUrl || '',
+          videoName: prev.videoName || '',
+          videoSize: prev.videoSize || 0,
+          _file: prev._file || null,
+          _fileName: prev._fileName || '',
+          _fileSize: prev._fileSize || 0,
           section: g('section').value.trim(),
           title: g('title').value.trim(),
-          youtube: g('youtube').value.trim(),
+          youtube: ytEl ? ytEl.value.trim() : '',
           duration: g('duration').value.trim(),
           isFree: g('isFree').checked
         };
@@ -1322,7 +1927,7 @@
           const prev = $('wThumbPrev');
           if (prev) {
             if (prev.tagName === 'IMG') prev.src = ev.target.result;
-            else prev.outerHTML = `<img id="wThumbPrev" src="${ev.target.result}" class="w-full h-full object-cover">`;
+            else prev.outerHTML = `<img id="wThumbPrev" src="${ev.target.result}" class="w-full h-full object-contain">`;
           }
           toast('Thumbnail loaded');
         };
@@ -1370,8 +1975,57 @@
       const addBtn = $('wAddLesson');
       if (addBtn) addBtn.addEventListener('click', () => {
         collectLessons();
-        wiz.lessons.push({ lid: null, section: '', title: '', youtube: '', hasVideo: false, duration: '', isFree: false });
+        wiz.lessons.push({ lid: null, section: '', title: '', youtube: '', hasVideo: false, src: 'youtube', videoUrl: '', videoName: '', videoSize: 0, _file: null, _fileName: '', _fileSize: 0, duration: '', isFree: false });
         paintWiz();
+      });
+      // YouTube / Upload tab switch (data collect kore repaint, lekha harabe na)
+      document.querySelectorAll('#wLessonRows [data-src-tab]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          collectLessons();
+          const parts = String(btn.dataset.srcTab).split(':');
+          const idx = Number(parts[0]);
+          if (wiz.lessons[idx]) wiz.lessons[idx].src = parts[1] === 'upload' ? 'upload' : 'youtube';
+          paintWiz();
+        });
+      });
+      // video file select (memory-te rakhe, Save-er somoy upload hobe)
+      document.querySelectorAll('#wLessonRows [data-up-file]').forEach(inp => {
+        inp.addEventListener('change', () => {
+          const idx = Number(inp.dataset.upFile);
+          const file = inp.files && inp.files[0];
+          if (!file || !wiz.lessons[idx]) return;
+          if (!/video\/(mp4|webm|quicktime)/i.test(file.type) && !/\.(mp4|webm|mov)$/i.test(file.name)) {
+            toast('Only MP4 / WebM video allowed', false);
+            inp.value = '';
+            return;
+          }
+          if (file.size > 500 * 1024 * 1024) { toast('Video must be under 500MB', false); inp.value = ''; return; }
+          collectLessons();
+          wiz.lessons[idx]._file = file;
+          wiz.lessons[idx]._fileName = file.name;
+          wiz.lessons[idx]._fileSize = file.size;
+          wiz.lessons[idx].src = 'upload';
+          paintWiz();
+          toast('Video ready: ' + file.name);
+        });
+      });
+      // uploaded / ready video remove
+      document.querySelectorAll('#wLessonRows [data-up-rm]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          collectLessons();
+          const idx = Number(btn.dataset.upRm);
+          const l = wiz.lessons[idx];
+          if (!l) return;
+          // temp upload (ekhono save hoyni) hole server file-o mushe felo
+          if (!l.lid && l.videoUrl) {
+            try { await api('/api/admin/videos', { method: 'DELETE', body: JSON.stringify({ videoUrl: l.videoUrl }) }); } catch (e) {}
+          }
+          l.videoUrl = ''; l.videoName = ''; l.videoSize = 0;
+          l._file = null; l._fileName = ''; l._fileSize = 0;
+          l.hasVideo = !!(l.youtube && wizYtId(l.youtube));
+          l.src = 'upload';
+          paintWiz();
+        });
       });
       document.querySelectorAll('#wLessonRows [data-rm]').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1386,15 +2040,47 @@
       if (save) save.addEventListener('click', saveWiz);
     }
 
+    // raw video file -> /api/admin/videos/upload (progress bar soho)
+    function uploadVideoFile(file, idx) {
+      return new Promise((resolve, reject) => {
+        const wrap = document.querySelector('[data-up-prog-wrap="' + idx + '"]');
+        const bar = document.querySelector('[data-up-prog="' + idx + '"]');
+        const txt = document.querySelector('[data-up-prog-txt="' + idx + '"]');
+        if (wrap) wrap.style.display = '';
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/admin/videos/upload', true);
+        xhr.setRequestHeader('Authorization', 'Bearer ' + state.token);
+        xhr.setRequestHeader('Content-Type', file.type || 'video/mp4');
+        xhr.setRequestHeader('x-file-name', encodeURIComponent(file.name));
+        xhr.upload.onprogress = e => {
+          if (!e.lengthComputable) return;
+          const pct = Math.round((e.loaded / e.total) * 100);
+          if (bar) bar.style.width = pct + '%';
+          if (txt) txt.textContent = 'Uploading ' + file.name + '... ' + pct + '%';
+        };
+        xhr.onload = () => {
+          let j = null;
+          try { j = JSON.parse(xhr.responseText); } catch (e) {}
+          if (xhr.status >= 200 && xhr.status < 300 && j && j.success) resolve(j.data);
+          else reject(new Error((j && j.message) || ('Upload failed (HTTP ' + xhr.status + ')')));
+        };
+        xhr.onerror = () => reject(new Error('Network error during upload'));
+        xhr.send(file);
+      });
+    }
+
     async function saveWiz() {
       if (wiz.saving) return;
       collectLessons();
-      // validate lessons
+      // validate lessons (YouTube link BA uploaded video — jekono ekta lagbei)
       for (let i = 0; i < wiz.lessons.length; i++) {
         const l = wiz.lessons[i];
         if (!l.title) { wizErr('Class ' + (i + 1) + ': title is required'); return; }
-        if (!l.lid && !wizYtId(l.youtube)) { wizErr('Class ' + (i + 1) + ': valid YouTube link is required'); return; }
-        if (l.lid && l.youtube && !wizYtId(l.youtube)) { wizErr('Class ' + (i + 1) + ': YouTube link is not valid'); return; }
+        const hasYt = !!wizYtId(l.youtube);
+        const hasUp = !!(l.videoUrl || l._file);
+        if (l.youtube && !hasYt) { wizErr('Class ' + (i + 1) + ': YouTube link is not valid'); return; }
+        if (!l.lid && !hasYt && !hasUp) { wizErr('Class ' + (i + 1) + ': YouTube link BA video upload din'); return; }
+        if (l.lid && !hasYt && !hasUp && !l.hasVideo) { wizErr('Class ' + (i + 1) + ': YouTube link BA video upload din'); return; }
       }
       wiz.saving = true;
       const saveBtn = $('wizSave');
@@ -1423,11 +2109,27 @@
           const created = await api('/api/admin/courses', { method: 'POST', body: JSON.stringify(payload) });
           courseId = created.data.id;
         }
-        // sync lessons (order = row sequence)
+        // sync lessons (order = row sequence) — pending video age upload, tarpor attach
         for (let i = 0; i < wiz.lessons.length; i++) {
           const l = wiz.lessons[i];
+          if (saveBtn) saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Saving class ' + (i + 1) + '/' + wiz.lessons.length + '...';
+          let upUrl = '', upName = '', upSize = 0;
+          if (l._file) {
+            try {
+              const up = await uploadVideoFile(l._file, i);
+              upUrl = up.videoUrl; upName = up.videoName || l._fileName; upSize = up.videoSize || l._fileSize;
+              l.videoUrl = upUrl; l.videoName = upName; l.videoSize = upSize; l._file = null;
+            } catch (err) { throw new Error('Class ' + (i + 1) + ': ' + err.message); }
+          }
           const body = { section: l.section, title: l.title, duration: l.duration, isFree: l.isFree, order: i + 1 };
-          if (l.youtube) body.youtubeUrl = l.youtube;
+          if ((l.src || 'youtube') === 'upload') {
+            if (upUrl) { body.videoUrl = upUrl; body.videoName = upName; body.videoSize = upSize; }
+            else if (l.videoUrl) { body.videoUrl = l.videoUrl; body.videoName = l.videoName || ''; body.videoSize = l.videoSize || 0; }
+          } else {
+            if (l.youtube) body.youtubeUrl = l.youtube;
+            // upload theke YouTube-e switch korle purono mp4 clear hobe (server file mushe felbe)
+            if (l.lid && l.videoUrl) body.videoUrl = '';
+          }
           if (l.lid) await api('/api/admin/lessons/' + l.lid, { method: 'PUT', body: JSON.stringify(body) });
           else await api('/api/admin/courses/' + courseId + '/lessons', { method: 'POST', body: JSON.stringify(body) });
         }
@@ -1472,7 +2174,7 @@
           <div class="sm:col-span-2">${lbl('Cover Image')}
             <div class="mt-1 bg-[#F8F9FD] rounded-[10px] border border-slate-200 p-3 flex items-center gap-3">
               <div class="w-14 h-[72px] rounded-[6px] bg-white border border-slate-200 overflow-hidden flex items-center justify-center flex-shrink-0">
-                ${d.cover ? `<img id="ebCoverPrev" src="${esc(d.cover)}" class="w-full h-full object-cover">` : `<span id="ebCoverPrev"><i class="fa-solid fa-book text-slate-300 text-[20px]"></i></span>`}
+                ${d.cover ? `<img id="ebCoverPrev" src="${esc(d.cover)}" class="w-full h-full object-contain">` : `<span id="ebCoverPrev"><i class="fa-solid fa-book text-slate-300 text-[20px]"></i></span>`}
               </div>
               <div class="flex-1 min-w-0">
                 <input id="ebCover" value="${esc(d.cover)}" placeholder="Paste image URL or upload" class="${base}">
@@ -1532,7 +2234,7 @@
         const prev = $('ebCoverPrev');
         if (prev) {
           if (prev.tagName === 'IMG') prev.src = ev.target.result;
-          else prev.outerHTML = `<img id="ebCoverPrev" src="${ev.target.result}" class="w-full h-full object-cover">`;
+          else prev.outerHTML = `<img id="ebCoverPrev" src="${ev.target.result}" class="w-full h-full object-contain">`;
         }
         toast('Cover loaded');
       };
@@ -1672,11 +2374,6 @@
           </td>
           <td class="px-4 py-3 text-right whitespace-nowrap">
             <button data-profile="${u.id}" class="w-8 h-8 rounded-full bg-[#E0F2FE] text-[#0EA5E9] hover:bg-[#BAE6FD] transition inline-flex items-center justify-center mr-1" title="View Profile & Manage Course Access"><i class="fa-solid fa-eye text-[12px]"></i></button>
-            ${isBanned ? `
-              <button data-user-ban="${u.id}" data-action="unban" class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition inline-flex items-center justify-center mr-1" title="Unban Student"><i class="fa-solid fa-user-check text-[12px]"></i></button>
-            ` : `
-              <button data-user-ban="${u.id}" data-action="ban" class="w-8 h-8 rounded-full bg-amber-50 text-amber-600 hover:bg-amber-100 transition inline-flex items-center justify-center mr-1" title="Ban Student"><i class="fa-solid fa-ban text-[12px]"></i></button>
-            `}
             <button data-user-edit="${u.id}" class="w-8 h-8 rounded-full bg-[#E6F0FF] text-[#1A56FF] hover:bg-[#DDE8FF] transition inline-flex items-center justify-center mr-1" title="Edit"><i class="fa-solid fa-pen text-[12px]"></i></button>
             <button data-user-del="${u.id}" class="w-8 h-8 rounded-full bg-red-50 text-red-600 hover:bg-red-100 transition inline-flex items-center justify-center" title="Delete"><i class="fa-solid fa-trash text-[12px]"></i></button>
           </td>
@@ -1688,27 +2385,8 @@
       const profileBtn = e.target.closest('[data-profile]');
       const editBtn = e.target.closest('[data-user-edit]');
       const delBtn = e.target.closest('[data-user-del]');
-      const banBtn = e.target.closest('[data-user-ban]');
       if (profileBtn) { openUserProfile(profileBtn.dataset.profile); return; }
       if (editBtn) { openUserForm(editBtn.dataset.userEdit); return; }
-      if (banBtn) {
-        const uid = banBtn.dataset.userBan;
-        const action = banBtn.dataset.action;
-        const u = state.lists.users.find(x => String(x.id) === String(uid));
-        const title = action === 'unban' ? 'Unban Student?' : 'Ban Student?';
-        const text = action === 'unban' ? `Reactivate and unban "${(u && u.name) || 'this student'}"?` : `Are you sure you want to ban "${(u && u.name) || 'this student'}"? They will be locked out and cannot log in or access courses.`;
-        confirmDialog(title, text, async function () {
-          try {
-            const res = await api('/api/admin/users/' + uid + '/ban', {
-              method: 'POST',
-              body: JSON.stringify({ status: action === 'unban' ? 'active' : 'banned' })
-            });
-            toast(res.message);
-            renderUsers();
-          } catch (err) { toast(err.message, false); }
-        }, action === 'unban' ? 'Yes, Unban' : 'Yes, Ban Student');
-        return;
-      }
       if (delBtn) {
         const u = state.lists.users.find(x => String(x.id) === String(delBtn.dataset.userDel));
         confirmDialog('Delete user?', 'Remove "' + ((u && u.name) || '') + '" permanently?', async function () {
@@ -1893,7 +2571,7 @@
                 <div class="flex items-center justify-between gap-3 p-3 rounded-[10px] border border-slate-100 bg-[#FAFBFD] hover:bg-white transition">
                   <div class="flex items-center gap-3 min-w-0">
                     <div class="w-10 h-10 rounded-[8px] bg-[#0F2043] flex items-center justify-center text-white flex-shrink-0 text-[14px] overflow-hidden">
-                      ${c.thumbnail ? `<img src="${esc(c.thumbnail)}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-book-open"></i>`}
+                      ${c.thumbnail ? `<img src="${esc(c.thumbnail)}" class="w-full h-full object-contain">` : `<i class="fa-solid fa-book-open"></i>`}
                     </div>
                     <div class="min-w-0">
                       <div class="text-[13px] font-bold text-[#0F2043] truncate">${esc(c.title)}</div>
@@ -2014,6 +2692,10 @@
       acc[s] = state.lists.orders.filter(o => o.status === s).length;
       return acc;
     }, {});
+
+    // Sidebar badge sathe sathe update
+    state.pendingOrders = counts.pending || 0;
+    paintOrdersBadge();
 
     view.innerHTML = `
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
@@ -2185,6 +2867,565 @@
       </div>`);
   }
 
+  /* ---------------- Admins (multi-admin team, full access) ---------------- */
+  async function renderAdmins() {
+    const view = $('view');
+    view.innerHTML = `<div class="text-center py-20 text-slate-400"><i class="fa-solid fa-spinner fa-spin text-[22px]"></i><p class="text-[13px] mt-2">Loading admins...</p></div>`;
+    try {
+      // Admins list required; invites best-effort (ekta fail korle puro page blank hobe na)
+      const aj = await api('/api/admin/admins');
+      const list = aj.data || [];
+      let invites = [], invitesError = '';
+      try {
+        const ij = await api('/api/admin/admins/invites');
+        invites = (ij.data || []).filter(i => !i.used);
+      } catch (e) { invitesError = e.message || 'Could not load invitations'; }
+      const permBadge = p => `<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold">${esc(PERM_LABELS[p] || p)}</span>`;
+      view.innerHTML = `
+        ${invitesError ? `<div class="bg-[#FFFBEB] border border-[#FDE68A] text-[#92400E] text-[12px] font-semibold rounded-[12px] px-4 py-2.5 mb-4"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Invitations could not load (${esc(invitesError)}) — server restart diye abar try koro.</div>` : ''}
+        ${invites.length ? `
+        <div class="bg-white rounded-[14px] border border-[#FDE68A] shadow-sm overflow-hidden mb-4">
+          <div class="px-5 py-3.5 bg-[#FFFBEB] border-b border-[#FEF3C7] flex flex-wrap items-center justify-between gap-2">
+            <h3 class="text-[14px] font-extrabold text-[#0F2043]"><i class="fa-solid fa-envelope-open-text text-[#B45309] mr-1"></i>Pending Invitations (${invites.length})</h3>
+            <span class="text-[11px] font-bold text-slate-400">Links expire in 24 hours</span>
+          </div>
+          <div class="divide-y divide-slate-100">
+            ${invites.map(inv => {
+              const left = Number(inv.expiresAt || 0) - Date.now();
+              const expired = left <= 0;
+              return `
+              <div class="px-5 py-3 flex flex-wrap items-center gap-3">
+                <div class="w-10 h-10 rounded-full ${expired ? 'bg-slate-100 text-slate-400' : 'bg-[#FFFBEB] text-[#B45309]'} font-extrabold flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-paper-plane text-[14px]"></i></div>
+                <div class="min-w-0 flex-1">
+                  <div class="text-[13.5px] font-extrabold text-[#0F2043] truncate">${esc(inv.email)}
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ml-1 ${inv.role === 'superadmin' ? 'bg-[#0F2043] text-white' : 'bg-[#E6F0FF] text-[#1A56FF]'}">${esc(inv.role === 'superadmin' ? 'SUPER ADMIN' : 'Admin')}</span>
+                  </div>
+                  <div class="text-[11.5px] font-bold ${expired ? 'text-red-500' : 'text-[#B45309]'}"><i class="fa-regular fa-clock mr-1"></i>${expired ? 'Expired — resend for a new link' : esc(inviteExpiryText(left))}</div>
+                </div>
+                <div class="flex items-center gap-2">
+                  ${inv.acceptUrl && !expired ? `<button data-inv-copy="${esc(inv.acceptUrl)}" class="px-3 py-2 rounded-[10px] bg-[#E6F0FF] hover:bg-[#DDE8FF] font-bold text-[12px] text-[#1A56FF]"><i class="fa-solid fa-link mr-1"></i>Copy Link</button>` : ''}
+                  <button data-inv-resend="${inv.id}" class="px-3 py-2 rounded-[10px] bg-[#E6F4EA] hover:bg-[#D3EBD8] font-bold text-[12px] text-[#16A34A]"><i class="fa-solid fa-rotate-right mr-1"></i>Resend</button>
+                  <button data-inv-revoke="${inv.id}" data-inv-email="${esc(inv.email)}" class="px-3 py-2 rounded-[10px] bg-red-50 hover:bg-red-100 font-bold text-[12px] text-red-600"><i class="fa-solid fa-ban mr-1"></i>Revoke</button>
+                </div>
+              </div>`; }).join('')}
+          </div>
+        </div>` : ''}
+        <div class="bg-white rounded-[14px] border border-slate-100 shadow-sm overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 class="text-[15px] font-extrabold text-[#0F2043]"><i class="fa-solid fa-user-shield text-[#1A56FF] mr-1"></i>Admin Team (${list.length})</h3>
+              <p class="text-[11.5px] text-slate-500">Invite by email — new admins join with an accept link. You cannot delete your own account.</p>
+            </div>
+            <button id="addAdminBtn" class="px-4 py-2.5 rounded-[10px] bg-[#1A56FF] hover:bg-[#1445D6] text-white font-bold text-[12.5px]"><i class="fa-solid fa-paper-plane mr-1"></i> Invite Admin</button>
+          </div>
+          <div class="divide-y divide-slate-100">
+            ${list.map(a => {
+              const perms = Array.isArray(a.permissions) ? a.permissions : null;
+              return `
+              <div class="px-5 py-3.5 flex flex-wrap items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-[#EDE9FF] text-[#4F46E5] font-extrabold flex items-center justify-center">${esc((a.name || a.username || 'A').charAt(0).toUpperCase())}</div>
+                <div class="min-w-0 flex-1">
+                  <div class="text-[13.5px] font-extrabold text-[#0F2043]">${esc(a.name || '')}
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ml-1 ${a.role === 'superadmin' ? 'bg-[#0F2043] text-white' : 'bg-[#E6F0FF] text-[#1A56FF]'}">${esc(a.role === 'superadmin' ? 'SUPER ADMIN' : 'Admin')}</span>
+                  </div>
+                  <div class="text-[11.5px] text-slate-500">@${esc(a.username || '')}${a.email ? ' • ' + esc(a.email) : ''}</div>
+                  <div class="flex flex-wrap gap-1 mt-1.5">${perms === null ? '<span class="px-2 py-0.5 rounded-full bg-[#E6F4EA] text-[#16A34A] text-[10px] font-bold">Full access (legacy)</span>' : (perms.length ? perms.map(permBadge).join('') : '<span class="text-[10px] text-slate-400 font-bold">Dashboard only</span>')}</div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button data-admin-edit="${a.id}" class="px-3 py-2 rounded-[10px] bg-slate-100 hover:bg-slate-200 font-bold text-[12px] text-slate-700"><i class="fa-solid fa-pen mr-1"></i>Edit</button>
+                  <button data-admin-del="${a.id}" data-admin-name="${esc(a.name || a.username)}" class="px-3 py-2 rounded-[10px] bg-red-50 hover:bg-red-100 font-bold text-[12px] text-red-600"><i class="fa-solid fa-trash mr-1"></i>Remove</button>
+                </div>
+              </div>`; }).join('') || '<p class="px-5 py-8 text-center text-[13px] text-slate-400">No admins found</p>'}
+          </div>
+        </div>`;
+      $('addAdminBtn').addEventListener('click', function () { inviteAdminForm(); });
+      view.querySelectorAll('[data-admin-edit]').forEach(b => b.addEventListener('click', async function () {
+        const j = await api('/api/admin/admins');
+        const found = (j.data || []).find(x => String(x.id) === String(b.dataset.adminEdit));
+        adminForm(found);
+      }));
+      view.querySelectorAll('[data-inv-copy]').forEach(b => b.addEventListener('click', function () {
+        copyText(b.dataset.invCopy, 'Invitation link copied');
+      }));
+      view.querySelectorAll('[data-inv-resend]').forEach(b => b.addEventListener('click', async function () {
+        try {
+          const j = await api('/api/admin/admins/invites/' + b.dataset.invResend + '/resend', { method: 'POST' });
+          toast(j.message); renderAdmins();
+        } catch (err) { toast(err.message, false); }
+      }));
+      view.querySelectorAll('[data-inv-revoke]').forEach(b => b.addEventListener('click', function () {
+        confirmDialog('Revoke invitation?', 'The invitation for "' + b.dataset.invEmail + '" will be cancelled.', async function () {
+          try { await api('/api/admin/admins/invites/' + b.dataset.invRevoke, { method: 'DELETE' }); toast('Invitation revoked'); renderAdmins(); }
+          catch (err) { toast(err.message, false); }
+        }, 'Yes, Revoke');
+      }));
+      view.querySelectorAll('[data-admin-del]').forEach(b => b.addEventListener('click', function () {
+        confirmDialog('Remove admin?', '"' + b.dataset.adminName + '" will no longer be able to log in.', async function () {
+          try { await api('/api/admin/admins/' + b.dataset.adminDel, { method: 'DELETE' }); toast('Admin removed'); renderAdmins(); }
+          catch (err) { toast(err.message, false); }
+        }, 'Yes, Remove');
+      }));
+    } catch (err) { view.innerHTML = errorBox(err.message); }
+  }
+
+  /* Invitation email preview — same content as the mailed template (live values) */
+  function invitePreviewHtml(siteUrl, email, role) {
+    const roleLabel = role === 'superadmin' ? 'Super Administrator' : 'Administrator';
+    const host = String(siteUrl || '').replace(/^https?:\/\//, '') || 'website';
+    return `
+    <div class="rounded-[12px] overflow-hidden border border-slate-200">
+      <div class="text-center text-white px-4 py-4" style="background:linear-gradient(90deg,#1A56FF,#7C3AED)">
+        <div class="text-[24px] leading-none">🔐</div>
+        <div class="text-[15px] font-extrabold mt-1">Admin Invitation</div>
+      </div>
+      <div class="bg-white px-4 py-4 text-[12.5px] text-slate-700 leading-relaxed">
+        <p>You've been invited to join <a href="${esc(siteUrl)}" target="_blank" class="text-[#1A56FF] font-bold hover:underline">${esc(host)}</a> as an Administrator.</p>
+        <div class="bg-[#F8F9FD] border border-slate-200 rounded-[8px] px-3 py-2.5 mt-2 leading-loose">
+          <div>👤 Role: <b>${esc(roleLabel)}</b></div>
+          <div>📧 Email: <b>${esc(email || 'name@example.com')}</b></div>
+        </div>
+        <div class="text-center my-3">
+          <span class="inline-block text-white font-extrabold text-[13px] px-6 py-2.5 rounded-[10px]" style="background:#1A56FF">🔗 Accept Invitation</span>
+        </div>
+        <p class="text-[11.5px] text-[#B45309]">⏳ This invitation will expire in <b>24 hours</b>.</p>
+        <p class="text-[11px] text-slate-400 mt-1">If you did not expect this invitation, you can safely ignore this message.</p>
+      </div>
+    </div>`;
+  }
+
+  /* Invite Admin — email + role + permissions, accept link mailed */
+  async function inviteAdminForm() {
+    const base = 'w-full border border-slate-200 rounded-[8px] px-3 py-2 text-[13px] outline-none focus:border-[#1A56FF] bg-white';
+    const siteUrl = location.origin;
+    const isSuper = state.admin && state.admin.role === 'superadmin';
+    const defaultPerms = ['dashboard', 'courses', 'orders', 'users'];
+    openModal(`
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 sticky top-0 bg-white rounded-t-[16px] z-10">
+        <div>
+          <h3 class="text-[16px] font-extrabold text-[#0F2043]"><i class="fa-solid fa-paper-plane text-[#1A56FF] mr-1"></i>Invite Admin</h3>
+          <p class="text-[11px] text-slate-500">An accept link (valid 24 hours) will be emailed.</p>
+        </div>
+        <button onclick="closeModal()" class="w-9 h-9 rounded-full hover:bg-slate-100 text-slate-500"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label class="text-[11px] font-bold text-slate-600 uppercase">Email Address *</label>
+          <input id="invEmail" type="email" value="" class="${base} mt-1" placeholder="name@example.com">
+          <div class="mt-3"><label class="text-[11px] font-bold text-slate-600 uppercase">Role</label>
+            <select id="invRole" class="${base} mt-1">
+              <option value="admin">Administrator</option>
+              ${isSuper ? '<option value="superadmin">Super Admin (full access)</option>' : ''}
+            </select></div>
+          <div class="mt-3">
+            <label class="text-[11px] font-bold text-slate-600 uppercase">Permissions — which sections they can use</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 mt-2">
+              ${Object.keys(PERM_LABELS).filter(p => p !== 'dashboard').map(p => `
+                <label class="flex items-center gap-2 bg-[#F8F9FD] rounded-[8px] border border-slate-200 px-2.5 py-2 cursor-pointer text-[12px] font-semibold text-slate-700">
+                  <input type="checkbox" data-inv-perm="${p}" ${defaultPerms.includes(p) ? 'checked' : ''} class="w-4 h-4 accent-[#1A56FF] flex-shrink-0"> ${esc(PERM_LABELS[p])}
+                </label>`).join('')}
+            </div>
+            <p class="text-[10.5px] text-slate-400 mt-1">Super Admins get full access automatically. Dashboard is visible to everyone.</p>
+          </div>
+          <p id="invMsg" class="hidden mt-3 text-[12px] font-semibold rounded-lg px-3 py-2"></p>
+        </div>
+        <div>
+          <label class="text-[11px] font-bold text-slate-600 uppercase">Email Preview <span class="text-slate-400 normal-case font-semibold">(live)</span></label>
+          <div id="invPreview" class="mt-1"></div>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 px-6 pb-6">
+        <button onclick="closeModal()" class="px-4 py-2.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 font-bold text-[13px] text-slate-700">Cancel</button>
+        <button id="invSend" class="px-5 py-2.5 rounded-[10px] bg-[#1A56FF] hover:bg-[#1445D6] text-white font-bold text-[13px]"><i class="fa-solid fa-paper-plane mr-1"></i> Send Invitation</button>
+      </div>`);
+    const paintPreview = () => {
+      $('invPreview').innerHTML = invitePreviewHtml(siteUrl, $('invEmail').value.trim(), $('invRole').value);
+    };
+    $('invEmail').addEventListener('input', paintPreview);
+    $('invRole').addEventListener('change', paintPreview);
+    paintPreview();
+    $('invSend').addEventListener('click', async function () {
+      const box = $('invMsg');
+      box.classList.add('hidden');
+      const email = $('invEmail').value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        box.textContent = 'Please enter a valid email address';
+        box.className = 'mt-3 text-[12px] font-semibold rounded-lg px-3 py-2 bg-red-50 text-red-600 border border-red-100';
+        box.classList.remove('hidden');
+        return;
+      }
+      const perms = Array.from(document.querySelectorAll('[data-inv-perm]:checked')).map(el => el.dataset.invPerm);
+      const btn = $('invSend');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Sending...';
+      try {
+        const j = await api('/api/admin/admins/invite', { method: 'POST', body: JSON.stringify({ email, role: $('invRole').value, permissions: perms }) });
+        inviteSuccess(email, j.acceptUrl, j.message, !!(j.mail && j.mail.ok));
+      } catch (err) {
+        box.textContent = err.message;
+        box.className = 'mt-3 text-[12px] font-semibold rounded-lg px-3 py-2 bg-red-50 text-red-600 border border-red-100';
+        box.classList.remove('hidden');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane mr-1"></i> Send Invitation';
+      }
+    });
+  }
+
+  function inviteSuccess(email, acceptUrl, message, mailOk) {
+    openModal(`
+      <div class="p-6 text-center max-w-[480px] mx-auto">
+        <div class="w-14 h-14 rounded-full ${mailOk ? 'bg-[#E6F4EA]' : 'bg-[#FEF3C7]'} flex items-center justify-center mx-auto">
+          <i class="fa-solid ${mailOk ? 'fa-check text-[#16A34A]' : 'fa-triangle-exclamation text-[#B45309]'} text-[24px]"></i>
+        </div>
+        <h3 class="text-[17px] font-extrabold text-[#0F2043] mt-3">${mailOk ? 'Invitation Sent' : 'Invite Created'}</h3>
+        <p class="text-[12.5px] text-slate-500 mt-1">${esc(message || ('Invitation for ' + email + ' is ready.'))}</p>
+        ${acceptUrl ? `
+        <div class="mt-4 text-left">
+          <label class="text-[11px] font-bold text-slate-600 uppercase">Invitation Link <span class="text-slate-400 normal-case font-semibold">(expires in 24 hours)</span></label>
+          <div class="flex gap-2 mt-1">
+            <input id="invLink" readonly value="${esc(acceptUrl)}" class="flex-1 min-w-0 border border-slate-200 rounded-[8px] px-3 py-2 font-mono text-[11px] text-slate-600 bg-[#F8F9FD] outline-none">
+            <button id="invCopy" class="px-4 py-2 rounded-[8px] bg-[#0F2043] text-white text-[12px] font-bold flex-shrink-0"><i class="fa-solid fa-copy mr-1"></i>Copy</button>
+          </div>
+        </div>` : ''}
+        <button id="invDone" class="mt-5 px-6 py-2.5 rounded-[10px] bg-[#1A56FF] hover:bg-[#1445D6] text-white font-bold text-[13px]">Done</button>
+      </div>`);
+    const cp = $('invCopy');
+    if (cp) cp.addEventListener('click', () => copyText($('invLink').value, 'Invitation link copied'));
+    $('invDone').addEventListener('click', () => { closeModal(); renderAdmins(); });
+  }
+
+  function adminForm(a) {
+    if (!a) { toast('Admin not found', false); return; }
+    const base = 'w-full border border-slate-200 rounded-[8px] px-3 py-2 text-[13px] outline-none focus:border-[#1A56FF]';
+    const isSelf = state.admin && String(a.id) === String(state.admin.id);
+    const curPerms = Array.isArray(a.permissions) ? a.permissions : null;
+    const checked = p => (!curPerms || curPerms.includes(p)) ? 'checked' : '';
+    openModal(`
+      <div class="p-6 max-h-[85vh] overflow-y-auto">
+        <h3 class="text-[16px] font-extrabold text-[#0F2043]">Edit Admin</h3>
+        <p class="text-[12px] text-slate-500 mt-0.5">Update info, email, role or permissions</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+          <div><label class="text-[11px] font-bold text-slate-600 uppercase">Username</label>
+            <input value="${esc(a.username || '')}" disabled class="${base} mt-1 bg-slate-50 text-slate-500"></div>
+          <div><label class="text-[11px] font-bold text-slate-600 uppercase">Display Name</label>
+            <input id="aName" value="${esc(a.name || '')}" class="${base} mt-1 bg-white" placeholder="Full name"></div>
+          <div class="sm:col-span-2"><label class="text-[11px] font-bold text-slate-600 uppercase">Email (login)</label>
+            <input id="aEmail" type="email" value="${esc(a.email || '')}" class="${base} mt-1 bg-white" placeholder="name@example.com"></div>
+          <div><label class="text-[11px] font-bold text-slate-600 uppercase">Role</label>
+            <select id="aRole" class="${base} mt-1 bg-white" ${isSelf ? 'disabled' : ''}>
+              <option value="admin" ${a.role !== 'superadmin' ? 'selected' : ''}>Administrator</option>
+              <option value="superadmin" ${a.role === 'superadmin' ? 'selected' : ''}>Super Admin (full access)</option>
+            </select></div>
+          <div><label class="text-[11px] font-bold text-slate-600 uppercase">New Password <span class="text-slate-400 normal-case font-semibold">(empty = unchanged)</span></label>
+            <input id="aPass" type="text" class="${base} mt-1 bg-white" placeholder="••••••••"></div>
+        </div>
+        <div class="mt-4">
+          <label class="text-[11px] font-bold text-slate-600 uppercase">Permissions — which sections they can use</label>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 mt-2">
+            ${Object.keys(PERM_LABELS).filter(p => p !== 'dashboard').map(p => `
+              <label class="flex items-center gap-2 bg-[#F8F9FD] rounded-[8px] border border-slate-200 px-2.5 py-2 cursor-pointer text-[12px] font-semibold text-slate-700">
+                <input type="checkbox" data-perm-pick="${p}" ${checked(p)} class="w-4 h-4 accent-[#1A56FF] flex-shrink-0"> ${esc(PERM_LABELS[p])}
+              </label>`).join('')}
+          </div>
+          <p class="text-[10.5px] text-slate-400 mt-1">Super Admins get full access automatically. Dashboard is visible to everyone.</p>
+        </div>
+        <p id="aMsg" class="hidden mt-3 text-[12px] font-semibold rounded-lg px-3 py-2"></p>
+        <div class="flex justify-end gap-2 mt-5">
+          <button onclick="closeModal()" class="px-4 py-2.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 font-bold text-[13px] text-slate-700">Cancel</button>
+          <button id="aSave" class="px-5 py-2.5 rounded-[10px] bg-[#1A56FF] hover:bg-[#1445D6] text-white font-bold text-[13px]">Update</button>
+        </div>
+      </div>`);
+    $('aSave').addEventListener('click', async function () {
+      const box = $('aMsg');
+      box.classList.add('hidden');
+      try {
+        const perms = Array.from(document.querySelectorAll('[data-perm-pick]:checked')).map(el => el.dataset.permPick);
+        const payload = { name: $('aName').value.trim(), email: $('aEmail').value.trim(), password: $('aPass').value };
+        if (!isSelf) { payload.role = $('aRole').value; payload.permissions = perms; }
+        await api('/api/admin/admins/' + a.id, { method: 'PUT', body: JSON.stringify(payload) });
+        toast('Admin updated');
+        closeModal(); renderAdmins();
+      } catch (err) {
+        box.textContent = err.message;
+        box.className = 'mt-3 text-[12px] font-semibold rounded-lg px-3 py-2 bg-red-50 text-red-600 border border-red-100';
+        box.classList.remove('hidden');
+      }
+    });
+  }
+
+  /* ---------------- Notifications (Gmail / email pathano) ---------------- */
+  async function renderNotify() {
+    const view = $('view');
+    const base = 'w-full border border-slate-200 rounded-[8px] px-3 py-2 text-[13px] outline-none focus:border-[#1A56FF]';
+    view.innerHTML = `<div class="text-center py-20 text-slate-400"><i class="fa-solid fa-spinner fa-spin text-[22px]"></i><p class="text-[13px] mt-2">Loading...</p></div>`;
+    try {
+      const [sj, uj] = await Promise.all([api('/api/admin/settings'), api('/api/admin/users?limit=200')]);
+      const s = sj.data || {};
+      const users = (uj.data || []).filter(u => u.email && !String(u.email).includes('@mobile.studymart'));
+      const providerLabel = (s.emailProvider === 'sendgrid') ? 'SendGrid API' : (s.emailProvider === 'brevo') ? 'Brevo API (free 300/day)' : 'Gmail / SMTP';
+      view.innerHTML = `
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="bg-white rounded-[14px] border border-slate-100 shadow-sm p-5">
+            <h3 class="text-[15px] font-extrabold text-[#0F2043] mb-1"><i class="fa-solid fa-paper-plane text-[#16A34A] mr-1"></i>Send Notification</h3>
+            <p class="text-[11px] text-slate-500 mb-4">Status: ${s.emailEnabled ? '<b class="text-[#16A34A]">ON (' + esc(providerLabel) + ')</b>' : '<b class="text-red-600">OFF</b> — Settings > Email theke ON korun'}</p>
+            <div class="space-y-3">
+              <div><label class="text-[11px] font-bold text-slate-600 uppercase">To (email, comma diye onekgula)</label>
+                <textarea id="nTo" rows="2" class="${base} mt-1" placeholder="student@gmail.com, arekjon@gmail.com"></textarea></div>
+              <div class="grid grid-cols-2 gap-3">
+                <div><label class="text-[11px] font-bold text-slate-600 uppercase">Registered student</label>
+                  <select id="nUser" class="${base} mt-1"><option value="">-- select --</option>
+                  ${users.map(u => `<option value="${u.id}">${esc(u.name)} (${esc(u.email)})</option>`).join('')}</select></div>
+                <div class="flex items-end"><label class="flex items-center gap-2 text-[12px] font-bold text-slate-700 pb-2">
+                  <input id="nAll" type="checkbox" class="w-4 h-4 accent-[#1A56FF]"> Sob student ke</label></div>
+              </div>
+              <div><label class="text-[11px] font-bold text-slate-600 uppercase">Subject *</label>
+                <input id="nSub" class="${base} mt-1" placeholder="e.g. Eid offer: 20% discount!"></div>
+              <div><label class="text-[11px] font-bold text-slate-600 uppercase">Message * ({{name}} likhle student er nam bosbe)</label>
+                <textarea id="nMsg" rows="5" class="${base} mt-1" placeholder="Hi {{name}}, ..."></textarea></div>
+            </div>
+            <p id="nOut" class="hidden mt-3 text-[12px] font-semibold rounded-lg px-3 py-2"></p>
+            <button id="nSend" class="mt-4 px-5 py-2.5 rounded-[10px] bg-[#16A34A] hover:bg-[#15803D] text-white font-bold text-[13px]"><i class="fa-solid fa-paper-plane mr-1"></i> Send Email</button>
+          </div>
+          <div class="bg-white rounded-[14px] border border-slate-100 shadow-sm p-5 h-fit">
+            <h3 class="text-[15px] font-extrabold text-[#0F2043] mb-1"><i class="fa-solid fa-vial text-[#1A56FF] mr-1"></i>Test Email</h3>
+            <p class="text-[11px] text-slate-500 mb-3">Age nijer Gmail-e test pathiye dekho setup thik ache kina</p>
+            <div class="flex gap-2">
+              <input id="tMail" type="email" class="${base}" placeholder="tomar@gmail.com">
+              <button id="tSend" class="px-4 py-2 rounded-[8px] bg-[#0F2043] text-white font-bold text-[12px] flex-shrink-0">Test</button>
+            </div>
+            <p id="tOut" class="hidden mt-3 text-[12px] font-semibold rounded-lg px-3 py-2"></p>
+            <div class="mt-4 text-[11.5px] text-slate-500 bg-[#F8F9FD] rounded-[10px] p-3 leading-relaxed">
+              <b>Gmail setup:</b> Google Account > Security > 2-Step ON > App Passwords > "Mail" > 16-digit password copy kore Settings > Email > SMTP Pass-e boshan. Host: smtp.gmail.com, Port: 587.<br>
+              <b>SendGrid:</b> Provider SendGrid kore API Key boshan.
+            </div>
+          </div>
+        </div>`;
+      $('nSend').addEventListener('click', async function () {
+        const box = $('nOut');
+        box.classList.add('hidden');
+        try {
+          const j = await api('/api/admin/notify', { method: 'POST', body: JSON.stringify({
+            to: $('nTo').value, userId: $('nUser').value, sendToAll: $('nAll').checked,
+            subject: $('nSub').value, message: $('nMsg').value }) });
+          box.textContent = j.message;
+          box.className = 'mt-3 text-[12px] font-semibold rounded-lg px-3 py-2 bg-[#E6F4EA] text-[#16A34A] border border-[#C8E9D5]';
+          box.classList.remove('hidden'); toast(j.message);
+        } catch (err) {
+          box.textContent = err.message;
+          box.className = 'mt-3 text-[12px] font-semibold rounded-lg px-3 py-2 bg-red-50 text-red-600 border border-red-100';
+          box.classList.remove('hidden');
+        }
+      });
+      $('tSend').addEventListener('click', async function () {
+        const box = $('tOut');
+        box.classList.add('hidden');
+        try {
+          const j = await api('/api/admin/email-test', { method: 'POST', body: JSON.stringify({ to: $('tMail').value.trim() }) });
+          box.textContent = j.message;
+          box.className = 'mt-3 text-[12px] font-semibold rounded-lg px-3 py-2 bg-[#E6F4EA] text-[#16A34A] border border-[#C8E9D5]';
+          box.classList.remove('hidden');
+        } catch (err) {
+          box.textContent = err.message;
+          box.className = 'mt-3 text-[12px] font-semibold rounded-lg px-3 py-2 bg-red-50 text-red-600 border border-red-100';
+          box.classList.remove('hidden');
+        }
+      });
+    } catch (err) { view.innerHTML = errorBox(err.message); }
+  }
+
+  /* ---------------- Notice (order mail alert + template setup) ----------------
+   * - Admin email on new order (ON/OFF + addresses)
+   * - All order-related user mail templates are edited here */
+  async function renderNotice() {
+    const view = $('view');
+    const base = 'w-full border border-slate-200 rounded-[8px] px-3 py-2 text-[13px] outline-none focus:border-[#1A56FF]';
+    view.innerHTML = `<div class="text-center py-20 text-slate-400"><i class="fa-solid fa-spinner fa-spin text-[22px]"></i><p class="text-[13px] mt-2">Loading notice settings...</p></div>`;
+    try {
+      const [sj, tj] = await Promise.all([api('/api/admin/settings'), api('/api/admin/email-templates')]);
+      const s = sj.data || {};
+      const t = tj.data || {};
+      const orderKeys = ['new_order_admin', 'order_pending', 'order_confirmed', 'order_completed', 'order_cancelled', 'welcome']
+        .filter(k => t[k]);
+      const tplStyle = {
+        new_order_admin: ['fa-bell', '#0F2043'],
+        order_pending: ['fa-hourglass-half', '#F59E0B'],
+        order_confirmed: ['fa-circle-check', '#1A56FF'],
+        order_completed: ['fa-graduation-cap', '#16A34A'],
+        order_cancelled: ['fa-circle-xmark', '#DC2626'],
+        welcome: ['fa-hand-sparkles', '#7C3AED']
+      };
+      const kindTag = k => k === 'new_order_admin'
+        ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#0F2043] text-white">ADMIN MAIL</span>'
+        : '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E6F0FF] text-[#1A56FF]">USER MAIL</span>';
+      const providerLabel = (s.emailProvider === 'sendgrid') ? 'SendGrid API' : (s.emailProvider === 'brevo') ? 'Brevo API' : 'Gmail / SMTP';
+      const mailOn = !!s.emailEnabled;
+      const varList = ['name', 'phone', 'email', 'orderNo', 'total', 'items', 'payment', 'status', 'siteName'];
+      const toggle = (id, attr, on, accent) => `
+        <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+          <input ${id ? `id="${id}"` : ''} type="checkbox" ${attr} ${on ? 'checked' : ''} class="peer sr-only">
+          <span class="relative h-5 w-9 rounded-full bg-slate-200 transition-colors peer-checked:bg-[${accent}] after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:after:translate-x-4"></span>
+        </label>`;
+      view.innerHTML = `
+        <div class="rounded-[16px] p-5 mb-4 flex flex-wrap items-center gap-4 text-white shadow-sm" style="background:${mailOn ? 'linear-gradient(135deg,#16A34A 0%,#059669 100%)' : 'linear-gradient(135deg,#DC2626 0%,#B45309 100%)'}">
+          <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid ${mailOn ? 'fa-envelope-circle-check' : 'fa-triangle-exclamation'} text-[20px]"></i>
+          </div>
+          <div class="flex-1 min-w-[200px]">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-[15px] font-extrabold">Email Service ${mailOn ? 'is Active' : 'is Paused'}</span>
+              <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-white/20">${esc(providerLabel)}</span>
+            </div>
+            <p class="text-[12px] text-white/85 mt-0.5">${mailOn ? 'All order emails are being sent automatically.' : 'No emails are being sent right now. Enable it from Settings > Email.'}</p>
+          </div>
+          <a href="#/settings" class="px-4 py-2.5 rounded-[10px] bg-white font-bold text-[12px] text-[#0F2043] hover:bg-slate-100 flex-shrink-0"><i class="fa-solid fa-gear mr-1"></i>Email Settings</a>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-4 items-start">
+          <div class="space-y-4 lg:sticky lg:top-[78px]">
+            <div class="bg-white rounded-[16px] border border-slate-100 shadow-sm overflow-hidden">
+              <div class="px-5 pt-5 pb-3 flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-[12px] bg-[#FEF3C7] text-[#B45309] flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-bell"></i></div>
+                  <div>
+                    <h3 class="text-[14px] font-extrabold text-[#0F2043]">Admin Order Alerts</h3>
+                    <p class="text-[11px] text-slate-500">Instant email for every new order.</p>
+                  </div>
+                </div>
+                ${toggle('ntcAdminOn', '', !!s.adminNotifyEnabled, '#16A34A')}
+              </div>
+              <div class="px-5 pb-5">
+                <label class="text-[11px] font-bold text-slate-600 uppercase">Admin Emails <span class="text-slate-400 normal-case font-semibold">(comma separated)</span></label>
+                <input id="ntcAdminEmail" value="${esc(s.adminNotifyEmail || '')}" class="${base} mt-1" placeholder="owner@gmail.com, manager@gmail.com">
+                <p id="ntcAdminMsg" class="hidden mt-3 text-[12px] font-semibold rounded-lg px-3 py-2"></p>
+                <button id="ntcAdminSave" class="mt-3 w-full px-5 py-2.5 rounded-[10px] bg-[#16A34A] hover:bg-[#15803D] text-white font-bold text-[13px] transition">
+                  <i class="fa-solid fa-floppy-disk mr-1"></i> Save Alert Settings
+                </button>
+              </div>
+            </div>
+            <div class="bg-white rounded-[16px] border border-slate-100 shadow-sm p-5">
+              <div class="flex items-center gap-3 mb-1">
+                <div class="w-10 h-10 rounded-[12px] bg-[#E6F0FF] text-[#1A56FF] flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-vial"></i></div>
+                <div>
+                  <h3 class="text-[14px] font-extrabold text-[#0F2043]">Send a Test Email</h3>
+                  <p class="text-[11px] text-slate-500">Verify your email provider before going live.</p>
+                </div>
+              </div>
+              <div class="flex gap-2 mt-3">
+                <input id="ntcTestMail" type="email" class="${base} flex-1" placeholder="you@example.com">
+                <button id="ntcTestSend" class="px-5 py-2 rounded-[10px] bg-[#0F2043] hover:bg-[#16294F] text-white font-bold text-[12px] flex-shrink-0 transition"><i class="fa-solid fa-paper-plane mr-1"></i>Send</button>
+              </div>
+              <p id="ntcTestMsg" class="hidden mt-3 text-[12px] font-semibold rounded-lg px-3 py-2"></p>
+            </div>
+          </div>
+          <div class="space-y-4">
+            <div class="rounded-[16px] p-5 text-white shadow-sm" style="background:linear-gradient(135deg,#1A56FF 0%,#4F46E5 60%,#7C3AED 100%)">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-envelope-open-text"></i>
+                <h3 class="text-[14px] font-extrabold">Email Templates (${orderKeys.length})</h3>
+              </div>
+              <p class="text-[11.5px] text-white/85 mt-1 mb-3">Sent automatically on order events. Click any variable to copy it into your subject or body.</p>
+              <div class="flex flex-wrap gap-1.5">
+                ${varList.map(v => `<button type="button" data-var="{{${v}}}" title="Click to copy" class="px-2 py-1 rounded-[6px] bg-white/15 hover:bg-white/30 border border-white/20 font-mono text-[11px] font-bold transition">{{${v}}}</button>`).join('')}
+              </div>
+            </div>
+            ${orderKeys.map(k => {
+              const st = tplStyle[k] || ['fa-envelope', '#1A56FF'];
+              return `
+              <div class="bg-white rounded-[16px] border border-slate-100 shadow-sm overflow-hidden" style="border-left:4px solid ${st[1]}" data-tpl="${esc(k)}">
+                <div class="px-5 pt-4 pb-3 flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-[10px] flex items-center justify-center flex-shrink-0 text-white" style="background:${st[1]}"><i class="fa-solid ${st[0]} text-[14px]"></i></div>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-[13.5px] font-extrabold text-[#0F2043] truncate">${esc(t[k].name || k)}</div>
+                    <div class="mt-0.5">${kindTag(k)}</div>
+                  </div>
+                  ${toggle('', 'data-t-enabled', t[k].enabled !== false, '#16A34A')}
+                </div>
+                <div class="px-5 pb-5 space-y-3">
+                  <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase">Subject</label>
+                    <input data-t-subject value="${esc(t[k].subject || '')}" class="${base} mt-1" placeholder="Email subject...">
+                  </div>
+                  <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase">Body <span class="text-slate-400 normal-case font-semibold">(each line = new paragraph)</span></label>
+                    <textarea data-t-body rows="5" class="${base} mt-1" placeholder="Email body...">${esc(t[k].body || '')}</textarea>
+                  </div>
+                </div>
+              </div>`;
+            }).join('')}
+            <div class="bg-white rounded-[16px] border border-slate-100 shadow-sm p-4 flex flex-wrap items-center gap-2 lg:sticky lg:bottom-4">
+              <button id="ntcTplSave" class="flex-1 min-w-[160px] px-5 py-2.5 rounded-[10px] bg-[#1A56FF] hover:bg-[#1445D6] text-white font-bold text-[13px] transition"><i class="fa-solid fa-floppy-disk mr-1"></i> Save Templates</button>
+              <button id="ntcTplReset" class="px-4 py-2.5 rounded-[10px] bg-slate-100 hover:bg-slate-200 font-bold text-[13px] text-slate-700 transition">Reset to Default</button>
+            </div>
+            <p id="ntcTplMsg" class="hidden text-[12px] font-semibold rounded-lg px-3 py-2"></p>
+          </div>
+        </div>`;
+      view.querySelectorAll('[data-var]').forEach(ch => ch.addEventListener('click', () => {
+        const v = ch.dataset.var;
+        const done = () => toast('Copied ' + v);
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(done).catch(done);
+        else done();
+      }));
+      $('ntcAdminSave').addEventListener('click', async function () {
+        const box = $('ntcAdminMsg');
+        box.classList.add('hidden');
+        try {
+          await api('/api/admin/settings', { method: 'PUT', body: JSON.stringify({
+            adminNotifyEnabled: $('ntcAdminOn').checked,
+            adminNotifyEmail: $('ntcAdminEmail').value.trim()
+          }) });
+          box.textContent = 'Alert settings saved. New orders will notify these emails.';
+          box.className = 'mt-3 text-[12px] font-semibold rounded-lg px-3 py-2 bg-[#E6F4EA] text-[#16A34A] border border-[#C8E9D5]';
+          box.classList.remove('hidden'); toast('Alert settings saved');
+        } catch (err) {
+          box.textContent = err.message;
+          box.className = 'mt-3 text-[12px] font-semibold rounded-lg px-3 py-2 bg-red-50 text-red-600 border border-red-100';
+          box.classList.remove('hidden');
+        }
+      });
+      $('ntcTestSend').addEventListener('click', async function () {
+        const box = $('ntcTestMsg');
+        box.classList.add('hidden');
+        try {
+          const j = await api('/api/admin/email-test', { method: 'POST', body: JSON.stringify({ to: $('ntcTestMail').value.trim() }) });
+          box.textContent = j.message;
+          box.className = 'mt-3 text-[12px] font-semibold rounded-lg px-3 py-2 bg-[#E6F4EA] text-[#16A34A] border border-[#C8E9D5]';
+          box.classList.remove('hidden');
+        } catch (err) {
+          box.textContent = err.message;
+          box.className = 'mt-3 text-[12px] font-semibold rounded-lg px-3 py-2 bg-red-50 text-red-600 border border-red-100';
+          box.classList.remove('hidden');
+        }
+      });
+      $('ntcTplSave').addEventListener('click', async function () {
+        const box = $('ntcTplMsg');
+        box.classList.add('hidden');
+        try {
+          const payload = {};
+          view.querySelectorAll('[data-tpl]').forEach(card => {
+            const k = card.dataset.tpl;
+            payload[k] = {
+              subject: card.querySelector('[data-t-subject]').value,
+              body: card.querySelector('[data-t-body]').value,
+              enabled: card.querySelector('[data-t-enabled]').checked
+            };
+          });
+          await api('/api/admin/email-templates', { method: 'PUT', body: JSON.stringify(payload) });
+          box.textContent = 'Templates saved. Future emails will use this content.';
+          box.className = 'text-[12px] font-semibold rounded-lg px-3 py-2 bg-[#E6F4EA] text-[#16A34A] border border-[#C8E9D5]';
+          box.classList.remove('hidden'); toast('Templates saved');
+        } catch (err) {
+          box.textContent = err.message;
+          box.className = 'text-[12px] font-semibold rounded-lg px-3 py-2 bg-red-50 text-red-600 border border-red-100';
+          box.classList.remove('hidden');
+        }
+      });
+      $('ntcTplReset').addEventListener('click', function () {
+        confirmDialog('Reset templates?', 'All mail templates will be restored to their default content.', async function () {
+          await api('/api/admin/email-templates/reset', { method: 'POST' });
+          toast('Templates reset'); renderNotice();
+        }, 'Yes, Reset');
+      });
+    } catch (err) { view.innerHTML = errorBox(err.message); }
+  }
+
   /* ---------------- Settings ---------------- */
   async function renderSettings() {
     const view = $('view');
@@ -2220,6 +3461,24 @@
                 </div>
                 <label class="flex items-center gap-2 text-[11px] font-semibold text-slate-600"><input id="sNoticeDismissible" type="checkbox" ${s.noticeDismissible !== false ? 'checked' : ''} class="w-4 h-4 accent-[#1A56FF]"> Dismissible (close button dekhabe)</label>
                 <p class="text-[10px] text-slate-400">Empty text rakhle bar auto hide hobe. Sundor gradient default deya ache.</p>
+              </div>
+            </div>
+            <!-- Maintenance Mode -->
+            <div class="mb-4 bg-gradient-to-r from-[#FFF7ED] to-[#FEF2F2] rounded-[12px] border border-[#FED7AA] p-4">
+              <div class="flex items-center justify-between mb-2">
+                <label class="text-[11px] font-bold text-slate-600 uppercase"><i class="fa-solid fa-screwdriver-wrench text-[#EA580C] mr-1"></i>Maintenance Mode</label>
+                <label class="flex items-center gap-2 text-[11px] font-bold text-slate-700">
+                  <input id="sMaintEnabled" type="checkbox" ${s.maintenanceEnabled ? 'checked' : ''} class="w-4 h-4 accent-[#EA580C]"> Enable
+                </label>
+              </div>
+              <div class="grid grid-cols-1 gap-3">
+                <div><label class="text-[10px] font-bold text-slate-500 uppercase">Title</label><input id="sMaintTitle" value="${esc(s.maintenanceTitle || '')}" class="${base} mt-1" placeholder="Maintenance cholche 🔧"></div>
+                <div><label class="text-[10px] font-bold text-slate-500 uppercase">Message</label><textarea id="sMaintMsg" rows="2" class="${base} mt-1" placeholder="Amra site update korchi...">${esc(s.maintenanceMessage || '')}</textarea></div>
+                <div><label class="text-[10px] font-bold text-slate-500 uppercase">Back by / ETA (optional)</label><input id="sMaintEta" value="${esc(s.maintenanceEta || '')}" class="${base} mt-1" placeholder="e.g. Tonight 10 PM"></div>
+              </div>
+              <div class="flex items-center gap-2 mt-3">
+                <a href="maintenance.html" target="_blank" class="px-3 py-2 rounded-[8px] bg-white border border-slate-200 text-[11.5px] font-bold text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-eye mr-1"></i> Preview Page</a>
+                <p class="text-[10px] text-slate-400">ON thakle sob public page maintenance dekhabe. Admin panel khola thakbe.</p>
               </div>
             </div>
             <!-- Logo Upload -->
@@ -2310,6 +3569,51 @@
               <p id="botMsg" class="hidden mt-3 text-[12px] font-semibold rounded-lg px-3 py-2"></p>
               <button id="saveBot" class="mt-3 px-5 py-2.5 rounded-[10px] bg-[#229ED9] hover:bg-[#1B8AC0] text-white font-bold text-[13px]">
                 <i class="fa-solid fa-floppy-disk mr-1"></i> Save Bot Token
+              </button>
+            </div>
+
+            <div class="bg-white rounded-[14px] border border-slate-100 shadow-sm p-5">
+              <h3 class="text-[15px] font-extrabold text-[#0F2043] mb-1"><i class="fa-solid fa-envelope text-[#16A34A] mr-1"></i>Email Notifications (Brevo / Gmail)</h3>
+              <p class="text-[11px] text-slate-500 mb-4">Order / welcome / custom mail ekhan theke jabe. <b>Brevo FREE</b> (300/day, card lage na) recommended — Test Notifications menu theke kora jabe.</p>
+              <label class="flex items-center gap-2 text-[12px] font-bold text-slate-700 mb-3">
+                <input id="sEmailEnabled" type="checkbox" ${s.emailEnabled ? 'checked' : ''} class="w-4 h-4 accent-[#16A34A]"> Enable Email Notifications
+              </label>
+              <div class="grid grid-cols-2 gap-3 mb-3">
+                <div><label class="text-[11px] font-bold text-slate-600 uppercase">Provider</label>
+                  <select id="sEmailProvider" class="${base} mt-1">
+                    <option value="smtp" ${(!s.emailProvider || s.emailProvider === 'smtp') ? 'selected' : ''}>Gmail / SMTP</option>
+                    <option value="brevo" ${s.emailProvider === 'brevo' ? 'selected' : ''}>Brevo API (FREE 300/day)</option>
+                    <option value="sendgrid" ${s.emailProvider === 'sendgrid' ? 'selected' : ''}>SendGrid API</option>
+                  </select></div>
+                <div><label class="text-[11px] font-bold text-slate-600 uppercase">Sender Email *</label>
+                  <input id="sSenderEmail" value="${esc(s.senderEmail || '')}" class="${base} mt-1" placeholder="studymart@gmail.com"></div>
+              </div>
+              <div class="mb-3"><label class="text-[11px] font-bold text-slate-600 uppercase">Sender Name</label>
+                <input id="sSenderName" value="${esc(s.senderName || '')}" class="${base} mt-1" placeholder="StudyMart"></div>
+              <div id="smtpBox" class="grid grid-cols-2 gap-3">
+                <div class="col-span-2 text-[11px] font-bold text-slate-500">GMAIL / SMTP SETTINGS</div>
+                <div><label class="text-[11px] font-bold text-slate-600 uppercase">SMTP Host</label>
+                  <input id="sSmtpHost" value="${esc(s.smtpHost || 'smtp.gmail.com')}" class="${base} mt-1"></div>
+                <div><label class="text-[11px] font-bold text-slate-600 uppercase">Port</label>
+                  <input id="sSmtpPort" value="${esc(s.smtpPort || '587')}" class="${base} mt-1"></div>
+                <div><label class="text-[11px] font-bold text-slate-600 uppercase">SMTP User (gmail)</label>
+                  <input id="sSmtpUser" value="${esc(s.smtpUser || '')}" class="${base} mt-1" placeholder="studymart@gmail.com"></div>
+                <div><label class="text-[11px] font-bold text-slate-600 uppercase">App Password</label>
+                  <input id="sSmtpPass" type="password" value="" class="${base} mt-1" placeholder="${s.smtpUser ? 'Saved (change korte chaile likhun)' : 'xxxx xxxx xxxx xxxx'}"></div>
+                <label class="col-span-2 flex items-center gap-2 text-[12px] font-semibold text-slate-600"><input id="sSmtpSecure" type="checkbox" ${s.smtpSecure ? 'checked' : ''} class="w-4 h-4 accent-[#16A34A]"> SSL (port 465 hole tick din)</label>
+              </div>
+              <div id="sgBox" class="mt-3">
+                <label class="text-[11px] font-bold text-slate-600 uppercase">SendGrid API Key</label>
+                <input id="sSgKey" type="password" value="" class="${base} mt-1" placeholder="SG.xxx...">
+              </div>
+              <div id="brevoBox" class="mt-3">
+                <label class="text-[11px] font-bold text-slate-600 uppercase">Brevo API Key (xkeysib-...)</label>
+                <input id="sBrevoKey" type="password" value="" class="${base} mt-1" placeholder="xkeysib-xxx...">
+                <p class="text-[10.5px] text-slate-500 mt-1">app.brevo.com → profile menu → SMTP &amp; API → API Keys → Generate. FREE 300 mail/day. Sender Email-ta Brevo-te (Senders &amp; IP) verify kora thakte hobe.</p>
+              </div>
+              <p id="emailMsg" class="hidden mt-3 text-[12px] font-semibold rounded-lg px-3 py-2"></p>
+              <button id="saveEmail" class="mt-3 px-5 py-2.5 rounded-[10px] bg-[#16A34A] hover:bg-[#15803D] text-white font-bold text-[13px]">
+                <i class="fa-solid fa-floppy-disk mr-1"></i> Save Email Settings
               </button>
             </div>
 
@@ -2414,7 +3718,11 @@
             noticeLink: $('sNoticeLink') ? $('sNoticeLink').value.trim() : '',
             noticeBg: bgVal,
             noticeColor: colorVal,
-            noticeDismissible: $('sNoticeDismissible') ? $('sNoticeDismissible').checked : true
+            noticeDismissible: $('sNoticeDismissible') ? $('sNoticeDismissible').checked : true,
+            maintenanceEnabled: $('sMaintEnabled') ? $('sMaintEnabled').checked : false,
+            maintenanceTitle: $('sMaintTitle') ? $('sMaintTitle').value.trim() : '',
+            maintenanceMessage: $('sMaintMsg') ? $('sMaintMsg').value.trim() : '',
+            maintenanceEta: $('sMaintEta') ? $('sMaintEta').value.trim() : ''
           })
         });
         toast('Settings saved successfully');
@@ -2456,6 +3764,7 @@
       const enabled = $('sPipraEnabled').checked;
       const key = $('sPipraKey').value.trim();
       const base = $('sPipraBase').value.trim();
+      const keyIsMasked = (key === '••••••••' || key === '********');
       if (enabled && !key) {
         box.textContent = 'Enable korle PipaPay API Key dite hobe';
         box.className = 'mt-3 text-[12px] font-semibold rounded-lg px-3 py-2 bg-red-50 text-red-600 border border-red-100';
@@ -2463,9 +3772,11 @@
         return;
       }
       try {
+        const payload = { piprapayEnabled: enabled, piprapayBaseUrl: base };
+        if (!keyIsMasked) payload.piprapayApiKey = key;
         await api('/api/admin/settings', {
           method: 'PUT',
-          body: JSON.stringify({ piprapayEnabled: enabled, piprapayApiKey: key, piprapayBaseUrl: base })
+          body: JSON.stringify(payload)
         });
         box.textContent = 'Payment settings saved successfully';
         box.className = 'mt-3 text-[12px] font-semibold rounded-lg px-3 py-2 bg-[#E6F4EA] text-[#16A34A] border border-[#C8E9D5]';
@@ -2483,7 +3794,7 @@
       const box = $('botMsg');
       box.classList.add('hidden');
       const token = $('sBotToken').value.trim();
-      if (token && !/^\d+:[\w-]{20,}$/.test(token)) {
+      if (token && token !== '••••••••' && token !== '********' && !/^\d+:[\w-]{20,}$/.test(token)) {
         box.textContent = 'Token format thik nai — @BotFather theke copy kore full token daw';
         box.className = 'mt-3 text-[12px] font-semibold rounded-lg px-3 py-2 bg-red-50 text-red-600 border border-red-100';
         box.classList.remove('hidden');
@@ -2492,12 +3803,60 @@
       try {
         await api('/api/admin/settings', {
           method: 'PUT',
-          body: JSON.stringify({ botToken: token })
+          body: JSON.stringify({ botToken: (token === '••••••••' || token === '********') ? undefined : token })
         });
         box.textContent = 'Bot token saved — ekhon Order Approve-এ auto invite banbe';
         box.className = 'mt-3 text-[12px] font-semibold rounded-lg px-3 py-2 bg-[#E6F4EA] text-[#16A34A] border border-[#C8E9D5]';
         box.classList.remove('hidden');
         toast('Bot token saved');
+      } catch (err) {
+        box.textContent = err.message;
+        box.className = 'mt-3 text-[12px] font-semibold rounded-lg px-3 py-2 bg-red-50 text-red-600 border border-red-100';
+        box.classList.remove('hidden');
+      }
+    });
+
+    // Email settings: provider toggle + save
+    const provSel = $('sEmailProvider');
+    const smtpBox = $('smtpBox');
+    const sgBox = $('sgBox');
+    const brevoBox = $('brevoBox');
+    function paintEmailBoxes() {
+      const v = provSel && provSel.value;
+      if (smtpBox) smtpBox.style.display = (v === 'smtp' || !v) ? '' : 'none';
+      if (sgBox) sgBox.style.display = v === 'sendgrid' ? '' : 'none';
+      if (brevoBox) brevoBox.style.display = v === 'brevo' ? '' : 'none';
+    }
+    if (provSel) { provSel.addEventListener('change', paintEmailBoxes); paintEmailBoxes(); }
+    else paintEmailBoxes();
+    const saveEmailBtn = $('saveEmail');
+    if (saveEmailBtn) saveEmailBtn.addEventListener('click', async function () {
+      const box = $('emailMsg');
+      box.classList.add('hidden');
+      try {
+        const payload = {
+          emailEnabled: $('sEmailEnabled').checked,
+          emailProvider: $('sEmailProvider').value,
+          senderName: $('sSenderName').value.trim(),
+          senderEmail: $('sSenderEmail').value.trim(),
+          smtpHost: $('sSmtpHost').value.trim(),
+          smtpPort: $('sSmtpPort').value.trim(),
+          smtpSecure: $('sSmtpSecure').checked,
+          smtpUser: $('sSmtpUser').value.trim()
+        };
+        const pass = $('sSmtpPass').value;
+        if (pass && pass.trim() !== '') payload.smtpPass = pass;
+        const sg = $('sSgKey').value;
+        if (sg && sg.trim() !== '') payload.sendgridApiKey = sg.trim();
+        const bv = $('sBrevoKey').value;
+        if (bv && bv.trim() !== '') payload.brevoApiKey = bv.trim();
+        if (payload.emailEnabled && !payload.senderEmail) throw new Error('Sender Email din (Brevo-te verify kora address / Gmail address)');
+        await api('/api/admin/settings', { method: 'PUT', body: JSON.stringify(payload) });
+        box.textContent = 'Email settings saved — Notifications menu theke test mail pathan';
+        box.className = 'mt-3 text-[12px] font-semibold rounded-lg px-3 py-2 bg-[#E6F4EA] text-[#16A34A] border border-[#C8E9D5]';
+        box.classList.remove('hidden');
+        $('sSmtpPass').value = ''; $('sSgKey').value = ''; $('sBrevoKey').value = '';
+        toast('Email settings saved');
       } catch (err) {
         box.textContent = err.message;
         box.className = 'mt-3 text-[12px] font-semibold rounded-lg px-3 py-2 bg-red-50 text-red-600 border border-red-100';
@@ -2639,6 +3998,7 @@
             {key:'popular', label:'Popular Courses', icon:'fa-fire', hasTitle:true, hasRows:true},
             {key:'latest', label:'Latest Courses', icon:'fa-clock', hasTitle:true, hasRows:true},
             {key:'ebooks', label:'Ebooks', icon:'fa-book-open', hasTitle:true, hasRows:true},
+            {key:'popularEbooks', label:'Popular Ebooks (downloads)', icon:'fa-fire', hasTitle:true, hasRows:true},
             {key:'featured', label:'Featured Courses (dynamic)', icon:'fa-star', hasTitle:true, hasSubtitle:true},
             {key:'howToBuy', label:'How To Buy (text + video)', icon:'fa-circle-play', hasTitle:true, hasSubtitle:true},
             {key:'browseCategory', label:'Browse by Category', icon:'fa-table-cells', hasTitle:true},
@@ -2690,7 +4050,7 @@
                 </div>`;
             }
             if (s.hasRows) {
-              const curLimit = cfg.limit != null ? cfg.limit : (s.key === 'ebooks' ? 4 : 8);
+              const curLimit = cfg.limit != null ? cfg.limit : ((s.key === 'ebooks' || s.key === 'popularEbooks') ? 4 : 8);
               const curRows = cfg.rows != null ? cfg.rows : Math.max(1, Math.ceil(curLimit / 4));
               extra = `
                 <div class="mt-3 pt-3 border-t border-slate-200 space-y-2">
@@ -2813,7 +4173,7 @@
         const k = el.dataset.secLimit;
         sectionsPayload[k] = sectionsPayload[k] || {};
         const maxL = (k === 'categories') ? 10 : 20;
-        const defL = (k === 'ebooks') ? 4 : 8;
+        const defL = (k === 'ebooks' || k === 'popularEbooks') ? 4 : 8;
         sectionsPayload[k].limit = Math.max(1, Math.min(maxL, parseInt(el.value,10)||defL));
       });
       view.querySelectorAll('[data-sec-rows]').forEach(el=>{
@@ -2915,6 +4275,7 @@
     await refreshMeta();
     if (!location.hash) location.hash = '#/dashboard';
     route();
+    refreshOrdersBadge();
   }
 
   async function init() {

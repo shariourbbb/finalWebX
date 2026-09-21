@@ -16,11 +16,22 @@
 
   function applyTheme() {
     var t = getTheme();
-    document.documentElement.classList.toggle('sm-dark', t === 'dark');
+    try {
+      document.documentElement.classList.toggle('sm-dark', t === 'dark');
+      document.documentElement.style.colorScheme = t === 'dark' ? 'dark' : 'light';
+    } catch (e) {}
     document.querySelectorAll('[data-sm-theme-icon]').forEach(function (el) {
       el.className = t === 'dark' ? 'fa-solid fa-moon text-[15px] text-[#7AA2FF]' : 'fa-solid fa-sun text-[15px] text-[#F59E0B]';
     });
   }
+
+  // Apply saved theme immediately (no light-flash) — runs before DOMContentLoaded too
+  try { applyTheme(); } catch (e) {}
+  try {
+    window.addEventListener('storage', function (e) {
+      if (e && e.key === 'sm_theme') applyTheme();
+    });
+  } catch (e) {}
 
   function applyLang() {
     var l = getLang();
@@ -438,20 +449,20 @@
       document.addEventListener('keydown', function (e) { if (e.key === 'Escape') drawer.classList.add('hidden'); });
     }
 
-    // sync desktop logo with settings (app.js handles mobile #siteLogoImg; we mirror to desktop)
+    // sync desktop logo with settings (bootstrap only — NO extra fetch,
+    // nahole purono SVG logo age dekhiye pore replace hoye flash korto).
+    // app.js hydrateSettings thekeo window.__smSetDeskLogo() call kora hoy.
+    function setDeskLogo(url) {
+      if (!url || !String(url).trim()) return;
+      document.querySelectorAll('[data-sm-desk-logo]').forEach(function (img) { try{ img.src = url; }catch(e){} img.classList.remove('hidden'); });
+      document.querySelectorAll('[data-sm-desk-logo-fb]').forEach(function (fb) { fb.classList.add('hidden'); });
+    }
+    try { window.__smSetDeskLogo = setDeskLogo; } catch (e) {}
     try {
       var b = window.__SM_BOOTSTRAP__ && window.__SM_BOOTSTRAP__.settings;
       var logo = b && b.logoUrl;
-      if (!logo) {
-        fetch('/api/public/settings').then(function (r) { return r.json(); }).then(function (j) {
-          if (j && j.data && j.data.logoUrl) setDeskLogo(j.data.logoUrl);
-        }).catch(function () {});
-      } else setDeskLogo(logo);
+      if (logo && String(logo).trim()) setDeskLogo(logo);
     } catch (e) {}
-    function setDeskLogo(url) {
-      document.querySelectorAll('[data-sm-desk-logo]').forEach(function (img) { img.src = url; img.classList.remove('hidden'); });
-      document.querySelectorAll('[data-sm-desk-logo-fb]').forEach(function (fb) { fb.classList.add('hidden'); });
-    }
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accept Admin Invitation</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>*{font-family:'Inter',sans-serif}</style>
+</head>
+<body class="min-h-screen flex items-center justify-center px-4 py-10" style="background:linear-gradient(135deg,#EEF2FF 0%,#F3F0FF 50%,#E0E7FF 100%)">
+
+<div class="bg-white rounded-[20px] shadow-2xl border border-slate-100 w-full max-w-[440px] overflow-hidden">
+  <div class="text-center text-white px-6 py-7" style="background:linear-gradient(90deg,#1A56FF,#7C3AED)">
+    <div class="text-[30px] leading-none">🔐</div>
+    <div class="text-[19px] font-extrabold mt-2">Admin Invitation</div>
+    <div id="brandLine" class="text-[12px] text-white/80 mt-0.5">You are invited to join as an Administrator</div>
+  </div>
+
+  <div class="p-7">
+    <!-- loading -->
+    <div id="stLoading" class="text-center py-8 text-slate-400">
+      <i class="fa-solid fa-spinner fa-spin text-[24px]"></i>
+      <p class="text-[13px] mt-2">Validating invitation...</p>
+    </div>
+
+    <!-- invalid / expired -->
+    <div id="stError" class="hidden text-center py-4">
+      <div class="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto">
+        <i class="fa-solid fa-triangle-exclamation text-red-500 text-[24px]"></i>
+      </div>
+      <h3 class="text-[16px] font-extrabold text-[#0F2043] mt-3">Invitation Not Valid</h3>
+      <p id="errMsg" class="text-[13px] text-slate-500 mt-1"></p>
+      <p class="text-[12px] text-slate-400 mt-2">Please ask your administrator for a new invitation link.</p>
+    </div>
+
+    <!-- accept form -->
+    <form id="stForm" class="hidden space-y-3">
+      <div class="bg-[#F8F9FD] border border-slate-200 rounded-[10px] px-3.5 py-3 text-[13px]">
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-slate-500"><i class="fa-solid fa-envelope mr-1"></i><span id="invEmail">-</span></span>
+          <span id="invRole" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E6F0FF] text-[#1A56FF]">Admin</span>
+        </div>
+        <div id="invExpiry" class="text-[11px] font-bold text-[#B45309] mt-1"><i class="fa-regular fa-clock mr-1"></i></div>
+      </div>
+      <div>
+        <label class="text-[11px] font-bold text-slate-600 uppercase">Username *</label>
+        <input id="fUser" required placeholder="Choose a username" class="mt-1 w-full border border-slate-200 rounded-[10px] px-3 py-2.5 text-[14px] outline-none focus:border-[#1A56FF]">
+      </div>
+      <div>
+        <label class="text-[11px] font-bold text-slate-600 uppercase">Display Name</label>
+        <input id="fName" placeholder="Your full name" class="mt-1 w-full border border-slate-200 rounded-[10px] px-3 py-2.5 text-[14px] outline-none focus:border-[#1A56FF]">
+      </div>
+      <div>
+        <label class="text-[11px] font-bold text-slate-600 uppercase">Password * (min 6 characters)</label>
+        <input id="fPass" type="password" required minlength="6" placeholder="••••••••" class="mt-1 w-full border border-slate-200 rounded-[10px] px-3 py-2.5 text-[14px] outline-none focus:border-[#1A56FF]">
+      </div>
+      <p id="formErr" class="hidden text-[12px] font-semibold text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2"></p>
+      <button type="submit" id="fSubmit" class="w-full bg-[#1A56FF] hover:bg-[#1445D6] text-white font-bold text-[14px] py-3 rounded-[10px] transition">
+        <i class="fa-solid fa-check mr-1"></i> Accept &amp; Create Account
+      </button>
+    </form>
+
+    <!-- success -->
+    <div id="stDone" class="hidden text-center py-4">
+      <div class="w-14 h-14 rounded-full bg-[#E6F4EA] flex items-center justify-center mx-auto">
+        <i class="fa-solid fa-check text-[#16A34A] text-[24px]"></i>
+      </div>
+      <h3 class="text-[16px] font-extrabold text-[#0F2043] mt-3">Welcome Aboard!</h3>
+      <p class="text-[13px] text-slate-500 mt-1">Your admin account is ready. Log in to open the admin panel.</p>
+      <a href="admin.html" class="mt-5 inline-block w-full bg-[#0F2043] hover:bg-[#16294F] text-white font-bold text-[14px] py-3 rounded-[10px] transition">
+        <i class="fa-solid fa-right-to-bracket mr-1"></i> Go to Admin Login
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const token = new URLSearchParams(location.search).get('token') || '';
+
+  function showError(msg) {
+    $('stLoading').classList.add('hidden');
+    $('stForm').classList.add('hidden');
+    $('errMsg').textContent = msg;
+    $('stError').classList.remove('hidden');
+  }
+
+  async function boot() {
+    if (!token) { showError('This invitation link is incomplete (missing token).'); return; }
+    let j;
+    try {
+      const r = await fetch('/api/public/admin-invites/' + encodeURIComponent(token));
+      j = await r.json();
+    } catch (e) { showError('Could not reach the server. Please try again.'); return; }
+    if (!j || !j.success) { showError((j && j.message) || 'This invitation link is not valid.'); return; }
+    const d = j.data || {};
+    $('invEmail').textContent = d.email || '-';
+    $('invRole').textContent = d.role === 'superadmin' ? 'SUPER ADMIN' : 'Admin';
+    if (d.expiresAt) {
+      const ms = Number(d.expiresAt) - Date.now();
+      const h = Math.floor(ms / 3600000);
+      const m = Math.max(1, Math.round((ms % 3600000) / 60000));
+      $('invExpiry').textContent = h >= 1 ? ('Expires in ' + h + 'h ' + m + 'm') : ('Expires in ' + m + 'm');
+    }
+    const site = d.siteName || 'StudyMart';
+    document.title = 'Accept Admin Invitation - ' + site;
+    $('brandLine').textContent = 'You are invited to join ' + site + ' as an Administrator';
+    $('stLoading').classList.add('hidden');
+    $('stForm').classList.remove('hidden');
+  }
+
+  $('stForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const err = $('formErr');
+    err.classList.add('hidden');
+    const btn = $('fSubmit');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Creating account...';
+    try {
+      const r = await fetch('/api/public/admin-invites/' + encodeURIComponent(token) + '/accept', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: $('fUser').value.trim(), name: $('fName').value.trim(), password: $('fPass').value })
+      });
+      const j = await r.json();
+      if (!r.ok || !j || !j.success) throw new Error((j && j.message) || 'Could not accept invitation');
+      $('stForm').classList.add('hidden');
+      $('stDone').classList.remove('hidden');
+    } catch (ex) {
+      err.textContent = ex.message;
+      err.classList.remove('hidden');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-check mr-1"></i> Accept &amp; Create Account';
+    }
+  });
+
+  boot();
+})();
+</script>
+</body>
+</html>

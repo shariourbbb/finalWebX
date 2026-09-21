@@ -117,6 +117,56 @@ function requireAdmin(req, res, next) {
   next();
 }
 
+/* ---------- Admin permissions (Admin Manage > Permission) ----------
+ * ADMIN_PERMISSIONS: admin panel-er protita section-er key.
+ * - role 'superadmin' -> sob permission (full access, default admin)
+ * - purono 'admin' (permissions field nai) -> backward compat: full access
+ * - notun admin -> sudhu selected permissions[]-ei access pabe */
+const ADMIN_PERMISSIONS = [
+  'dashboard', 'homepage',
+  'courses', 'batches', 'ebookBatches', 'categories', 'platforms', 'ebooks',
+  'coupons', 'orders', 'users',
+  'admins', 'notify', 'settings'
+];
+
+function normalizePermissions(v) {
+  const out = [];
+  const push = (x) => {
+    const s = String(x == null ? '' : x).trim();
+    if (!s || out.includes(s)) return;
+    if (ADMIN_PERMISSIONS.includes(s)) out.push(s);
+  };
+  if (Array.isArray(v)) v.forEach(push);
+  else if (v !== undefined && v !== null && String(v).trim() !== '') String(v).split(/[\n,]+/).forEach(push);
+  return out;
+}
+
+function hasPermission(admin, perm) {
+  if (!admin) return false;
+  if (admin.role === 'superadmin') return true;
+  // purono admin-der permissions array nai -> full access (backward compat)
+  if (!Array.isArray(admin.permissions)) return true;
+  return admin.permissions.includes(perm);
+}
+
+// requireAdmin-er por use koro: fresh DB record theke permission check kore.
+// Session purono holeo permission change sathe sathe karjokor hobe.
+function requirePermission(perm) {
+  return (req, res, next) => {
+    if (!req.session) {
+      return res.status(401).json({ success: false, message: 'Unauthorized. Admin login required.' });
+    }
+    const admin = store.find('admins', req.session.id);
+    if (!admin) {
+      return res.status(401).json({ success: false, message: 'Admin account not found.' });
+    }
+    if (!hasPermission(admin, perm)) {
+      return res.status(403).json({ success: false, message: 'Access denied: "' + perm + '" permission nai. Super Admin-er sathe contact koro.' });
+    }
+    next();
+  };
+}
+
 function requireUser(req, res, next) {
   const session = getSession(req);
   if (!session || (session.role !== 'user' && session.role !== 'admin')) {
@@ -138,7 +188,14 @@ function optionalUser(req, res, next) {
 }
 
 function publicAdmin(admin) {
-  return { id: admin.id, username: admin.username, name: admin.name, role: admin.role };
+  return {
+    id: admin.id,
+    username: admin.username,
+    name: admin.name,
+    email: admin.email || '',
+    role: admin.role || 'admin',
+    permissions: Array.isArray(admin.permissions) ? admin.permissions : null // null = legacy full access
+  };
 }
 
 function publicUser(user) {
@@ -146,8 +203,12 @@ function publicUser(user) {
   return rest;
 }
 
-function loginAdmin(username, password) {
-  const admin = store.findBy('admins', 'username', username || '');
+function loginAdmin(identifier, password) {
+  const ident = String(identifier || '').trim();
+  if (!ident) return null;
+  // username diye (ager moto) + email diyeo login kora jabe (invite system-er jonno)
+  const admin = store.findBy('admins', 'username', ident)
+    || store.all('admins').find(a => String(a.email || '').toLowerCase() === ident.toLowerCase());
   if (!admin || !verifyPassword(password, admin.password)) return null;
   // Upgrade plain-text password to hashed on first successful login
   if (!String(admin.password).includes(':')) {
@@ -171,6 +232,7 @@ module.exports = {
   hashPassword, verifyPassword,
   createSession, destroySession, getSession, getToken,
   requireAdmin, requireUser, optionalUser,
+  requirePermission, hasPermission, normalizePermissions, ADMIN_PERMISSIONS,
   publicAdmin, publicUser,
   loginAdmin, loginUser,
   sessions

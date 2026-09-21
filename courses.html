@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Courses - StudyMart</title>
+<script>try{var __sm_t=localStorage.getItem('sm_theme')||'light';if(__sm_t==='dark'){document.documentElement.classList.add('sm-dark');document.documentElement.style.colorScheme='dark';}}catch(e){}</script>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -133,12 +134,6 @@
 
 </main>
 
-<!-- Floating Cart -->
-<a href="cart.html" class="fixed bottom-[86px] lg:bottom-6 right-4 sm:right-6 w-14 h-14 bg-[#1A56FF] rounded-full shadow-[0_8px_24px_rgba(26,86,255,0.4)] flex items-center justify-center text-white z-50 hover:bg-[#1446D1] transition">
-  <i class="fa-solid fa-cart-shopping text-[20px]"></i>
-  <span data-sm-cart-count class="absolute -top-1 -right-1 w-6 h-6 bg-[#EF4444] text-white text-[11px] font-bold rounded-full flex items-center justify-center border-2 border-white">0</span>
-</a>
-
 <!-- Footer same as index -->
 <footer class="bg-[#F3F4F8] border-t border-slate-100">
   <div class="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-6">
@@ -169,36 +164,10 @@
   </div>
 </footer>
 
-<!-- ===== Pro Mobile Bottom Nav (Android / Phone) ===== -->
-<style>
-.sm-bottom-nav{padding-bottom:env(safe-area-inset-bottom)}
-.sm-bottom-nav .bn-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;flex:1;padding:7px 2px 8px;border-radius:14px;color:#64748B;position:relative;transition:background .15s,color .15s}
-.sm-bottom-nav .bn-item i{font-size:19px;line-height:1}
-.sm-bottom-nav .bn-item span{font-size:11px;font-weight:600;white-space:nowrap;line-height:1}
-.sm-bottom-nav .bn-item.bn-active{background:#EAF0FF;color:#1A56FF}
-.sm-bottom-nav .bn-item.bn-active span{font-weight:700}
-.sm-bottom-nav .bn-item.bn-active::before{content:'';position:absolute;top:-9px;left:50%;transform:translateX(-50%);width:22px;height:3px;border-radius:9999px;background:linear-gradient(90deg,#1A56FF,#7C3AED)}
-</style>
-<div class="h-[76px] lg:hidden" aria-hidden="true"></div>
-<nav class="sm-bottom-nav fixed bottom-0 left-0 right-0 z-[70] border-t border-slate-200/90 lg:hidden" style="background:rgba(255,255,255,.98);backdrop-filter:blur(12px);box-shadow:0 -6px 24px rgba(15,32,67,.08)">
-  <div class="grid grid-cols-5 gap-1 px-2 pt-2" style="padding-bottom:calc(8px + env(safe-area-inset-bottom))">
-    <a href="index.html" data-bn="home" class="bn-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
-    <a href="courses.html" data-bn="courses" class="bn-item"><i class="fa-regular fa-square"></i><span>Courses</span></a>
-    <a href="courses.html" data-bn="ebook" class="bn-item"><i class="fa-regular fa-file-lines"></i><span>E-Book</span></a>
-    <a href="cart.html" data-bn="cart" class="bn-item"><span class="relative"><i class="fa-solid fa-cart-shopping"></i><span data-sm-cart-count class="absolute -top-2 -right-3 min-w-[16px] h-4 px-1 bg-[#1A56FF] text-white text-[10px] font-bold rounded-full hidden items-center justify-center">0</span></span><span>Cart</span></a>
-    <a href="dashboard.html" data-bn="account" data-account-link class="bn-item"><i class="fa-regular fa-user"></i><span>Account</span></a>
-  </div>
-</nav>
+<!-- Mobile bottom nav removed -->
 <script>
 (function(){
   try{
-    var p=(location.pathname.split('/').pop()||'index.html').split('?')[0].toLowerCase();
-    var map={'index.html':'home','':'home','courses.html':'courses','batch.html':'courses','course.html':'courses','ebook.html':'ebook','cart.html':'cart','dashboard.html':'account','auth.html':'account'};
-    var key=map[p]||'home';
-    if(p==='courses.html' && /ebook/i.test(location.search+location.hash)) key='ebook';
-    document.querySelectorAll('.sm-bottom-nav [data-bn]').forEach(function(a){ if(a.dataset.bn===key) a.classList.add('bn-active'); });
-    var n=0; try{ n=(JSON.parse(localStorage.getItem('sm_cart'))||[]).length; }catch(e){}
-    document.querySelectorAll('.sm-bottom-nav [data-sm-cart-count]').forEach(function(el){ el.textContent=n; el.classList.toggle('hidden',!n); el.classList.toggle('flex',!!n); });
     // Smart Account routing: guest -> auth page, logged-in -> dashboard
     var hasTok=function(){ try{return !!(localStorage.getItem('sm_user_token')||sessionStorage.getItem('sm_user_token'));}catch(x){return false;} };
     if(!hasTok()) document.querySelectorAll('[data-account-link]').forEach(function(a){ a.href='auth.html?next='+encodeURIComponent('dashboard.html'); });
@@ -247,11 +216,31 @@ async function loadCoursePage(){
   const secsEl=document.getElementById('batchSections');
   try{
     const unwrap=j=>Array.isArray(j)?j:(j&&Array.isArray(j.data)?j.data:[]);
+    // instant: server-injected catalog (zero network), then background revalidate
+    try {
+      var __cc = window.__SM_BOOTSTRAP__ && window.__SM_BOOTSTRAP__.catalog;
+      if (__cc && Array.isArray(__cc.batches) && Array.isArray(__cc.courses)) {
+        paintAll(__cc.batches, __cc.categories || [], __cc.courses);
+        var __ck = 'cat:' + __cc.batches.length + ':' + (__cc.categories || []).length + ':' + __cc.courses.length;
+        pillsEl._smKey = __ck; secsEl._smKey = __ck;
+      }
+    } catch (e) {}
     const [batches,cats,courses]=await Promise.all([
       fetch('/api/batches').then(r=>r.json()).then(unwrap),
       fetch('/api/categories').then(r=>r.json()).then(unwrap),
       fetch('/api/courses').then(r=>r.json()).then(unwrap)
     ]);
+    var __k = 'cat:' + batches.length + ':' + (cats || []).length + ':' + courses.length + ':' + JSON.stringify((courses || []).slice(0, 20).map(c => c.id));
+    if (pillsEl._smKey !== __k || secsEl._smKey !== __k) paintAll(batches, cats, courses);
+    pillsEl._smKey = __k; secsEl._smKey = __k;
+  }catch(e){
+    if (!pillsEl._smKey) pillsEl.innerHTML='<p class="col-span-full text-[13px] text-red-400 text-center py-4">Failed to load batches</p>';
+  }
+}
+
+function paintAll(batches, cats, courses){
+  const pillsEl=document.getElementById('batchPills');
+  const secsEl=document.getElementById('batchSections');
     const activeBatches=(Array.isArray(batches)?batches:[]).filter(b=>b.status!=='inactive'&&b.status!=='archived').sort((a,b)=>((Number(a.order)||999)-(Number(b.order)||999))||(Number(a.id)-Number(b.id)));
     const catById={};(Array.isArray(cats)?cats:[]).forEach(c=>{catById[c.id]=c.name||'General'});
 
@@ -320,9 +309,6 @@ async function loadCoursePage(){
         </div>${dots}
       </section>`;
     }).join('');
-  }catch(e){
-    pillsEl.innerHTML='<p class="col-span-full text-[13px] text-red-400 text-center py-4">Failed to load batches</p>';
-  }
 }
 document.addEventListener('DOMContentLoaded',loadCoursePage);
 </script>

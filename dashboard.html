@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard - StudyMart</title>
+<script>try{var __sm_t=localStorage.getItem('sm_theme')||'light';if(__sm_t==='dark'){document.documentElement.classList.add('sm-dark');document.documentElement.style.colorScheme='dark';}}catch(e){}</script>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -81,7 +82,7 @@
         <span id="bellDot" class="hidden absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-[#EF4444] rounded-full border-2 border-white"></span>
       </button>
       <div class="flex items-center gap-2">
-        <div id="dashHeaderAvatar" class="w-8 h-8 rounded-full bg-[#EDE9FF] border border-[#DDD6FE] flex items-center justify-center text-[#4F46E5] font-extrabold text-[13px]">G</div>
+        <div id="dashHeaderAvatar" class="w-8 h-8 rounded-full bg-[#EDE9FF] border border-[#DDD6FE] flex items-center justify-center text-[#4F46E5] font-extrabold text-[13px] overflow-hidden">G</div>
         <span class="hidden lg:flex items-center gap-1 text-[13px] font-semibold text-[#0F2043]"><span id="dashHeaderName">Guest</span> <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i></span>
       </div>
     </div>
@@ -92,7 +93,7 @@
       <a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Courses</a>
       <a href="dashboard.html" class="px-3 py-2.5 rounded-xl bg-[#EEF2FF] text-[#1A56FF]">Dashboard</a>
       <a href="#secOrders" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">My Orders</a>
-      <a href="#secAccount" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Profile</a>
+      <a href="#secProfile" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Profile</a>
     </nav>
   </div>
 </header>
@@ -114,7 +115,7 @@
       <a href="#secOrders" class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-slate-50 text-slate-700 font-medium text-[13px]">
         <i class="fa-solid fa-bag-shopping w-5 text-center text-[14px]"></i> My Orders
       </a>
-      <a href="#secAccount" class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-slate-50 text-slate-700 font-medium text-[13px]">
+      <a href="#secProfile" class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-slate-50 text-slate-700 font-medium text-[13px]">
         <i class="fa-regular fa-user w-5 text-center text-[14px]"></i> Profile
       </a>
       <div class="pt-3 mt-3 border-t border-slate-100">
@@ -169,6 +170,15 @@
           <p class="text-[13px] text-slate-400 text-center py-6"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading your orders...</p>
         </div>
       </section>
+      <!-- ===== My Profile (details + edit: photo, name, phone, password) ===== -->
+      <section id="secProfile" class="mt-5 scroll-mt-20">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-[14px] sm:text-[15px] font-extrabold text-[#0F2043]">My Profile</h2>
+        </div>
+        <div id="profileWrap" class="bg-white rounded-[14px] border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.04)] overflow-hidden">
+          <p class="text-[13px] text-slate-400 text-center py-6"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading profile...</p>
+        </div>
+      </section>
       <!-- ===== Student account (login / register) ===== -->
       <section id="secAccount" class="mt-5 scroll-mt-20">
         <h2 class="text-[17px] sm:text-[19px] font-extrabold text-[#0F2043] mb-3">My Account</h2>
@@ -188,55 +198,13 @@
 
     </main>
 
-    <!-- Right Profile - Desktop -->
-    <aside class="hidden xl:block w-[300px] flex-shrink-0 p-6">
-      <div class="bg-white rounded-[14px] border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.04)] p-5">
-        <h3 class="font-extrabold text-[15px] text-[#0F2043] mb-4">Profile</h3>
-        <div class="flex flex-col items-center text-center">
-          <div id="dashProfileAvatar" class="w-16 h-16 rounded-full bg-[#EDE9FF] border-2 border-[#DDD6FE] flex items-center justify-center text-[#4F46E5] font-extrabold text-[20px]">G</div>
-          <div id="dashProfileName" class="font-bold text-[14px] text-[#0F2043] mt-2">Guest</div>
-          <div id="dashProfileEmail" class="text-[11px] text-slate-500">Please login</div>
-        </div>
-        <div class="mt-6 space-y-1">
-          <a href="#secAccount" class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-slate-50 text-[13px] font-medium text-[#0F2043]"><i class="fa-regular fa-user w-5 text-center text-slate-500"></i> My Profile</a>
-          <a href="#secOrders" class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-slate-50 text-[13px] font-medium text-[#0F2043]"><i class="fa-solid fa-bag-shopping w-5 text-center text-slate-500"></i> My Orders</a>
-          <a href="#secAccount" class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-slate-50 text-[13px] font-medium text-[#0F2043]"><i class="fa-solid fa-gear w-5 text-center text-slate-500"></i> Account Settings</a>
-          <button data-dash-logout class="w-full flex items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-red-50 text-[13px] font-medium text-[#0F2043] hover:text-red-600"><i class="fa-solid fa-arrow-right-from-bracket w-5 text-center text-slate-500"></i> Logout</button>
-        </div>
-      </div>
-    </aside>
   </div>
 </div>
 
-<!-- ===== Pro Mobile Bottom Nav (Android / Phone) ===== -->
-<style>
-.sm-bottom-nav{padding-bottom:env(safe-area-inset-bottom)}
-.sm-bottom-nav .bn-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;flex:1;padding:7px 2px 8px;border-radius:14px;color:#64748B;position:relative;transition:background .15s,color .15s}
-.sm-bottom-nav .bn-item i{font-size:19px;line-height:1}
-.sm-bottom-nav .bn-item span{font-size:11px;font-weight:600;white-space:nowrap;line-height:1}
-.sm-bottom-nav .bn-item.bn-active{background:#EAF0FF;color:#1A56FF}
-.sm-bottom-nav .bn-item.bn-active span{font-weight:700}
-.sm-bottom-nav .bn-item.bn-active::before{content:'';position:absolute;top:-9px;left:50%;transform:translateX(-50%);width:22px;height:3px;border-radius:9999px;background:linear-gradient(90deg,#1A56FF,#7C3AED)}
-</style>
-<nav class="sm-bottom-nav fixed bottom-0 left-0 right-0 z-[70] border-t border-slate-200/90 lg:hidden" style="background:rgba(255,255,255,.98);backdrop-filter:blur(12px);box-shadow:0 -6px 24px rgba(15,32,67,.08)">
-  <div class="grid grid-cols-5 gap-1 px-2 pt-2" style="padding-bottom:calc(8px + env(safe-area-inset-bottom))">
-    <a href="index.html" data-bn="home" class="bn-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
-    <a href="courses.html" data-bn="courses" class="bn-item"><i class="fa-regular fa-square"></i><span>Courses</span></a>
-    <a href="courses.html" data-bn="ebook" class="bn-item"><i class="fa-regular fa-file-lines"></i><span>E-Book</span></a>
-    <a href="cart.html" data-bn="cart" class="bn-item"><span class="relative"><i class="fa-solid fa-cart-shopping"></i><span data-sm-cart-count class="absolute -top-2 -right-3 min-w-[16px] h-4 px-1 bg-[#1A56FF] text-white text-[10px] font-bold rounded-full hidden items-center justify-center">0</span></span><span>Cart</span></a>
-    <a href="dashboard.html" data-bn="account" data-account-link class="bn-item"><i class="fa-regular fa-user"></i><span>Account</span></a>
-  </div>
-</nav>
+<!-- Mobile bottom nav removed -->
 <script>
 (function(){
   try{
-    var p=(location.pathname.split('/').pop()||'index.html').split('?')[0].toLowerCase();
-    var map={'index.html':'home','':'home','courses.html':'courses','batch.html':'courses','course.html':'courses','ebook.html':'ebook','cart.html':'cart','dashboard.html':'account','auth.html':'account'};
-    var key=map[p]||'home';
-    if(p==='courses.html' && /ebook/i.test(location.search+location.hash)) key='ebook';
-    document.querySelectorAll('.sm-bottom-nav [data-bn]').forEach(function(a){ if(a.dataset.bn===key) a.classList.add('bn-active'); });
-    var n=0; try{ n=(JSON.parse(localStorage.getItem('sm_cart'))||[]).length; }catch(e){}
-    document.querySelectorAll('.sm-bottom-nav [data-sm-cart-count]').forEach(function(el){ el.textContent=n; el.classList.toggle('hidden',!n); el.classList.toggle('flex',!!n); });
     // Smart Account routing: guest -> auth page, logged-in -> dashboard
     var hasTok=function(){ try{return !!(localStorage.getItem('sm_user_token')||sessionStorage.getItem('sm_user_token'));}catch(x){return false;} };
     if(!hasTok()) document.querySelectorAll('[data-account-link]').forEach(function(a){ a.href='auth.html?next='+encodeURIComponent('dashboard.html'); });
@@ -279,9 +247,9 @@ document.getElementById('bellBtn').addEventListener('click',()=>{document.getEle
   function thumbHTML(c, size){
     // size: 'continue' | 'row' | 'grid' — same UI as before, real thumbnail or gradient
     if(c.thumbnail){
-      if(size==='continue') return '<div class="w-[112px] sm:w-[132px] h-[112px] sm:h-[108px] rounded-[10px] flex-shrink-0 overflow-hidden relative bg-[#0F2043]"><img src="'+esc(c.thumbnail)+'" alt="'+esc(c.title)+'" class="w-full h-full object-cover" loading="lazy"></div>';
-      if(size==='row') return '<div class="w-[64px] h-[64px] rounded-[10px] flex-shrink-0 overflow-hidden relative bg-[#0F2043]"><img src="'+esc(c.thumbnail)+'" alt="'+esc(c.title)+'" class="w-full h-full object-cover" loading="lazy"></div>';
-      return '<div class="h-[110px] relative overflow-hidden bg-[#0F2043]"><img src="'+esc(c.thumbnail)+'" alt="'+esc(c.title)+'" class="w-full h-full object-cover" loading="lazy"></div>';
+      if(size==='continue') return '<div class="w-[112px] sm:w-[132px] h-[112px] sm:h-[108px] rounded-[10px] flex-shrink-0 overflow-hidden relative bg-[#0F2043]"><img src="'+esc(c.thumbnail)+'" alt="'+esc(c.title)+'" class="w-full h-full object-contain" loading="lazy"></div>';
+      if(size==='row') return '<div class="w-[64px] h-[64px] rounded-[10px] flex-shrink-0 overflow-hidden relative bg-[#0F2043]"><img src="'+esc(c.thumbnail)+'" alt="'+esc(c.title)+'" class="w-full h-full object-contain" loading="lazy"></div>';
+      return '<div class="aspect-video relative overflow-hidden bg-[#0F2043]"><img src="'+esc(c.thumbnail)+'" alt="'+esc(c.title)+'" class="w-full h-full object-cover" loading="lazy"></div>';
     }
     var g = GRADS[String(c.id||'').length % GRADS.length];
     var batch = esc(c.batchName||'Course'), cat = esc(c.categoryName||'');
@@ -401,15 +369,183 @@ document.getElementById('bellBtn').addEventListener('click',()=>{document.getEle
     }).join('');
   }
 
+  function setAvatar(el, me){
+    if(!el) return;
+    var url = me && me.avatar ? String(me.avatar) : '';
+    if(url){ el.innerHTML = '<img src="'+esc(url)+'" alt="Profile photo" class="w-full h-full object-cover">'; }
+    else { el.textContent = initial(me?(me.name||'G'):'G'); }
+  }
+  function displayEmail(me){
+    if(!me) return '';
+    if(me.email && me.email.indexOf('@mobile.studymart')===-1) return me.email;
+    return me.phone || me.email || '';
+  }
   function paintUser(me){
     var name = me ? me.name : 'Guest';
     var greet = $('dashGreet'); if(greet) greet.textContent = 'Hi, '+(me?firstName(name):'Guest');
     var sub = $('dashGreetSub'); if(sub) sub.textContent = me ? 'Welcome back to StudyMart' : 'Login kore tomar course dekho';
     var hn = $('dashHeaderName'); if(hn) hn.textContent = me?firstName(name):'Guest';
-    var ha = $('dashHeaderAvatar'); if(ha) ha.textContent = initial(name);
-    var pa = $('dashProfileAvatar'); if(pa) pa.textContent = initial(name);
-    var pn = $('dashProfileName'); if(pn) pn.textContent = me?name:'Guest';
-    var pe = $('dashProfileEmail'); if(pe){ var em = me ? (me.email&&me.email.indexOf('@mobile.studymart')===-1?me.email:(me.phone||me.email||'')) : ''; pe.textContent = me?(em||'Student account'):'Please login'; }
+    setAvatar($('dashHeaderAvatar'), me);
+  }
+
+  /* ============ My Profile: details + edit (photo / name / phone / password) ============ */
+  var currentMe = null;
+  var pendingAvatar = null; // null = no change, '' = remove, dataURL = new photo
+  var savingProfile = false, savingPwd = false;
+
+  function profileMsg(text, ok){
+    var el = $('pfMsg'); if(!el) return;
+    el.textContent = text;
+    el.className = 'mt-3 text-[12px] font-semibold rounded-[10px] px-3 py-2 ' + (ok ? 'bg-[#E6F4EA] text-[#16A34A] border border-[#C8E9D5]' : 'bg-red-50 text-red-600 border border-red-100');
+    el.classList.remove('hidden');
+  }
+  function pwdMsg(text, ok){
+    var el = $('pwdMsg'); if(!el) return;
+    el.textContent = text;
+    el.className = 'mt-3 text-[12px] font-semibold rounded-[10px] px-3 py-2 ' + (ok ? 'bg-[#E6F4EA] text-[#16A34A] border border-[#C8E9D5]' : 'bg-red-50 text-red-600 border border-red-100');
+    el.classList.remove('hidden');
+  }
+
+  function renderProfile(me, loggedIn){
+    var box = $('profileWrap'); if(!box) return;
+    currentMe = loggedIn ? me : null;
+    pendingAvatar = null;
+    if(!loggedIn){ box.innerHTML = guestCTA('Login to view your profile','Login kore profile details, photo, password change korte parbe','Login'); return; }
+    var em = displayEmail(me) || '-';
+    var since = me.createdAt ? fmtDate(me.createdAt) : '';
+    var avUrl = me.avatar ? String(me.avatar) : '';
+    box.innerHTML =
+      '<div class="p-4 sm:p-5">'
+      + '<div class="flex flex-col sm:flex-row sm:items-center gap-4">'
+      + '<div class="relative flex-shrink-0 mx-auto sm:mx-0">'
+      + '<div id="pfAvatar" class="w-20 h-20 rounded-full bg-[#EDE9FF] border-2 border-[#DDD6FE] flex items-center justify-center text-[#4F46E5] font-extrabold text-[24px] overflow-hidden">'
+      + (avUrl ? '<img src="'+esc(avUrl)+'" alt="Profile photo" class="w-full h-full object-cover">' : esc(initial(me.name)))
+      + '</div>'
+      + '<button id="pfPhotoBtn" type="button" title="Change photo" class="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-[#1A56FF] hover:bg-[#1445D6] text-white flex items-center justify-center shadow border-2 border-white"><i class="fa-solid fa-camera text-[11px]"></i></button>'
+      + '<input id="pfPhotoInput" type="file" accept="image/*" class="hidden">'
+      + '</div>'
+      + '<div class="flex-1 min-w-0 text-center sm:text-left">'
+      + '<h3 class="font-extrabold text-[16px] text-[#0F2043] truncate">'+esc(me.name||'')+'</h3>'
+      + '<p class="text-[12px] text-slate-500 truncate mt-0.5"><i class="fa-regular fa-envelope mr-1"></i>'+esc(em)+'</p>'
+      + (since ? '<p class="text-[11px] text-slate-400 mt-0.5"><i class="fa-regular fa-calendar mr-1"></i>Member since '+esc(since)+'</p>' : '')
+      + '<div class="mt-2 flex items-center justify-center sm:justify-start gap-2">'
+      + (avUrl ? '<button id="pfPhotoRemove" type="button" class="text-[11px] font-bold text-red-600 hover:text-red-700"><i class="fa-solid fa-trash mr-1 text-[10px]"></i>Remove photo</button>' : '<span class="text-[11px] text-slate-400">Tap <i class="fa-solid fa-camera text-[10px]"></i> to add a profile photo</span>')
+      + '</div>'
+      + '</div>'
+      + '</div>'
+      + '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">'
+      + '<div><label class="text-[11px] font-bold text-slate-600 uppercase">Full Name</label>'
+      + '<input id="pfName" value="'+esc(me.name||'')+'" placeholder="Your name" class="mt-1 w-full border border-slate-200 rounded-[10px] px-3 py-2.5 text-[13px] outline-none focus:border-[#1A56FF]"></div>'
+      + '<div><label class="text-[11px] font-bold text-slate-600 uppercase">Email (login)</label>'
+      + '<input value="'+esc((me.email&&me.email.indexOf('@mobile.studymart')!==-1)?(me.phone||'Mobile account'):me.email||'')+'" disabled class="mt-1 w-full border border-slate-200 rounded-[10px] px-3 py-2.5 text-[13px] bg-slate-50 text-slate-500 cursor-not-allowed"></div>'
+      + '<div><label class="text-[11px] font-bold text-slate-600 uppercase">Mobile Number</label>'
+      + '<input id="pfPhone" value="'+esc(me.phone||'')+'" placeholder="01XXXXXXXXX" class="mt-1 w-full border border-slate-200 rounded-[10px] px-3 py-2.5 text-[13px] outline-none focus:border-[#1A56FF]"></div>'
+      + '<div><label class="text-[11px] font-bold text-slate-600 uppercase">Account Status</label>'
+      + '<div class="mt-1 w-full border border-slate-200 rounded-[10px] px-3 py-2.5 text-[13px] bg-slate-50 text-slate-600 font-semibold">'+esc(me.status||'active')+'</div></div>'
+      + '</div>'
+      + '<p id="pfMsg" class="hidden mt-3 text-[12px] font-semibold rounded-[10px] px-3 py-2"></p>'
+      + '<div class="flex justify-end mt-4"><button id="pfSave" type="button" class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-[10px] bg-[#1A56FF] hover:bg-[#1445D6] text-white font-bold text-[13px]"><i class="fa-solid fa-floppy-disk text-[12px]"></i> Save Changes</button></div>'
+      + '</div>'
+      + '<div id="secProfilePwd" class="border-t border-slate-100 p-4 sm:p-5 scroll-mt-20">'
+      + '<h4 class="font-extrabold text-[14px] text-[#0F2043]"><i class="fa-solid fa-key text-[#1A56FF] mr-1.5"></i>Change Password</h4>'
+      + '<div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">'
+      + '<div><label class="text-[11px] font-bold text-slate-600 uppercase">Current Password</label>'
+      + '<input id="pwdCur" type="password" placeholder="••••••••" class="mt-1 w-full border border-slate-200 rounded-[10px] px-3 py-2.5 text-[13px] outline-none focus:border-[#1A56FF]"></div>'
+      + '<div><label class="text-[11px] font-bold text-slate-600 uppercase">New Password</label>'
+      + '<input id="pwdNew" type="password" placeholder="Min 4 characters" class="mt-1 w-full border border-slate-200 rounded-[10px] px-3 py-2.5 text-[13px] outline-none focus:border-[#1A56FF]"></div>'
+      + '<div><label class="text-[11px] font-bold text-slate-600 uppercase">Confirm New</label>'
+      + '<input id="pwdCon" type="password" placeholder="Repeat new password" class="mt-1 w-full border border-slate-200 rounded-[10px] px-3 py-2.5 text-[13px] outline-none focus:border-[#1A56FF]"></div>'
+      + '</div>'
+      + '<p id="pwdMsg" class="hidden mt-3 text-[12px] font-semibold rounded-[10px] px-3 py-2"></p>'
+      + '<div class="flex justify-end mt-4"><button id="pwdSave" type="button" class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-[10px] bg-[#0F2043] hover:bg-[#16294F] text-white font-bold text-[13px]"><i class="fa-solid fa-lock text-[12px]"></i> Update Password</button></div>'
+      + '</div>';
+    // wire photo picker
+    var fileBtn = $('pfPhotoBtn'), fileInput = $('pfPhotoInput');
+    if(fileBtn && fileInput) fileBtn.addEventListener('click', function(){ fileInput.click(); });
+    if(fileInput) fileInput.addEventListener('change', function(){ if(fileInput.files && fileInput.files[0]) handlePhotoFile(fileInput.files[0]); fileInput.value=''; });
+    var rmBtn = $('pfPhotoRemove');
+    if(rmBtn) rmBtn.addEventListener('click', function(){
+      pendingAvatar = '';
+      var av = $('pfAvatar'); if(av) av.textContent = initial(($('pfName')&&$('pfName').value)||(currentMe&&currentMe.name)||'G');
+      profileMsg('Photo removed — Save Changes chap dile apply hobe', true);
+    });
+    var saveBtn = $('pfSave');
+    if(saveBtn) saveBtn.addEventListener('click', saveProfile);
+    var pwdBtn = $('pwdSave');
+    if(pwdBtn) pwdBtn.addEventListener('click', savePassword);
+  }
+
+  function handlePhotoFile(file){
+    if(!/^image\//.test(file.type||'')){ profileMsg('Please choose an image file (JPG/PNG)', false); return; }
+    if(file.size > 5*1024*1024){ profileMsg('Image too large — max 5MB', false); return; }
+    var url;
+    try{ url = URL.createObjectURL(file); }catch(e){ profileMsg('Could not read this image', false); return; }
+    var img = new Image();
+    img.onload = function(){
+      try{
+        var w = img.naturalWidth||img.width||256, h = img.naturalHeight||img.height||256;
+        var scale = Math.min(1, 256/Math.max(w,h));
+        var cw = Math.max(1, Math.round(w*scale)), ch = Math.max(1, Math.round(h*scale));
+        var cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
+        cv.getContext('2d').drawImage(img, 0, 0, cw, ch);
+        pendingAvatar = cv.toDataURL('image/jpeg', 0.82);
+        var av = $('pfAvatar');
+        if(av) av.innerHTML = '<img src="'+pendingAvatar+'" alt="Profile photo" class="w-full h-full object-cover">';
+        profileMsg('New photo selected — Save Changes chap dile save hobe', true);
+      }catch(e){ profileMsg('Could not process this image', false); }
+      try{ URL.revokeObjectURL(url); }catch(x){}
+    };
+    img.onerror = function(){ try{ URL.revokeObjectURL(url); }catch(x){} profileMsg('Could not read this image', false); };
+    img.src = url;
+  }
+
+  async function saveProfile(){
+    if(savingProfile) return;
+    var nameEl = $('pfName'), phoneEl = $('pfPhone');
+    var name = nameEl ? nameEl.value.trim() : '';
+    var phone = phoneEl ? phoneEl.value.trim() : '';
+    if(!name){ profileMsg('Name cannot be empty', false); return; }
+    savingProfile = true;
+    var btn = $('pfSave'); if(btn){ btn.disabled = true; btn.classList.add('opacity-60'); }
+    try{
+      var body = { name: name, phone: phone };
+      if(pendingAvatar !== null) body.avatar = pendingAvatar;
+      var r = await fetch('/api/public/auth/profile', { method:'PUT', headers: Object.assign({'Content-Type':'application/json'}, headers()), body: JSON.stringify(body) });
+      var j = await r.json().catch(function(){ return null; });
+      if(!r.ok || !j || j.success === false) throw new Error((j && j.message) || 'Failed to save profile');
+      currentMe = j.data;
+      try{ localStorage.setItem('sm_user', JSON.stringify({ name: currentMe.name })); }catch(e){}
+      paintUser(currentMe);
+      renderProfile(currentMe, true);
+      var box = $('profileWrap');
+      if(box) box.scrollIntoView({ behavior:'smooth', block:'nearest' });
+      profileMsg('Profile updated successfully', true);
+    }catch(e){ profileMsg(e.message || 'Failed to save profile', false); }
+    savingProfile = false;
+    if(btn){ btn.disabled = false; btn.classList.remove('opacity-60'); }
+  }
+
+  async function savePassword(){
+    if(savingPwd) return;
+    var cur = $('pwdCur') ? $('pwdCur').value : '';
+    var nw = $('pwdNew') ? $('pwdNew').value : '';
+    var con = $('pwdCon') ? $('pwdCon').value : '';
+    if(!cur || !nw || !con){ pwdMsg('Fill all three password fields', false); return; }
+    if(nw !== con){ pwdMsg('New password and confirm do not match', false); return; }
+    if(nw.trim().length < 4){ pwdMsg('New password must be at least 4 characters', false); return; }
+    savingPwd = true;
+    var btn = $('pwdSave'); if(btn){ btn.disabled = true; btn.classList.add('opacity-60'); }
+    try{
+      var r = await fetch('/api/public/auth/password', { method:'PUT', headers: Object.assign({'Content-Type':'application/json'}, headers()), body: JSON.stringify({ currentPassword: cur, newPassword: nw }) });
+      var j = await r.json().catch(function(){ return null; });
+      if(!r.ok || !j || j.success === false) throw new Error((j && j.message) || 'Failed to change password');
+      if($('pwdCur')) $('pwdCur').value = '';
+      if($('pwdNew')) $('pwdNew').value = '';
+      if($('pwdCon')) $('pwdCon').value = '';
+      pwdMsg('Password changed successfully', true);
+    }catch(e){ pwdMsg(e.message || 'Failed to change password', false); }
+    savingPwd = false;
+    if(btn){ btn.disabled = false; btn.classList.remove('opacity-60'); }
   }
 
   async function boot(){
@@ -436,6 +572,7 @@ document.getElementById('bellBtn').addEventListener('click',()=>{document.getEle
       }catch(e){}
     }
     paintUser(loggedIn?me:null);
+    renderProfile(me, loggedIn);
     // enrolled = from /api/public/my/courses (includes admin granted + paid orders)
     var enrolled = [];
     if(loggedIn){

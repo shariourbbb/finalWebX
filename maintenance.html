@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maintenance — StudyMart</title>
+<script>try{var __sm_t=localStorage.getItem('sm_theme')||'light';if(__sm_t==='dark'){document.documentElement.classList.add('sm-dark');document.documentElement.style.colorScheme='dark';}}catch(e){}</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="assets/navbar.css">
+<style>
+*{font-family:'Inter',sans-serif}
+.gear-spin{animation:spin 6s linear infinite}
+.gear-spin-rev{animation:spinrev 8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes spinrev{to{transform:rotate(-360deg)}}
+html.sm-dark body{background:#0B1226 !important}
+</style>
+</head>
+<body class="bg-[#F8F9FD] text-slate-900 antialiased min-h-screen flex items-center justify-center px-4 py-14">
+<main class="w-full max-w-[560px]">
+  <div class="bg-white rounded-[20px] border border-slate-100 shadow-[0_20px_60px_rgba(30,58,138,0.12)] p-8 sm:p-12 text-center">
+    <div class="relative w-24 h-24 mx-auto">
+      <div class="absolute inset-0 rounded-full bg-[#EEF2FF]"></div>
+      <i class="fa-solid fa-gear gear-spin absolute left-[18px] top-[20px] text-[#1A56FF] text-[34px]"></i>
+      <i class="fa-solid fa-gear gear-spin-rev absolute right-[14px] bottom-[16px] text-[#7C3AED] text-[22px]"></i>
+    </div>
+    <p class="mt-5 inline-block px-3 py-1 rounded-full bg-[#FFF2E6] text-[#F59E0B] text-[11px] font-extrabold tracking-wide">SITE UNDER MAINTENANCE</p>
+    <h1 id="mTitle" class="mt-3 text-[22px] sm:text-[26px] font-extrabold text-[#0F2043]">Maintenance cholche 🔧</h1>
+    <p id="mMsg" class="mt-2 text-[13.5px] text-slate-500 leading-relaxed">Amra site update korchi. Kichukkhon por abar aso.</p>
+    <p id="mEta" class="hidden mt-2 text-[12.5px] font-bold text-[#1A56FF]"></p>
+    <div class="mt-3 flex items-center justify-center gap-2 text-[12px] text-slate-400">
+      <i class="fa-solid fa-rotate fa-spin"></i><span id="mRetry">Auto check hocche...</span>
+    </div>
+    <div class="mt-6 flex flex-wrap justify-center gap-2">
+      <button onclick="checkNow()" class="px-5 py-2.5 rounded-[10px] bg-[#1A56FF] hover:bg-[#1445D6] text-white font-bold text-[13px]"><i class="fa-solid fa-rotate mr-1"></i> Try Again</button>
+      <a id="mTelegram" href="#" target="_blank" class="hidden px-5 py-2.5 rounded-[10px] bg-[#E6F0FF] text-[#1A56FF] font-bold text-[13px]"><i class="fa-brands fa-telegram mr-1"></i> Telegram</a>
+    </div>
+    <p class="mt-6 text-[11px] text-slate-400">Admin? <a href="admin.html" class="text-[#1A56FF] font-bold hover:underline">Login here</a></p>
+  </div>
+  <p class="mt-4 text-center text-[11.5px] text-slate-400">© <span id="mSite">StudyMart</span> — shigroi fire aschi</p>
+</main>
+<script>
+(function(){
+  'use strict';
+  function paint(s){
+    s = s || {};
+    if (s.siteName) document.getElementById('mSite').textContent = s.siteName;
+    if (s.maintenanceTitle) document.getElementById('mTitle').textContent = s.maintenanceTitle;
+    if (s.maintenanceMessage) document.getElementById('mMsg').textContent = s.maintenanceMessage;
+    var eta = document.getElementById('mEta');
+    if (s.maintenanceEta && String(s.maintenanceEta).trim() !== '') {
+      eta.textContent = '⏳ Back by: ' + s.maintenanceEta;
+      eta.classList.remove('hidden');
+    } else eta.classList.add('hidden');
+    var tg = document.getElementById('mTelegram');
+    if (s.telegram && String(s.telegram).trim() !== '') { tg.href = s.telegram; tg.classList.remove('hidden'); }
+  }
+  try {
+    var b = window.__SM_BOOTSTRAP__ && window.__SM_BOOTSTRAP__.settings;
+    if (b) paint(b);
+  } catch(e){}
+  async function check(silent){
+    var el = document.getElementById('mRetry');
+    try {
+      const r = await fetch('/api/public/maintenance-status', { cache: 'no-store' });
+      const j = await r.json();
+      if (j && j.success && j.data && !j.data.enabled) {
+        if (el) el.textContent = 'Site ready! Redirect hocche...';
+        setTimeout(function(){ window.location.href = 'index.html'; }, 800);
+        return true;
+      }
+      if (j && j.data) paint(Object.assign({}, (window.__SM_BOOTSTRAP__||{}).settings||{}, j.data));
+    } catch(e){}
+    if (!silent && el) {
+      el.textContent = 'Ekhono maintenance cholche...';
+      setTimeout(function(){ el.textContent = 'Auto check hocche...'; }, 2000);
+    }
+    return false;
+  }
+  window.checkNow = function(){ check(false); };
+  setInterval(function(){ check(true); }, 30000);
+  document.addEventListener('DOMContentLoaded', function(){ check(true); });
+})();
+</script>
+</body>
+</html>

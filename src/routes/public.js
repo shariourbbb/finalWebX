@@ -8,6 +8,22 @@ const piprapay = require('../piprapay');
 
 const router = express.Router();
 
+/* ---------- Fast repeat loads: short public cache, never for private/auth data ----------
+ * List/catalogue GETs: 30s browser cache + 90s stale-while-revalidate.
+ * Search (?q=): 10s only. /my/* (login data): never cached. */
+router.get('*', (req, res, next) => {
+  try {
+    if (req.path.startsWith('/my/') || req.path.startsWith('/auth/')) {
+      res.setHeader('Cache-Control', 'private, no-store');
+    } else if (req.query && req.query.q) {
+      res.setHeader('Cache-Control', 'public, max-age=10');
+    } else if (req.method === 'GET') {
+      res.setHeader('Cache-Control', 'public, max-age=30, stale-while-revalidate=90');
+    }
+  } catch (e) {}
+  next();
+});
+
 // Secrets (gateway API keys) must NEVER leak to the public website.
 const SECRET_SETTING_KEYS = ['piprapayApiKey', 'botToken'];
 function publicSettings() {
@@ -188,7 +204,14 @@ function safeLessons(courseId) {
   return store.all('lessons')
     .filter(l => String(l.courseId) === String(courseId) && (l.status || 'active') === 'active')
     .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0))
-    .map(l => ({ id: l.id, section: l.section || '', title: l.title, duration: l.duration || '', isFree: !!l.isFree, order: Number(l.order) || 0 }));
+    .map(l => ({ id: l.id, section: l.section || '', title: l.title, duration: l.duration || '', isFree: !!l.isFree, order: Number(l.order) || 0, source: (l.videoUrl ? 'upload' : 'youtube') }));
+}
+
+function lessonVideoPayload(lesson) {
+  if (lesson.videoUrl) {
+    return { source: 'upload', embedUrl: '', videoUrl: lesson.videoUrl };
+  }
+  return { source: 'youtube', embedUrl: 'https://www.youtube-nocookie.com/embed/' + lesson.videoId + '?rel=0', videoUrl: '' };
 }
 
 router.get('/courses', (req, res) => {
@@ -215,10 +238,45 @@ router.get('/courses/:idOrSlug', (req, res) => {
   res.json({ success: true, data: enrich(course) });
 });
 
-/* ---------- Coupons (optional single/multi course targeting) ----------
- * coupon.courseIds khali hole sob course-e cholbe; nahole sudhu oi course
- * gulo-te discount (minOrder + discount oi course gulor subtotal-er upor). */
-function validateCoupon(code, subtotal, items) {
+/* ---------- Coupons (course / batch / category targeting) ----------
+ * coupon.courseIds + batchIds + categoryIds — tin tai khali hole sob
+ * course-e cholbe; nahole cart-er je item gulo selected course / batch /
+ * category-r sathe mile (OR logic) sudhu oi gulor subtotal-er upor
+ * discount + minOrder check hobe. */
+function couponItemMeta(item) {
+  const id = String(item.courseId != null ? item.courseId : (item.ebookId != null ? item.ebookId : (item.id != null ? item.id : '')));
+  if (!id) return { id: '', batchIds: [], categoryId: '' };
+  const course = store.find('courses', id);
+  if (course) {
+    return {
+      id,
+      batchIds: [String(course.batchId || '')].filter(Boolean),
+      categoryId: String(course.categoryId || '')
+    };
+  }
+  const ebook = store.find('ebooks', id);
+  if (ebook) {
+    const bids = [String(ebook.batchId || ''), String(ebook.ebookBatchId || '')].filter(Boolean);
+    return { id, batchIds: bids, categoryId: String(ebook.categoryId || '') };
+  }
+  // catalogue-e na thakle frontend-er pathano batchId/categoryId thakle seta use koro
+  return {
+    id,
+    batchIds: [String(item.batchId || ''), String(item.ebookBatchId || '')].filter(Boolean),
+    categoryId: String(item.categoryId || '')
+  };
+}
+
+function couponBuyerOf(buyer, sessionUser) {
+  const b = buyer && typeof buyer === 'object' ? buyer : {};
+  const s = sessionUser && typeof sessionUser === 'object' ? sessionUser : {};
+  const userId = String(b.userId || s.id || '').trim();
+  const email = String(b.email || s.email || '').trim().toLowerCase();
+  const phone = String(b.phone || s.phone || '').replace(/[\s\-()]/g, '');
+  return { userId, email, phone };
+}
+
+function validateCoupon(code, subtotal, items, buyer) {
   const coupon = store.findBy('coupons', 'code', code || '');
   if (!coupon) return { valid: false, message: 'Invalid coupon code' };
   if (coupon.status !== 'active') return { valid: false, message: 'This coupon is not active' };
@@ -228,11 +286,31 @@ function validateCoupon(code, subtotal, items) {
   if (coupon.usageLimit && Number(coupon.used) >= Number(coupon.usageLimit)) {
     return { valid: false, message: 'Coupon usage limit reached' };
   }
-  const targets = Array.isArray(coupon.courseIds) ? coupon.courseIds.map(String) : [];
+  // User restriction: any of userIds / allowedEmails / allowedPhones set = private coupon
+  const allowedIds = Array.isArray(coupon.userIds) ? coupon.userIds.map(String) : [];
+  const allowedEmails = Array.isArray(coupon.allowedEmails) ? coupon.allowedEmails.map(e => String(e).toLowerCase()) : [];
+  const allowedPhones = Array.isArray(coupon.allowedPhones) ? coupon.allowedPhones.map(p => String(p).replace(/[\s\-()]/g, '')) : [];
+  if (allowedIds.length || allowedEmails.length || allowedPhones.length) {
+    const who = couponBuyerOf(buyer, null);
+    const hitUser = (who.userId && allowedIds.includes(String(who.userId)))
+      || (who.email && allowedEmails.includes(who.email))
+      || (who.phone && allowedPhones.includes(who.phone));
+    if (!hitUser) return { valid: false, message: 'This coupon is not assigned to your account' };
+  }
+  const courseTargets = Array.isArray(coupon.courseIds) ? coupon.courseIds.map(String) : [];
+  const batchTargets = Array.isArray(coupon.batchIds) ? coupon.batchIds.map(String) : [];
+  const categoryTargets = Array.isArray(coupon.categoryIds) ? coupon.categoryIds.map(String) : [];
+  const hasTarget = courseTargets.length || batchTargets.length || categoryTargets.length;
   let base = Number(subtotal) || 0;
-  if (targets.length && Array.isArray(items) && items.length) {
-    const hit = items.filter(i => targets.includes(String(i.courseId != null ? i.courseId : (i.ebookId != null ? i.ebookId : i.id))));
-    if (!hit.length) return { valid: false, message: 'Ei coupon sudhu nirdisto course-er jonno' };
+  if (hasTarget && Array.isArray(items) && items.length) {
+    const hit = items.filter(i => {
+      const meta = couponItemMeta(i);
+      if (courseTargets.includes(meta.id)) return true;
+      if (meta.batchIds.some(b => batchTargets.includes(String(b)))) return true;
+      if (meta.categoryId && categoryTargets.includes(String(meta.categoryId))) return true;
+      return false;
+    });
+    if (!hit.length) return { valid: false, message: 'This coupon is not valid for the selected items' };
     base = hit.reduce((s, i) => s + Number(i.price || 0), 0);
   }
   if (base < Number(coupon.minOrder || 0)) {
@@ -246,9 +324,64 @@ function validateCoupon(code, subtotal, items) {
   return { valid: true, coupon, discount };
 }
 
-router.post('/coupons/validate', (req, res) => {
-  const { code, subtotal, items } = req.body || {};
-  const result = validateCoupon(code, Number(subtotal) || 0, items);
+/* ---------- Admin invitations (accept via emailed link, 24h expiry) ---------- */
+function findAdminInvite(token) {
+  const t = String(token || '').trim();
+  if (!t) return null;
+  return store.all('adminInvites').find(i => String(i.token || '') === t) || null;
+}
+
+router.get('/admin-invites/:token', (req, res) => {
+  const invite = findAdminInvite(req.params.token);
+  if (!invite) return res.status(404).json({ success: false, message: 'Invalid invitation link' });
+  if (invite.used) return res.status(410).json({ success: false, message: 'This invitation has already been used' });
+  if (Date.now() > Number(invite.expiresAt || 0)) {
+    return res.status(410).json({ success: false, message: 'This invitation has expired. Please ask for a new one.' });
+  }
+  const s = store.load().settings || {};
+  res.json({
+    success: true,
+    data: { email: invite.email, role: invite.role, siteName: s.siteName || 'StudyMart', expiresAt: invite.expiresAt }
+  });
+});
+
+router.post('/admin-invites/:token/accept', (req, res) => {
+  const invite = findAdminInvite(req.params.token);
+  if (!invite) return res.status(404).json({ success: false, message: 'Invalid invitation link' });
+  if (invite.used) return res.status(410).json({ success: false, message: 'This invitation has already been used' });
+  if (Date.now() > Number(invite.expiresAt || 0)) {
+    return res.status(410).json({ success: false, message: 'This invitation has expired. Please ask for a new one.' });
+  }
+  const { username, name, password } = req.body || {};
+  const cleanUser = String(username || '').trim();
+  if (!cleanUser) return res.status(400).json({ success: false, message: 'Username is required' });
+  if (store.findBy('admins', 'username', cleanUser)) {
+    return res.status(409).json({ success: false, message: 'This username is already taken' });
+  }
+  if (store.all('admins').some(a => String(a.email || '').toLowerCase() === String(invite.email || '').toLowerCase())) {
+    return res.status(409).json({ success: false, message: 'This email is already an admin' });
+  }
+  if (!password || String(password).length < 6) {
+    return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
+  }
+  const admin = store.insert('admins', {
+    username: cleanUser,
+    name: String(name || cleanUser).trim(),
+    email: String(invite.email || '').toLowerCase(),
+    password: auth.hashPassword(String(password)),
+    role: invite.role === 'superadmin' ? 'superadmin' : 'admin',
+    permissions: Array.isArray(invite.permissions) ? invite.permissions : []
+  });
+  store.update('adminInvites', invite.id, { used: true, usedAt: new Date().toISOString(), usedBy: cleanUser });
+  res.status(201).json({ success: true, message: 'Welcome aboard! You can now log in to the admin panel.', data: { username: admin.username, email: admin.email } });
+});
+
+router.post('/coupons/validate', auth.optionalUser, (req, res) => {
+  const { code, subtotal, items, email, phone, userId } = req.body || {};
+  const sessionUser = req.session && req.session.role === 'user'
+    ? { id: req.session.id, email: req.session.email, phone: req.session.phone }
+    : null;
+  const result = validateCoupon(code, Number(subtotal) || 0, items, couponBuyerOf({ email, phone, userId }, sessionUser));
   if (!result.valid) return res.status(400).json({ success: false, message: result.message });
   res.json({
     success: true,
@@ -337,6 +470,7 @@ router.post('/auth/register', (req, res) => {
     status: 'active'
   });
   const token = auth.createSession({ id: user.id, role: 'user', name: user.name, email: user.email });
+  try { require('../email').notifyWelcome(user); } catch (e) {}
   res.status(201).json({ success: true, message: 'Account created successfully', token, data: auth.publicUser(user) });
 });
 
@@ -379,6 +513,7 @@ router.post('/auth/google', async (req, res) => {
     if (user && user.status === 'blocked') {
       return res.status(403).json({ success: false, message: 'This account has been blocked' });
     }
+    let isNewGoogleUser = false;
     if (!user) {
       const crypto = require('crypto');
       user = store.insert('users', {
@@ -391,8 +526,10 @@ router.post('/auth/google', async (req, res) => {
         role: 'student',
         status: 'active'
       });
+      isNewGoogleUser = true;
     }
     const token = auth.createSession({ id: user.id, role: 'user', name: user.name, email: user.email });
+    try { if (isNewGoogleUser) require('../email').notifyWelcome(user); } catch (e) {}
     res.json({ success: true, message: 'Welcome, ' + user.name.split(' ')[0], token, data: auth.publicUser(user) });
   } catch (err) {
     res.status(401).json({ success: false, message: err.message || 'Google verification failed' });
@@ -406,6 +543,78 @@ router.get('/auth/me', auth.requireUser, (req, res) => {
   const user = store.find('users', req.session.id);
   if (!user) return res.status(404).json({ success: false, message: 'User not found' });
   res.json({ success: true, data: auth.publicUser(user) });
+});
+
+/* ---------- Student profile: view is /auth/me, edit profile + change password ---------- */
+router.put('/auth/profile', auth.requireUser, (req, res) => {
+  if (req.session.role !== 'user') {
+    return res.status(400).json({ success: false, message: 'Admins use the Admin Panel account settings' });
+  }
+  const user = store.find('users', req.session.id);
+  if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+  const { name, phone, avatar } = req.body || {};
+  const data = {};
+  if (name !== undefined) {
+    const nm = String(name || '').trim();
+    if (!nm) return res.status(400).json({ success: false, message: 'Name cannot be empty' });
+    if (nm.length > 80) return res.status(400).json({ success: false, message: 'Name is too long (max 80 characters)' });
+    data.name = nm;
+  }
+  if (phone !== undefined) {
+    const raw = String(phone || '').trim();
+    if (raw) {
+      const ph = normalizeMobile(raw) || (/^01\d{9}$/.test(raw.replace(/[\s-]/g, '')) ? raw.replace(/[\s-]/g, '') : '');
+      if (!ph) return res.status(400).json({ success: false, message: 'Enter a valid mobile number (01XXXXXXXXX)' });
+      const taken = store.all('users').some(u => String(u.id) !== String(user.id) && String(u.phone || '').trim() && (String(u.phone).trim() === ph || normalizeMobile(u.phone) === ph));
+      if (taken) return res.status(409).json({ success: false, message: 'This mobile number is already used by another account' });
+      data.phone = ph;
+    } else {
+      data.phone = '';
+    }
+  }
+  if (avatar !== undefined) {
+    const av = String(avatar || '').trim();
+    if (!av) {
+      data.avatar = '';
+    } else if (av.startsWith('data:')) {
+      const saved = store.storeImage(av, 'avatar-' + user.id);
+      // storeImage returns the original data-URL back if it could not save it
+      if (typeof saved === 'string' && saved.startsWith('data:') && saved.length > 200000) {
+        return res.status(400).json({ success: false, message: 'Photo is too large. Try a smaller image (max ~200KB after resize)' });
+      }
+      data.avatar = saved;
+    } else if (/^(\/uploads\/|https?:\/\/)/.test(av) && av.length < 500) {
+      data.avatar = av;
+    } else {
+      return res.status(400).json({ success: false, message: 'Invalid photo format' });
+    }
+  }
+  const updated = store.update('users', user.id, data);
+  res.json({ success: true, message: 'Profile updated successfully', data: auth.publicUser(updated) });
+});
+
+router.put('/auth/password', auth.requireUser, (req, res) => {
+  if (req.session.role !== 'user') {
+    return res.status(400).json({ success: false, message: 'Admins use the Admin Panel account settings' });
+  }
+  const user = store.find('users', req.session.id);
+  if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+  const { currentPassword, newPassword } = req.body || {};
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ success: false, message: 'Current password and new password are required' });
+  }
+  if (!auth.verifyPassword(String(currentPassword), user.password) && !auth.verifyPassword(String(currentPassword).trim(), user.password)) {
+    return res.status(400).json({ success: false, message: 'Current password is incorrect' });
+  }
+  const np = String(newPassword).trim();
+  if (np.length < 4) {
+    return res.status(400).json({ success: false, message: 'New password must be at least 4 characters' });
+  }
+  if (String(currentPassword) === np) {
+    return res.status(400).json({ success: false, message: 'New password must be different from the current one' });
+  }
+  const updated = store.update('users', user.id, { password: auth.hashPassword(np) });
+  res.json({ success: true, message: 'Password changed successfully', data: auth.publicUser(updated) });
 });
 
 /* ---------- Orders (checkout) ---------- */
@@ -432,13 +641,16 @@ router.post('/orders', auth.optionalUser, async (req, res) => {
   const subtotal = detailed.reduce((sum, i) => sum + i.price, 0);
   let discount = 0;
   let appliedCoupon = null;
+  const isStudent = req.session && req.session.role === 'user';
   if (couponCode) {
-    const check = validateCoupon(couponCode, subtotal, detailed);
+    const check = validateCoupon(couponCode, subtotal, detailed, couponBuyerOf(
+      { email, phone, userId: isStudent ? req.session.id : null },
+      isStudent ? { id: req.session.id, email: req.session.email, phone: req.session.phone } : null
+    ));
     if (!check.valid) return res.status(400).json({ success: false, message: check.message });
     discount = check.discount;
     appliedCoupon = check.coupon;
   }
-  const isStudent = req.session && req.session.role === 'user';
   const orderNo = 'SM' + Date.now().toString().slice(-8);
   const finalTotal = Math.max(0, subtotal - discount);
   const isFree = finalTotal <= 0;
@@ -466,8 +678,12 @@ router.post('/orders', auth.optionalUser, async (req, res) => {
     store.update('coupons', appliedCoupon.id, { used: Number(appliedCoupon.used || 0) + 1 });
   }
 
+  // Notun order aslei admin-ke email alert (Notice page-e ON/OFF + address)
+  try { require('../email').notifyAdminNewOrder(store.find('orders', order.id) || order); } catch (e) {}
+
   // Instant response for free orders (no gateway or manual approval needed)
   if (isFree) {
+    try { require('../email').notifyOrder(store.find('orders', order.id) || order, 'completed'); } catch (e) {}
     return res.status(201).json({
       success: true,
       message: 'Free enrollment completed successfully.',
@@ -495,6 +711,7 @@ router.post('/orders', auth.optionalUser, async (req, res) => {
         webhookUrl: siteBase + '/api/public/payments/piprapay/webhook'
       });
       store.update('orders', order.id, { pp_id: charge.pp_id, paymentUrl: charge.pp_url });
+      try { require('../email').notifyOrder(store.find('orders', order.id) || order, 'pending'); } catch (e) {}
       return res.status(201).json({
         success: true,
         message: 'Redirecting to payment...',
@@ -505,6 +722,7 @@ router.post('/orders', auth.optionalUser, async (req, res) => {
     }
   }
   res.status(201).json({ success: true, message: 'Order placed successfully. Order No: ' + orderNo, data: order });
+  try { require('../email').notifyOrder(order, 'pending'); } catch (e) {}
 });
 
 /* ---------- PipaPay: verify + webhook ---------- */
@@ -519,6 +737,7 @@ function markPipraPaid(order, tx, ppId) {
     const cp = store.findBy('coupons', 'code', order.couponCode);
     if (cp) store.update('coupons', cp.id, { used: Number(cp.used || 0) + 1 });
   }
+  try { require('../email').notifyOrder(store.find('orders', order.id) || order, 'confirmed'); } catch (e) {}
   return store.find('orders', order.id);
 }
 
@@ -609,7 +828,7 @@ function enrichEbook(ebook) {
 
 router.get('/ebooks', (req, res) => {
   let list = activeOnly(store.all('ebooks')).map(enrichEbook);
-  const { batch, batchId, category, categoryId, ebookBatch, ebookBatchId, q } = req.query;
+  const { batch, batchId, category, categoryId, ebookBatch, ebookBatchId, q, sort } = req.query;
   if (batch) list = list.filter(e => String(e.batchSlug).toLowerCase() === String(batch).toLowerCase());
   if (batchId) list = list.filter(e => String(e.batchId) === String(batchId));
   if (ebookBatch) list = list.filter(e => String(e.ebookBatchSlug).toLowerCase() === String(ebookBatch).toLowerCase());
@@ -619,6 +838,9 @@ router.get('/ebooks', (req, res) => {
   if (q) {
     const term = String(q).toLowerCase();
     list = list.filter(e => (e.title + ' ' + (e.details || '') + ' ' + (e.author || '')).toLowerCase().includes(term));
+  }
+  if (String(sort || '').toLowerCase() === 'popular') {
+    list = list.slice().sort((a, b) => (Number(b.downloads) || 0) - (Number(a.downloads) || 0));
   }
   const paged = store.paginate(list, req.query);
   res.json(Object.assign({ success: true, count: paged.total, data: paged.items }, paged));
@@ -849,11 +1071,10 @@ router.get('/my/lessons/:id/watch', auth.optionalUser, (req, res) => {
   if (lesson.isFree) {
     return res.json({
       success: true,
-      data: {
+      data: Object.assign({
         title: lesson.title,
-        embedUrl: 'https://www.youtube-nocookie.com/embed/' + lesson.videoId + '?rel=0',
         watermark: me ? (me.name || me.email || '') : ''
-      }
+      }, lessonVideoPayload(lesson))
     });
   }
   // Paid class: must be logged in + enrolled
@@ -862,11 +1083,10 @@ router.get('/my/lessons/:id/watch', auth.optionalUser, (req, res) => {
   if (!enrolled) return res.status(403).json({ success: false, message: 'This class is locked. Please enroll first.' });
   res.json({
     success: true,
-    data: {
+    data: Object.assign({
       title: lesson.title,
-      embedUrl: 'https://www.youtube-nocookie.com/embed/' + lesson.videoId + '?rel=0',
       watermark: me.name || me.email || ''
-    }
+    }, lessonVideoPayload(lesson))
   });
 });
 

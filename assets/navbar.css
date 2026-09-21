@@ -18,7 +18,7 @@
 .sm-sug-row { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 8px 12px; cursor: pointer; }
 .sm-sug-row:hover, .sm-sug-row.sug-active { background: #F1F5FF; }
 .sm-sug-thumb { width: 34px; height: 34px; border-radius: 9px; overflow: hidden; flex-shrink: 0; background: #EEF2FF; display: flex; align-items: center; justify-content: center; color: #1A56FF; font-size: 14px; }
-.sm-sug-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.sm-sug-thumb img { width: 100%; height: 100%; object-fit: contain; }
 .sm-sug-meta { flex: 1; min-width: 0; }
 .sm-sug-title { font-size: 12.5px; font-weight: 700; color: #0F2043; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sm-sug-sub { font-size: 11px; color: #64748B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -69,14 +69,168 @@ html.sm-dark .sm-desk-cart-badge{ border-color:#0F1A33; }
 #smDeskDrawer .sm-backdrop { position: absolute; inset: 0; background: rgba(15,32,67,.45); }
 #smDeskDrawer .sm-panel { position: absolute; left: 0; top: 0; bottom: 0; width: 300px; max-width: 85vw; background: #fff; box-shadow: 8px 0 40px rgba(0,0,0,.15); padding: 18px 14px; overflow-y: auto; }
 
-/* ---- Simple dark theme (desktop toggle, persists) ---- */
+/* ---- Full dark theme (toggle persists via localStorage sm_theme) ---- */
+html.sm-dark { color-scheme: dark; }
 html.sm-dark body { background: #0B1226 !important; color: #E2E8F0 !important; }
 html.sm-dark header { background: #0F1A33 !important; border-color: #1E2A4A !important; }
+html.sm-dark header .border-slate-100,
+html.sm-dark header .border-slate-200 { border-color: #1E2A4A !important; }
+html.sm-dark #mobileMenu { background: #0F1A33 !important; border-color: #1E2A4A !important; }
+html.sm-dark #mobileMenu a { color: #CBD5E1 !important; }
+html.sm-dark #mobileMenu a:hover { background: #1E2C52 !important; color: #fff !important; }
+
+/* desktop bar */
 html.sm-dark .sm-desk-nav-link { color: #CBD5E1 !important; }
 html.sm-dark .sm-desk-nav-link.sm-active, html.sm-dark .sm-desk-nav-link:hover { color: #7AA2FF !important; }
 html.sm-dark .sm-desk-pill, html.sm-dark .sm-desk-search { background: #16213D !important; border-color: #2A3A63 !important; color: #E2E8F0 !important; }
 html.sm-dark .sm-desk-search input { color: #E2E8F0 !important; }
+html.sm-dark .sm-desk-search input::placeholder { color: #64748B !important; }
 html.sm-dark .sm-desk-menu { background: #16213D !important; border-color: #2A3A63 !important; }
 html.sm-dark .sm-desk-menu a, html.sm-dark .sm-desk-menu button.sm-mi { color: #CBD5E1 !important; }
 html.sm-dark .sm-desk-menu a:hover, html.sm-dark .sm-desk-menu button.sm-mi:hover { background: #1E2C52 !important; color: #fff !important; }
+html.sm-dark #smDeskDrawer .sm-panel { background: #0F1A33 !important; color: #E2E8F0 !important; }
+html.sm-dark #smDeskDrawer .sm-panel a { color: #CBD5E1 !important; }
+html.sm-dark #smDeskDrawer .sm-panel a:hover { background: #1E2C52 !important; color: #fff !important; }
+html.sm-dark .sm-desk-tg-icon { background: #1E2C52 !important; color: #7AA2FF !important; }
+
+/* phone header icons + logo text (hardcoded navy) */
+html.sm-dark header .fa-bars,
+html.sm-dark header .fa-magnifying-glass,
+html.sm-dark header .fa-user,
+html.sm-dark header .fa-cart-shopping,
+html.sm-dark header .fa-bell,
+html.sm-dark header .fa-xmark { color: #E2E8F0 !important; }
+html.sm-dark header a[href="index.html"] span span:first-child,
+html.sm-dark header span.text-\[\#0F2043\],
+html.sm-dark header .text-\[\#0F2043\] { color: #F1F5F9 !important; }
+html.sm-dark header .hover\:bg-slate-100:hover { background: #1E2C52 !important; }
+
+/* hero + sections */
+html.sm-dark .hero-bg { background: linear-gradient(135deg, #141B3D 0%, #16213D 45%, #1A1440 100%) !important; border-color: #2A3A63 !important; }
+html.sm-dark main { background: transparent !important; }
+html.sm-dark footer { background: #0F1A33 !important; border-color: #1E2A4A !important; }
+html.sm-dark footer .border-slate-200 { border-color: #1E2A4A !important; }
+
+/* generic surfaces: white cards, light backgrounds */
+html.sm-dark .bg-white { background-color: #131E3A !important; }
+html.sm-dark .bg-\[\#F8F9FD\],
+html.sm-dark .bg-\[\#F5F7FB\],
+html.sm-dark .bg-\[\#F3F4F8\],
+html.sm-dark .bg-slate-50 { background-color: #0B1226 !important; }
+html.sm-dark .bg-slate-100 { background-color: #1E2C52 !important; }
+html.sm-dark .bg-\[\#F8FAFF\] { background-color: #16213D !important; }
+html.sm-dark .bg-\[\#F0F4FF\],
+html.sm-dark .bg-\[\#E6F0FF\],
+html.sm-dark .bg-\[\#EEF2FF\],
+html.sm-dark .bg-\[\#EDE9FF\] { background-color: #1E2C52 !important; }
+html.sm-dark .bg-\[\#E0F2FE\] { background-color: #1E2C52 !important; }
+html.sm-dark .bg-\[\#E6F4EA\] { background-color: #143325 !important; }
+html.sm-dark .bg-\[\#FFF2E6\] { background-color: #3A2A14 !important; }
+
+/* borders */
+html.sm-dark .border-slate-100,
+html.sm-dark .border-slate-200,
+html.sm-dark .border-\[\#E8E8FF\],
+html.sm-dark .divide-slate-100 > * + * { border-color: #22315A !important; }
+html.sm-dark .divide-slate-100 { --tw-divide-opacity: 1; }
+html.sm-dark .shadow-sm,
+html.sm-dark .shadow-\[0_2px_10px_rgba\(0\2c 0\2c 0\2c 0\.04\)\],
+html.sm-dark .shadow-\[0_2px_12px_rgba\(0\2c 0\2c 0\2c 0\.06\)\],
+html.sm-dark .shadow-\[0_2px_14px_rgba\(0\2c 0\2c 0\2c 0\.05\)\] { box-shadow: 0 2px 14px rgba(0,0,0,.45) !important; }
+
+/* text colors */
+html.sm-dark .text-slate-900,
+html.sm-dark .text-\[\#0F2043\] { color: #F1F5F9 !important; }
+html.sm-dark .text-slate-800,
+html.sm-dark .text-slate-700 { color: #CBD5E1 !important; }
+html.sm-dark .text-slate-600 { color: #94A3B8 !important; }
+html.sm-dark .text-slate-500 { color: #7D8DB0 !important; }
+html.sm-dark .text-slate-400 { color: #5B6B8C !important; }
+html.sm-dark .hover\:text-\[\#1A56FF\]:hover { color: #7AA2FF !important; }
+
+/* keep brand blue readable, keep badges */
+html.sm-dark .text-\[\#1A56FF\] { color: #7AA2FF !important; }
+html.sm-dark .text-\[\#4F46E5\] { color: #A5B4FC !important; }
+html.sm-dark .text-\[\#16A34A\] { color: #4ADE80 !important; }
+html.sm-dark .text-\[\#0EA5E9\] { color: #38BDF8 !important; }
+html.sm-dark a.bg-\[\#1A56FF\],
+html.sm-dark button.bg-\[\#1A56FF\] { background-color: #1A56FF !important; color: #fff !important; }
+
+/* hover states on light cards */
+html.sm-dark .hover\:bg-slate-50:hover { background-color: #1E2C52 !important; }
+html.sm-dark .hover\:bg-slate-100:hover { background-color: #24345E !important; }
+
+/* inputs */
+html.sm-dark input,
+html.sm-dark textarea,
+html.sm-dark select { background-color: #16213D !important; border-color: #2A3A63 !important; color: #E2E8F0 !important; }
+html.sm-dark input::placeholder,
+html.sm-dark textarea::placeholder { color: #5B6B8C !important; }
+html.sm-dark input:focus { border-color: #1A56FF !important; }
+
+/* How-to-buy dark navy block stays, but outer card + video placeholder */
+html.sm-dark #secHowToBuy .bg-white { background-color: #131E3A !important; }
+html.sm-dark #hbDesc { color: #94A3B8 !important; }
+
+/* dashboard / cart / auth / modals (JS-rendered too) */
+html.sm-dark #smCartBox,
+html.sm-dark #smCartModal .bg-white { background-color: #131E3A !important; }
+html.sm-dark [data-sm-auth] .bg-white,
+html.sm-dark [data-sm-course-detail] .bg-white,
+html.sm-dark [data-sm-courses] .bg-white,
+html.sm-dark [data-sm-myorders] .border { background-color: #131E3A !important; }
+html.sm-dark [data-sm-course-detail] .bg-\[\#F8F9FD\] { background-color: #16213D !important; }
+html.sm-dark #smToast { background: #1E2C52 !important; color: #fff !important; }
+
+/* fixed mobile buy bar (course/ebook) */
+html.sm-dark .fixed.bottom-0.bg-white { background-color: #0F1A33 !important; border-color: #1E2A4A !important; }
+
+/* footer social + scroll-top buttons */
+html.sm-dark footer a.bg-white,
+html.sm-dark footer button.bg-white { background-color: #16213D !important; border-color: #2A3A63 !important; color: #CBD5E1 !important; }
+
+/* red/green status pills stay readable */
+html.sm-dark .bg-red-50 { background-color: #3A1620 !important; }
+html.sm-dark .text-red-600 { color: #FCA5A5 !important; }
 html.sm-dark main, html.sm-dark footer { filter: none; }
+
+/* auth page (standalone gradient + card) */
+html.sm-dark body { background: #0B1226 !important; }
+html.sm-dark .auth-input { background: #16213D !important; border-color: #2A3A63 !important; color: #E2E8F0 !important; }
+html.sm-dark .auth-input:focus { background: #131E3A !important; }
+html.sm-dark .from-white { --tw-gradient-from: #131E3A !important; --tw-gradient-to: #131E3A !important; }
+html.sm-dark .to-\[\#F4F7FE\] { --tw-gradient-to: #16213D !important; }
+html.sm-dark .bg-\[\#F1F5F9\] { background-color: #1E2C52 !important; }
+html.sm-dark .tab-idle { color: #94A3B8 !important; }
+html.sm-dark .tab-idle:hover { color: #fff !important; }
+
+/* courses.html: custom category card classes (JS-rendered too) */
+html.sm-dark .cat-academic,
+html.sm-dark .skill-prog { background: #1B2350 !important; border-color: #2A3A63 !important; }
+html.sm-dark .cat-revision,
+html.sm-dark .skill-graphic { background: #143325 !important; border-color: #1E4D33 !important; }
+html.sm-dark .cat-admission { background: #3A2A14 !important; border-color: #5C451A !important; }
+html.sm-dark .skill-digital { background: #16294F !important; border-color: #2A3A63 !important; }
+html.sm-dark .skill-lang { background: #3A1B33 !important; border-color: #5C2A4D !important; }
+html.sm-dark .skill-others { background: #16213D !important; border-color: #2A3A63 !important; }
+
+/* courses.html: count pills + icon colors inside category cards */
+html.sm-dark .bg-\[\#DDD6FE\] { background-color: #2A3560 !important; }
+html.sm-dark .bg-\[\#C8E9D5\] { background-color: #143325 !important; }
+html.sm-dark .bg-\[\#FFE4C7\] { background-color: #3A2A14 !important; }
+html.sm-dark .text-\[\#3B5BFE\] { color: #8FA2FF !important; }
+html.sm-dark .text-\[\#15803D\] { color: #4ADE80 !important; }
+html.sm-dark .text-\[\#C2410C\] { color: #FBBF24 !important; }
+html.sm-dark .text-\[\#F59E0B\] { color: #FBBF24 !important; }
+
+/* courses.html: tailwind opacity-variant utilities */
+html.sm-dark .bg-white\/90 { background-color: rgba(19,30,58,.92) !important; }
+html.sm-dark .border-slate-100\/90 { border-color: #22315A !important; }
+html.sm-dark .border-slate-200\/90 { border-color: #22315A !important; }
+html.sm-dark .border-black\/5 { border-color: rgba(255,255,255,.08) !important; }
+
+/* courses.html: carousel dots */
+html.sm-dark #batchSections .bg-slate-200 { background-color: #2A3A63 !important; }
+
+/* courses.html: floating cart badge white ring */
+html.sm-dark a[href="cart.html"] .border-white { border-color: #0F1A33 !important; }

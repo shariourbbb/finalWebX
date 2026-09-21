@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>StudyMart - Your Learning Journey Starts Here</title>
+<script>try{var __sm_t=localStorage.getItem('sm_theme')||'light';if(__sm_t==='dark'){document.documentElement.classList.add('sm-dark');document.documentElement.style.colorScheme='dark';}}catch(e){}</script>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -22,10 +23,10 @@ tailwind.config = {
 .scrollbar-hide::-webkit-scrollbar{display:none}
 .scrollbar-hide{-ms-overflow-style:none; scrollbar-width:none}
 .hero-bg{background: linear-gradient(135deg, #F3F0FF 0%, #EEF2FF 45%, #F0F4FF 100%);}
-html.sm-loading #secHero{opacity:0}
-html.sm-loading #siteLogoImg,html.sm-loading #siteLogoFallback{opacity:0}
-html.sm-ready #secHero{opacity:1;transition:opacity .18s ease}
-html.sm-ready #siteLogoImg,html.sm-ready #siteLogoFallback{opacity:1;transition:opacity .18s ease}
+html.sm-loading #secHero,html.sm-loading #secCategories,html.sm-loading #secEbookCategory,html.sm-loading #secPopular,html.sm-loading #secFeatured,html.sm-loading #secEbooks,html.sm-loading #secPopularEbooks,html.sm-loading #secHowToBuy{opacity:0!important}
+html.sm-loading #siteLogoImg,html.sm-loading #siteLogoFallback,html.sm-loading [data-sm-desk-logo],html.sm-loading [data-sm-desk-logo-fb],html.sm-loading #siteNameDisplay,html.sm-loading #siteFooterNameDisplay,html.sm-loading #siteFooterLogoImg,html.sm-loading #siteFooterLogoFallback,html.sm-loading #siteTaglineDisplay,html.sm-loading #siteFooterTaglineDisplay{opacity:0!important}
+html.sm-loading #noticeBar{display:none!important}
+html.sm-ready #secHero,html.sm-ready #secCategories,html.sm-ready #secEbookCategory,html.sm-ready #secPopular,html.sm-ready #secFeatured,html.sm-ready #secEbooks,html.sm-ready #secPopularEbooks,html.sm-ready #secHowToBuy,html.sm-ready #siteLogoImg,html.sm-ready #siteLogoFallback,html.sm-ready #siteNameDisplay,html.sm-ready #siteFooterNameDisplay,html.sm-ready #siteTaglineDisplay,html.sm-ready #siteFooterTaglineDisplay{opacity:1;transition:opacity .18s ease}
 /* Popular cards */
 .card-physics{background: linear-gradient(135deg, #1E0E62 0%, #2D1B8A 50%, #1E135E 100%);}
 .card-chemistry{background: linear-gradient(135deg, #0B3D2E 0%, #14532D 50%, #0F4C3A 100%);}
@@ -327,10 +328,21 @@ html.sm-ready #siteLogoImg,html.sm-ready #siteLogoFallback{opacity:1;transition:
   <section id="secEbooks" class="mt-6 sm:mt-8">
     <div class="flex items-center justify-between mb-3">
       <h2 id="secEbooksTitle" class="text-[16px] sm:text-[20px] font-extrabold text-[#0F2043]">Ebooks</h2>
-      <a href="courses.html" class="text-[#1A56FF] font-bold text-[12px] sm:text-[13px] flex items-center gap-1">View All <i class="fa-solid fa-arrow-right text-[11px]"></i></a>
+      <a href="ebooks.html" class="text-[#1A56FF] font-bold text-[12px] sm:text-[13px] flex items-center gap-1">View All <i class="fa-solid fa-arrow-right text-[11px]"></i></a>
     </div>
     <div id="ebooksGrid" class="flex gap-3 sm:gap-4 overflow-x-auto scrollbar-hide course-scroll pb-2 sm:grid sm:grid-cols-4 sm:overflow-visible">
       <p class="min-w-full text-center text-[13px] text-slate-400 py-10 sm:col-span-4"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading e-books...</p>
+    </div>
+  </section>
+
+  <!-- Popular Ebooks (most downloaded) -->
+  <section id="secPopularEbooks" class="mt-6 sm:mt-8">
+    <div class="flex items-center justify-between mb-3">
+      <h2 id="secPopularEbooksTitle" class="text-[16px] sm:text-[20px] font-extrabold text-[#0F2043]">Popular Ebooks</h2>
+      <a href="ebooks.html?sort=popular" class="text-[#1A56FF] font-bold text-[12px] sm:text-[13px] flex items-center gap-1">View All <i class="fa-solid fa-arrow-right text-[11px]"></i></a>
+    </div>
+    <div id="popularEbooksGrid" class="flex gap-3 sm:gap-4 overflow-x-auto scrollbar-hide course-scroll pb-2 sm:grid sm:grid-cols-4 sm:overflow-visible">
+      <p class="min-w-full text-center text-[13px] text-slate-400 py-10 sm:col-span-4"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading popular e-books...</p>
     </div>
   </section>
 
@@ -442,36 +454,10 @@ html.sm-ready #siteLogoImg,html.sm-ready #siteLogoFallback{opacity:1;transition:
   </div>
 </footer>
 
-<!-- ===== Pro Mobile Bottom Nav (Android / Phone) ===== -->
-<style>
-.sm-bottom-nav{padding-bottom:env(safe-area-inset-bottom)}
-.sm-bottom-nav .bn-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;flex:1;padding:7px 2px 8px;border-radius:14px;color:#64748B;position:relative;transition:background .15s,color .15s}
-.sm-bottom-nav .bn-item i{font-size:19px;line-height:1}
-.sm-bottom-nav .bn-item span{font-size:11px;font-weight:600;white-space:nowrap;line-height:1}
-.sm-bottom-nav .bn-item.bn-active{background:#EAF0FF;color:#1A56FF}
-.sm-bottom-nav .bn-item.bn-active span{font-weight:700}
-.sm-bottom-nav .bn-item.bn-active::before{content:'';position:absolute;top:-9px;left:50%;transform:translateX(-50%);width:22px;height:3px;border-radius:9999px;background:linear-gradient(90deg,#1A56FF,#7C3AED)}
-</style>
-<div class="h-[76px] lg:hidden" aria-hidden="true"></div>
-<nav class="sm-bottom-nav fixed bottom-0 left-0 right-0 z-[70] border-t border-slate-200/90 lg:hidden" style="background:rgba(255,255,255,.98);backdrop-filter:blur(12px);box-shadow:0 -6px 24px rgba(15,32,67,.08)">
-  <div class="grid grid-cols-5 gap-1 px-2 pt-2" style="padding-bottom:calc(8px + env(safe-area-inset-bottom))">
-    <a href="index.html" data-bn="home" class="bn-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
-    <a href="courses.html" data-bn="courses" class="bn-item"><i class="fa-regular fa-square"></i><span>Courses</span></a>
-    <a href="courses.html" data-bn="ebook" class="bn-item"><i class="fa-regular fa-file-lines"></i><span>E-Book</span></a>
-    <a href="cart.html" data-bn="cart" class="bn-item"><span class="relative"><i class="fa-solid fa-cart-shopping"></i><span data-sm-cart-count class="absolute -top-2 -right-3 min-w-[16px] h-4 px-1 bg-[#1A56FF] text-white text-[10px] font-bold rounded-full hidden items-center justify-center">0</span></span><span>Cart</span></a>
-    <a href="dashboard.html" data-bn="account" data-account-link class="bn-item"><i class="fa-regular fa-user"></i><span>Account</span></a>
-  </div>
-</nav>
+<!-- Mobile bottom nav removed -->
 <script>
 (function(){
   try{
-    var p=(location.pathname.split('/').pop()||'index.html').split('?')[0].toLowerCase();
-    var map={'index.html':'home','':'home','courses.html':'courses','batch.html':'courses','course.html':'courses','ebook.html':'ebook','cart.html':'cart','dashboard.html':'account','auth.html':'account'};
-    var key=map[p]||'home';
-    if(p==='courses.html' && /ebook/i.test(location.search+location.hash)) key='ebook';
-    document.querySelectorAll('.sm-bottom-nav [data-bn]').forEach(function(a){ if(a.dataset.bn===key) a.classList.add('bn-active'); });
-    var n=0; try{ n=(JSON.parse(localStorage.getItem('sm_cart'))||[]).length; }catch(e){}
-    document.querySelectorAll('.sm-bottom-nav [data-sm-cart-count]').forEach(function(el){ el.textContent=n; el.classList.toggle('hidden',!n); el.classList.toggle('flex',!!n); });
     // Smart Account routing: guest -> auth page, logged-in -> dashboard
     var hasTok=function(){ try{return !!(localStorage.getItem('sm_user_token')||sessionStorage.getItem('sm_user_token'));}catch(x){return false;} };
     if(!hasTok()) document.querySelectorAll('[data-account-link]').forEach(function(a){ a.href='auth.html?next='+encodeURIComponent('dashboard.html'); });
@@ -550,80 +536,100 @@ function applyHomePageData(hp){
       if (!container) return;
       if (catCfg.enabled===false) { toggleSec('secCategories', false); return; }
       const esc = s => String(s==null?'':s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-      let items = [];
-      // Batch mode: fetch batches, filter by batchIds if set
+      const toItems = (batches)=>{
+        let list = (batches||[]).filter(b=> (b.status||'active')==='active');
+        list = list.slice().sort((a,b)=> ((Number(a.order)||999)-(Number(b.order)||999)) || (Number(a.id)-Number(b.id)));
+        if (Array.isArray(catCfg.batchIds) && catCfg.batchIds.length>0){
+          const ids = catCfg.batchIds.map(String);
+          list = list.filter(b=> ids.includes(String(b.id)));
+        }
+        return list.map(b=> ({
+          id: b.id,
+          name: b.name,
+          icon: b.icon || 'fa-layer-group',
+          iconUrl: b.iconUrl || '',
+          color: b.color || '#6366F1',
+          bg: (b.color || '#6366F1') + '22',
+          link: 'batch.html?batch=' + encodeURIComponent(b.slug || b.id),
+          enabled: true
+        }));
+      };
+      const limit = Math.max(1, Math.min(10, parseInt(catCfg.limit,10) || 5));
+      const layout = catCfg.layout || '1row';
+      const showArrows = catCfg.showArrows !== false;
+      const render = (items)=>{
+        if (items.length===0) { container.innerHTML='<p class="text-[12px] text-slate-400 py-4">No batches yet — Batch Manage e batch create korun</p>'; return; }
+        if (layout === '2rows') {
+          container.className = 'grid gap-3 sm:gap-4 pb-2 -mx-3 px-3 sm:mx-0 sm:px-0';
+          container.style.gridTemplateColumns = `repeat(${Math.min(5, Math.ceil(items.length/2))}, minmax(0,1fr))`;
+          if (prevBtn) { prevBtn.classList.add('hidden'); prevBtn.style.display='none'; }
+          if (nextBtn) { nextBtn.classList.add('hidden'); nextBtn.style.display='none'; }
+          if (mobileWrap) mobileWrap.classList.add('hidden');
+        } else {
+          if (items.length <= 5) {
+            container.className = 'grid gap-3 sm:gap-4 pb-2 -mx-3 px-3 sm:mx-0 sm:px-0';
+            container.style.gridTemplateColumns = `repeat(${items.length}, minmax(0,1fr))`;
+            const shouldShow = showArrows;
+            if (prevBtn) { if(shouldShow){ prevBtn.classList.remove('hidden'); prevBtn.style.display='flex'; } else { prevBtn.classList.add('hidden'); } }
+            if (nextBtn) { if(shouldShow){ nextBtn.classList.remove('hidden'); nextBtn.style.display='flex'; } else { nextBtn.classList.add('hidden'); } }
+            if (mobileWrap) { if(shouldShow) mobileWrap.classList.remove('hidden'); else mobileWrap.classList.add('hidden'); }
+          } else {
+            container.className = 'flex gap-3 sm:gap-4 overflow-x-auto scrollbar-hide course-scroll pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 snap-x snap-mandatory';
+            container.style.gridTemplateColumns = '';
+            const shouldShow = showArrows;
+            if (prevBtn) { if(shouldShow){ prevBtn.classList.remove('hidden'); prevBtn.style.display='flex'; } else { prevBtn.classList.add('hidden'); } }
+            if (nextBtn) { if(shouldShow){ nextBtn.classList.remove('hidden'); nextBtn.style.display='flex'; } else { nextBtn.classList.add('hidden'); } }
+            if (mobileWrap) { if(shouldShow) mobileWrap.classList.remove('hidden'); else mobileWrap.classList.add('hidden'); }
+          }
+        }
+        const isGrid = (layout==='2rows') || (layout==='1row' && items.length <=5);
+        container.innerHTML = items.map(it=>`
+          <a href="${esc(it.link||'courses.html')}" class="${isGrid ? 'min-w-0' : 'flex-shrink-0 w-[110px] sm:w-auto snap-start'} bg-white rounded-[14px] border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.04)] p-3 sm:p-4 flex flex-col items-center justify-center gap-2 hover:shadow-md hover:-translate-y-0.5 transition min-h-[86px] sm:min-h-[110px] h-auto">
+            <div class="w-[44px] h-[44px] rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden" style="background:${esc(it.bg||'#EEF2FF')}">
+              ${it.iconUrl ? `<img src="${esc(it.iconUrl)}" alt="${esc(it.name)}" class="w-full h-full object-contain p-1.5">` : `<i class="fa-solid ${esc(it.icon||'fa-layer-group')} text-[18px]" style="color:${esc(it.color||'#6366F1')}"></i>`}
+            </div>
+            <span class="text-[11px] sm:text-[12px] font-bold text-[#0F2043] text-center leading-tight">${esc(it.name)}</span>
+          </a>
+        `).join('');
+        return JSON.stringify(items.map(it=>it.id||it.name));
+      };
+      // 1) INSTANT: bootstrap catalog theke songe songe paint (zero network, no flash)
+      let paintedKey = '';
+      try{
+        const bootCat = window.__SM_BOOTSTRAP__ && window.__SM_BOOTSTRAP__.catalog;
+        if (Array.isArray(catCfg.batchIds) && bootCat && Array.isArray(bootCat.batches) && bootCat.batches.length){
+          let quick = toItems(bootCat.batches).slice(0, limit);
+          if (quick.length===0 && catCfg.items && catCfg.items.length) quick = catCfg.items.filter(it=> it.enabled!==false).slice(0, limit);
+          if (quick.length) paintedKey = render(quick);
+        } else if (!Array.isArray(catCfg.batchIds)){
+          const quick = (catCfg.items || []).filter(it=> it.enabled!==false).slice(0, limit);
+          if (quick.length) paintedKey = render(quick);
+        }
+      }catch(e){}
+      // 2) BACKGROUND revalidate — sudhu change hole re-paint (flash nei)
       if (Array.isArray(catCfg.batchIds)) {
         try{
           const res = await fetch('/api/public/batches');
           const json = await res.json();
-          let batches = (json.data||[]).filter(b=> (b.status||'active')==='active');
-          batches = batches.slice().sort((a,b)=> ((Number(a.order)||999)-(Number(b.order)||999)) || (Number(a.id)-Number(b.id)));
-          if (catCfg.batchIds.length>0){
-            const ids = catCfg.batchIds.map(String);
-            batches = batches.filter(b=> ids.includes(String(b.id)));
+          let fresh = toItems(json.data||[]);
+          if (fresh.length===0 && catCfg.items && catCfg.items.length) {
+            fresh = catCfg.items.filter(it=> it.enabled!==false);
           }
-          items = batches.map(b=> ({
-            id: b.id,
-            name: b.name,
-            icon: b.icon || 'fa-layer-group',
-            iconUrl: b.iconUrl || '',
-            color: b.color || '#6366F1',
-            bg: (b.color || '#6366F1') + '22',
-            link: 'batch.html?batch=' + encodeURIComponent(b.slug || b.id),
-            enabled: true
-          }));
-          if (items.length===0 && catCfg.items && catCfg.items.length) {
-            items = catCfg.items.filter(it=> it.enabled!==false);
-          }
+          fresh = fresh.slice(0, limit);
+          if (JSON.stringify(fresh.map(it=>it.id||it.name)) !== paintedKey) render(fresh);
         }catch(e){
-          items = (catCfg.items||[]).filter(it=> it.enabled!==false);
+          if (!paintedKey) render((catCfg.items||[]).filter(it=> it.enabled!==false).slice(0, limit));
         }
-      } else {
-        items = (catCfg.items || []).filter(it=> it.enabled!==false);
+      } else if (!paintedKey) {
+        render((catCfg.items || []).filter(it=> it.enabled!==false).slice(0, limit));
       }
-      const limit = Math.max(1, Math.min(10, parseInt(catCfg.limit,10) || items.length || 5));
-      items = items.slice(0, limit);
-      const layout = catCfg.layout || '1row';
-      const showArrows = catCfg.showArrows !== false;
-      if (items.length===0) { container.innerHTML='<p class="text-[12px] text-slate-400 py-4">No batches yet — Batch Manage e batch create korun</p>'; return; }
-      if (layout === '2rows') {
-        container.className = 'grid gap-3 sm:gap-4 pb-2 -mx-3 px-3 sm:mx-0 sm:px-0';
-        container.style.gridTemplateColumns = `repeat(${Math.min(5, Math.ceil(items.length/2))}, minmax(0,1fr))`;
-        if (prevBtn) { prevBtn.classList.add('hidden'); prevBtn.style.display='none'; }
-        if (nextBtn) { nextBtn.classList.add('hidden'); nextBtn.style.display='none'; }
-        if (mobileWrap) mobileWrap.classList.add('hidden');
-      } else {
-        if (items.length <= 5) {
-          container.className = 'grid gap-3 sm:gap-4 pb-2 -mx-3 px-3 sm:mx-0 sm:px-0';
-          container.style.gridTemplateColumns = `repeat(${items.length}, minmax(0,1fr))`;
-          const shouldShow = showArrows;
-          if (prevBtn) { if(shouldShow){ prevBtn.classList.remove('hidden'); prevBtn.style.display='flex'; } else { prevBtn.classList.add('hidden'); } }
-          if (nextBtn) { if(shouldShow){ nextBtn.classList.remove('hidden'); nextBtn.style.display='flex'; } else { nextBtn.classList.add('hidden'); } }
-          if (mobileWrap) { if(shouldShow) mobileWrap.classList.remove('hidden'); else mobileWrap.classList.add('hidden'); }
-        } else {
-          container.className = 'flex gap-3 sm:gap-4 overflow-x-auto scrollbar-hide course-scroll pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 snap-x snap-mandatory';
-          container.style.gridTemplateColumns = '';
-          const shouldShow = showArrows;
-          if (prevBtn) { if(shouldShow){ prevBtn.classList.remove('hidden'); prevBtn.style.display='flex'; } else { prevBtn.classList.add('hidden'); } }
-          if (nextBtn) { if(shouldShow){ nextBtn.classList.remove('hidden'); nextBtn.style.display='flex'; } else { nextBtn.classList.add('hidden'); } }
-          if (mobileWrap) { if(shouldShow) mobileWrap.classList.remove('hidden'); else mobileWrap.classList.add('hidden'); }
-        }
-      }
-      const isGrid = (layout==='2rows') || (layout==='1row' && items.length <=5);
-      container.innerHTML = items.map(it=>`
-        <a href="${esc(it.link||'courses.html')}" class="${isGrid ? 'min-w-0' : 'flex-shrink-0 w-[110px] sm:w-auto snap-start'} bg-white rounded-[14px] border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.04)] p-3 sm:p-4 flex flex-col items-center justify-center gap-2 hover:shadow-md hover:-translate-y-0.5 transition min-h-[86px] sm:min-h-[110px] h-auto">
-          <div class="w-[44px] h-[44px] rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden" style="background:${esc(it.bg||'#EEF2FF')}">
-            ${it.iconUrl ? `<img src="${esc(it.iconUrl)}" alt="${esc(it.name)}" class="w-full h-full object-contain p-1.5">` : `<i class="fa-solid ${esc(it.icon||'fa-layer-group')} text-[18px]" style="color:${esc(it.color||'#6366F1')}"></i>`}
-          </div>
-          <span class="text-[11px] sm:text-[12px] font-bold text-[#0F2043] text-center leading-tight">${esc(it.name)}</span>
-        </a>
-      `).join('');
     })();
     toggleSec('secCategories', sec.categories && sec.categories.enabled);
     toggleSec('secEbookCategory', sec.ebookCategory && sec.ebookCategory.enabled);
     toggleSec('secPopular', sec.popular && sec.popular.enabled);
     toggleSec('secLatest', sec.latest && sec.latest.enabled);
     toggleSec('secEbooks', sec.ebooks && sec.ebooks.enabled);
+    toggleSec('secPopularEbooks', sec.popularEbooks && sec.popularEbooks.enabled);
     toggleSec('secFeatured', sec.featured && sec.featured.enabled);
     toggleSec('secBrowseCategory', sec.browseCategory && sec.browseCategory.enabled);
     toggleSec('secStats', sec.stats && sec.stats.enabled);
@@ -648,6 +654,7 @@ function applyHomePageData(hp){
     if(sec.popular && sec.popular.title) setText('secPopularTitle', sec.popular.title);
     if(sec.latest && sec.latest.title) setText('secLatestTitle', sec.latest.title);
     if(sec.ebooks && sec.ebooks.title) setText('secEbooksTitle', sec.ebooks.title);
+    if(sec.popularEbooks && sec.popularEbooks.title) setText('secPopularEbooksTitle', sec.popularEbooks.title);
     if(sec.featured){
       if(sec.featured.title) setText('secFeaturedTitle', sec.featured.title);
       if(sec.featured.subtitle){ const e=document.getElementById('secFeaturedSub'); if(e) e.textContent=sec.featured.subtitle; }
@@ -655,8 +662,7 @@ function applyHomePageData(hp){
     if(sec.browseCategory && sec.browseCategory.title) setText('secBrowseCategoryTitle', sec.browseCategory.title);
     if(sec.stats && sec.stats.title) setText('secStatsTitle', sec.stats.title);
     if(sec.batchesSection && sec.batchesSection.title) setText('secBatchesTitle', sec.batchesSection.title);
-    document.documentElement.classList.remove('sm-loading');
-    document.documentElement.classList.add('sm-ready');
+    try{ if(typeof window.__smMarkReady==='function') window.__smMarkReady('homepage'); else { document.documentElement.classList.remove('sm-loading'); document.documentElement.classList.add('sm-ready'); } }catch(e){ document.documentElement.classList.remove('sm-loading'); document.documentElement.classList.add('sm-ready'); }
 }
 (function(){
   try{
@@ -668,10 +674,10 @@ function applyHomePageData(hp){
     (async function(){
       const res = await fetch('/api/public/homepage');
       const json = await res.json();
-      if(!json.success || !json.data) { document.documentElement.classList.remove('sm-loading'); document.documentElement.classList.add('sm-ready'); return; }
+      if(!json.success || !json.data) { try{ if(typeof window.__smMarkReady==='function') window.__smMarkReady('homepage'); else { document.documentElement.classList.remove('sm-loading'); document.documentElement.classList.add('sm-ready'); } }catch(x){} return; }
       applyHomePageData(json.data);
     })();
-  }catch(e){ document.documentElement.classList.remove('sm-loading'); document.documentElement.classList.add('sm-ready'); console.warn('homepage load failed', e.message); }
+  }catch(e){ try{ if(typeof window.__smMarkReady==='function') window.__smMarkReady('homepage'); else { document.documentElement.classList.remove('sm-loading'); document.documentElement.classList.add('sm-ready'); } }catch(x){} console.warn('homepage load failed', e.message); }
 })();
 </script>
 <script>
@@ -695,22 +701,10 @@ function smHpLimit(secKey, defLimit){
   if (!box) return;
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
   const icons = { academic: 'fa-atom', admission: 'fa-building-columns', revision: 'fa-rotate', skill: 'fa-laptop-code', ebook: 'fa-book' };
-  try {
-    var popLimit = smHpLimit('popular', 8);
-    try{
-      var hpRes = await fetch('/api/public/homepage');
-      var hpJson = await hpRes.json();
-      if(hpJson && hpJson.success && hpJson.data && hpJson.data.sections && hpJson.data.sections.popular){
-        window.__SM_HP__ = hpJson.data;
-        popLimit = smHpLimit('popular', 8);
-      }
-    }catch(e){}
-    const r = await fetch('/api/public/courses?limit=' + popLimit);
-    const j = await r.json();
-    let list = j.data || [];
-    list = list.slice(0, popLimit);
+  function paintPopular(list) {
     if (!list.length) {
       box.innerHTML = '<p class="min-w-full text-center text-[13px] text-slate-400 py-10 sm:col-span-4">No courses yet — Admin Panel থেকে course add করুন</p>';
+      box._smKey = 'empty';
       return;
     }
     box.innerHTML = list.map(c => {
@@ -724,7 +718,7 @@ function smHpLimit(secKey, defLimit){
       const sub = c.teacher ? ('By ' + c.teacher) : (c.platformName || c.categoryName || '');
       return `
       <div onclick="window.location.href='course.html?id=${c.id}'" class="min-w-[160px] max-w-[160px] sm:min-w-0 sm:max-w-none snap-start flex-shrink-0 bg-white rounded-[12px] sm:rounded-[14px] overflow-hidden border border-slate-100 shadow-[0_2px_12px_rgba(0,0,0,0.06)] hover:shadow-lg hover:-translate-y-0.5 transition flex flex-col cursor-pointer">
-        <div class="relative h-[88px] sm:h-[124px] overflow-hidden bg-[#0F2043]">
+        <div class="relative aspect-video overflow-hidden bg-[#0F2043]">
           ${cover}
           <span class="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-black/45 backdrop-blur border border-white/25 text-white text-[9px] sm:text-[10px] font-bold truncate max-w-[calc(100%-16px)]">${esc(c.batchName || 'Course')}</span>
           ${off}
@@ -745,8 +739,21 @@ function smHpLimit(secKey, defLimit){
         </div>
       </div>`;
     }).join('');
+    box._smKey = JSON.stringify(list.map(c => c.id));
+  }
+  try {
+    var popLimit = smHpLimit('popular', 8);
+    // instant: server-injected catalog (zero network), then background revalidate
+    try {
+      var __cat = window.__SM_BOOTSTRAP__ && window.__SM_BOOTSTRAP__.catalog;
+      if (__cat && Array.isArray(__cat.courses) && __cat.courses.length) paintPopular(__cat.courses.slice(0, popLimit));
+    } catch (e) {}
+    const r = await fetch('/api/public/courses?limit=' + popLimit);
+    const j = await r.json();
+    let list = (j.data || []).slice(0, popLimit);
+    if (box._smKey !== JSON.stringify(list.map(c => c.id))) paintPopular(list);
   } catch (e) {
-    box.innerHTML = '<p class="min-w-full text-center text-[13px] text-slate-400 py-10 sm:col-span-4">Could not load courses</p>';
+    if (!box._smKey) box.innerHTML = '<p class="min-w-full text-center text-[13px] text-slate-400 py-10 sm:col-span-4">Could not load courses</p>';
   }
 })();
 </script>
@@ -769,7 +776,7 @@ window.smRenderEbookCards = function(box, list, emptyMsg) {
       const price = Number(b.price) || 0, old = Number(b.oldPrice) || 0;
       const off = old > price && price > 0 ? Math.round(((old - price) / old) * 100) : 0;
       const cover = b.cover
-        ? `<img src="${esc(b.cover)}" alt="${esc(b.title)}" class="absolute inset-0 w-full h-full object-cover" loading="lazy">`
+        ? `<img src="${esc(b.cover)}" alt="${esc(b.title)}" class="absolute inset-0 w-full h-full object-contain" loading="lazy">`
         : `<div class="absolute inset-0 flex items-center justify-center" style="background:${grads[i % grads.length]}"><i class="fa-solid fa-book-open text-white/30 text-[30px] sm:text-[44px]"></i></div>`;
       const priceRow = price > 0
         ? `<span class="text-[#1A56FF] font-extrabold text-[13px] sm:text-[15px]">৳${price}</span>${old > price ? `<span class="text-[10px] sm:text-[11px] text-slate-400 line-through font-semibold">৳${old}</span>` : ''}`
@@ -803,20 +810,51 @@ window.smRenderEbookCards = function(box, list, emptyMsg) {
   if (!box) return;
   try {
     var ebLimit = smHpLimit('ebooks', 4);
-    try{
-      var hpRes2 = await fetch('/api/public/homepage');
-      var hpJson2 = await hpRes2.json();
-      if(hpJson2 && hpJson2.success && hpJson2.data && hpJson2.data.sections && hpJson2.data.sections.ebooks){
-        window.__SM_HP__ = window.__SM_HP__ || hpJson2.data;
-        if(window.__SM_HP__.sections) window.__SM_HP__.sections.ebooks = hpJson2.data.sections.ebooks;
-        ebLimit = smHpLimit('ebooks', 4);
+    // instant: server-injected catalog (zero network), then background revalidate
+    try {
+      var __catEb = window.__SM_BOOTSTRAP__ && window.__SM_BOOTSTRAP__.catalog;
+      if (__catEb && Array.isArray(__catEb.ebooks) && __catEb.ebooks.length) {
+        window.smRenderEbookCards(box, __catEb.ebooks.slice(0, ebLimit));
+        box._smKey = JSON.stringify(__catEb.ebooks.slice(0, ebLimit).map(b => b.id));
       }
-    }catch(e){}
+    } catch (e) {}
     const r = await fetch('/api/public/ebooks?limit=' + ebLimit);
     const j = await r.json();
-    window.smRenderEbookCards(box, (j.data || []).slice(0, ebLimit));
+    var list = (j.data || []).slice(0, ebLimit);
+    if (box._smKey !== JSON.stringify(list.map(b => b.id))) {
+      window.smRenderEbookCards(box, list);
+      box._smKey = JSON.stringify(list.map(b => b.id));
+    }
   } catch (e) {
-    box.innerHTML = '<p class="min-w-full text-center text-[13px] text-slate-400 py-10 sm:col-span-4">Could not load e-books</p>';
+    if (!box._smKey) box.innerHTML = '<p class="min-w-full text-center text-[13px] text-slate-400 py-10 sm:col-span-4">Could not load e-books</p>';
+  }
+})();
+
+// Popular Ebooks (most downloaded) - Row/Limit Admin theke
+(async function loadPopularEbooks(){
+  const box = document.getElementById('popularEbooksGrid');
+  if (!box) return;
+  const byDl = (a, b) => (Number(b.downloads) || 0) - (Number(a.downloads) || 0);
+  try {
+    var popEbLimit = smHpLimit('popularEbooks', 4);
+    // instant: server-injected catalog (zero network), then background revalidate
+    try {
+      var __catPop = window.__SM_BOOTSTRAP__ && window.__SM_BOOTSTRAP__.catalog;
+      if (__catPop && Array.isArray(__catPop.ebooks) && __catPop.ebooks.length) {
+        var quick = __catPop.ebooks.slice().sort(byDl).slice(0, popEbLimit);
+        window.smRenderEbookCards(box, quick);
+        box._smKey = JSON.stringify(quick.map(b => b.id));
+      }
+    } catch (e) {}
+    const r = await fetch('/api/public/ebooks?sort=popular&limit=' + popEbLimit);
+    const j = await r.json();
+    var list = (j.data || []).slice(0, popEbLimit);
+    if (box._smKey !== JSON.stringify(list.map(b => b.id))) {
+      window.smRenderEbookCards(box, list);
+      box._smKey = JSON.stringify(list.map(b => b.id));
+    }
+  } catch (e) {
+    if (!box._smKey) box.innerHTML = '<p class="min-w-full text-center text-[13px] text-slate-400 py-10 sm:col-span-4">Could not load popular e-books</p>';
   }
 })();
 
@@ -825,19 +863,10 @@ window.smRenderEbookCards = function(box, list, emptyMsg) {
   const box = document.getElementById('ebookBatchGrid');
   if (!box) return;
   const esc = window.smEsc;
-  try {
-    var catLimit = smHpLimit('ebookCategory', 8);
-    const [bRes, eRes, hRes] = await Promise.all([fetch('/api/public/ebook-batches'), fetch('/api/public/ebooks?limit=200'), fetch('/api/public/homepage').catch(function(){return null;})]);
-    try{
-      if(hRes){ var hJ = await hRes.json(); if(hJ && hJ.success && hJ.data){ window.__SM_HP__ = hJ.data; catLimit = smHpLimit('ebookCategory', 8); } }
-    }catch(e){}
-    const bj = await bRes.json();
-    const ej = await eRes.json();
-    let batches = bj.data || [];
-    batches = batches.slice(0, catLimit);
-    const ebooks = ej.data || [];
+  function paintEbb(batches, ebooks) {
     if (!batches.length) {
       box.innerHTML = '<p class="min-w-full text-center text-[13px] text-slate-400 py-10 sm:col-span-4">No e-book batches yet — Admin Panel → E-Book Batch থেকে create করুন</p>';
+      box._smKey = 'empty';
       return;
     }
     box.innerHTML = batches.map(b => {
@@ -851,14 +880,31 @@ window.smRenderEbookCards = function(box, list, emptyMsg) {
         <span class="text-[10px] font-semibold text-slate-400">${n} book${n === 1 ? '' : 's'}</span>
       </button>`;
     }).join('');
+    box._smKey = JSON.stringify(batches.map(b => b.id));
     box.querySelectorAll('[data-ebb]').forEach(a => {
       // Category button-e click korle alada page-e PDF list khulbe
       a.addEventListener('click', () => {
         window.location.href = 'ebooks.html?ebookBatch=' + encodeURIComponent(a.dataset.ebb);
       });
     });
+  }
+  try {
+    var catLimit = smHpLimit('ebookCategory', 8);
+    // instant: server-injected catalog (zero network)
+    try {
+      var __catEb2 = window.__SM_BOOTSTRAP__ && window.__SM_BOOTSTRAP__.catalog;
+      if (__catEb2 && Array.isArray(__catEb2.ebookBatches) && __catEb2.ebookBatches.length) {
+        paintEbb(__catEb2.ebookBatches.slice(0, catLimit), __catEb2.ebooks || []);
+      }
+    } catch (e) {}
+    const [bRes, eRes] = await Promise.all([fetch('/api/public/ebook-batches'), fetch('/api/public/ebooks?limit=200')]);
+    const bj = await bRes.json();
+    const ej = await eRes.json();
+    let batches = (bj.data || []).slice(0, catLimit);
+    const ebooks = ej.data || [];
+    if (box._smKey !== JSON.stringify(batches.map(b => b.id))) paintEbb(batches, ebooks);
   } catch (e) {
-    box.innerHTML = '<p class="min-w-full text-center text-[13px] text-slate-400 py-10 sm:col-span-4">Could not load e-book batches</p>';
+    if (!box._smKey) box.innerHTML = '<p class="min-w-full text-center text-[13px] text-slate-400 py-10 sm:col-span-4">Could not load e-book batches</p>';
   }
 })();
 </script>

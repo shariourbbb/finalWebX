@@ -48,6 +48,14 @@
           if (fi) fi.classList.add('hidden');
           if (ff) ff.classList.remove('hidden');
         }
+        try {
+          var __dl = (s.logoUrl && String(s.logoUrl).trim()) ? String(s.logoUrl).trim() : '';
+          if (__dl && typeof window.__smSetDeskLogo === 'function') window.__smSetDeskLogo(__dl);
+          else if (__dl) {
+            document.querySelectorAll('[data-sm-desk-logo]').forEach(function (img) { try{ img.src = __dl; }catch(e){} img.classList.remove('hidden'); });
+            document.querySelectorAll('[data-sm-desk-logo-fb]').forEach(function (fb) { fb.classList.add('hidden'); });
+          }
+        } catch (e) {}
         const sn = s.siteName;
         const hn = document.getElementById('siteNameDisplay');
         const fn = document.getElementById('siteFooterNameDisplay');
@@ -101,9 +109,12 @@
           if (color && String(color).trim()!=='') bar.style.color = color; else bar.style.color='#fff';
           bar.classList.remove('hidden'); bar.classList.add('flex');
         })();
-        // hero may be handled by inline script, but also ensure sm-ready class
-        document.documentElement.classList.remove('sm-loading');
-        document.documentElement.classList.add('sm-ready');
+        // GATE: branding done — page visible hobe sudhu jokhon homepage-o
+        // ready (index) ba branding-ekai jothesto (onno pages)
+        try {
+          if (typeof window.__smMarkReady === 'function') window.__smMarkReady('branding');
+          else { document.documentElement.classList.remove('sm-loading'); document.documentElement.classList.add('sm-ready'); }
+        } catch (e) { try{ document.documentElement.classList.remove('sm-loading'); document.documentElement.classList.add('sm-ready'); }catch(x){} }
       }
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', doBranding);
@@ -228,7 +239,7 @@
     return `
       <div class="bg-white rounded-[12px] sm:rounded-[14px] border border-slate-100 shadow-sm hover:shadow-md transition overflow-hidden flex flex-col">
         <a href="course.html?id=${c.id}" class="block">
-          <div class="h-[88px] sm:h-[110px] w-full relative overflow-hidden bg-[#0F2043]">
+          <div class="aspect-video w-full relative overflow-hidden bg-[#0F2043]">
             ${c.thumbnail
               ? `<img src="${esc(c.thumbnail)}" alt="${esc(c.title)}" class="w-full h-full object-cover" loading="lazy">`
               : `<div class="h-full w-full flex items-center justify-center" style="background:linear-gradient(135deg,${esc(c.batchColor || '#1A56FF')} 0%,#0F2043 100%)"><span class="text-white/90 text-[11px] sm:text-[13px] font-extrabold px-2 sm:px-3 text-center leading-tight">${esc(c.batchName || 'Course')}</span></div>`}
@@ -264,34 +275,71 @@
     return parts.length ? '?' + parts.join('&') : '';
   }
 
+  /* ---------- Instant catalog (server-injected, zero-fetch first paint) ---------- */
+  function getCatalog() {
+    try { return (window.__SM_BOOTSTRAP__ && window.__SM_BOOTSTRAP__.catalog) || null; }
+    catch (e) { return null; }
+  }
+  function mergeById(base, add) {
+    const seen = new Set(base.map(c => String(c.id)));
+    add.forEach(c => { if (!seen.has(String(c.id))) { seen.add(String(c.id)); base.push(c); } });
+    return base;
+  }
+  // Unfiltered blocks (home/all-courses/featured) render instantly from catalog.
+  // Batch/category/search blocks still fetch (filtered views).
+  function catalogCourses(block) {
+    const cat = getCatalog();
+    if (!cat || !Array.isArray(cat.courses)) return null;
+    if (block.dataset.smBatch || block.dataset.smCategory || block.dataset.smQ) return null;
+    let list = cat.courses.slice();
+    if (block.dataset.smFeatured) list = list.filter(c => c.featured);
+    const lim = parseInt(block.dataset.smLimit, 10) || 0;
+    if (lim > 0) list = list.slice(0, Math.min(lim, 60));
+    return list;
+  }
+  function paintCoursesBlock(block, list) {
+    const title = block.dataset.smTitle;
+    const gridClass = block.dataset.smGrid || 'grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4';
+    const head = title ? `<h2 class="text-[17px] sm:text-[19px] font-extrabold text-[#0F2043] mb-3">${esc(title)}</h2>` : '';
+    block.innerHTML = head + (list.length
+      ? `<div class="${gridClass}">${list.map(courseCard).join('')}</div>`
+      : '<p class="text-[13px] text-slate-400 text-center py-8">No course found here yet. Add courses from the Admin Panel.</p>');
+    block._smKey = JSON.stringify(list.map(c => c.id));
+    block._smPainted = true;
+  }
+
   async function hydrateCourseBlocks() {
     const blocks = $$('[data-sm-courses]');
-    for (const block of blocks) {
-      const title = block.dataset.smTitle;
+    await Promise.all(blocks.map(async (block) => {
+      // 1) instant paint from bootstrap catalog (no network)
+      try {
+        const quick = catalogCourses(block);
+        if (quick) { paintCoursesBlock(block, quick); SM.courses = mergeById(SM.courses, quick); }
+      } catch (e) {}
+      // 2) background revalidate — re-paint only if data actually changed
       try {
         const json = await apiGet('/api/public/courses' + buildQuery(block));
-        SM.courses = SM.courses.concat(json.data);
-        const gridClass = block.dataset.smGrid || 'grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4';
-        const head = title ? `<h2 class="text-[17px] sm:text-[19px] font-extrabold text-[#0F2043] mb-3">${esc(title)}</h2>` : '';
-        block.innerHTML = head + (json.data.length
-          ? `<div class="${gridClass}">${json.data.map(courseCard).join('')}</div>`
-          : '<p class="text-[13px] text-slate-400 text-center py-8">No course found here yet. Add courses from the Admin Panel.</p>');
+        SM.courses = mergeById(SM.courses, json.data || []);
+        const key = JSON.stringify((json.data || []).map(c => c.id));
+        if (block._smKey !== key) paintCoursesBlock(block, json.data || []);
+        else block._smPainted = true;
       } catch (err) {
-        block.innerHTML = (title ? `<h2 class="text-[17px] font-extrabold text-[#0F2043] mb-3">${esc(title)}</h2>` : '') +
-          `<p class="text-[13px] text-slate-400 text-center py-6">Could not load courses: ${esc(err.message)}</p>`;
+        if (!block._smPainted) {
+          const title = block.dataset.smTitle;
+          block.innerHTML = (title ? `<h2 class="text-[17px] font-extrabold text-[#0F2043] mb-3">${esc(title)}</h2>` : '') +
+            `<p class="text-[13px] text-slate-400 text-center py-6">Could not load courses: ${esc(err.message)}</p>`;
+        }
       }
-    }
+    }));
   }
 
   async function hydrateBatchPills() {
     const els = $$('[data-sm-batches]');
     if (!els.length) return;
-    try {
-      const json = await apiGet('/api/public/batches');
-      SM.meta.batches = (json.data || []).slice().sort((a, b) => ((Number(a.order) || 999) - (Number(b.order) || 999)) || (Number(a.id) - Number(b.id)));
-      json.data = SM.meta.batches;
+    const paint = list => {
+      SM.meta.batches = list.slice().sort((a, b) => ((Number(a.order) || 999) - (Number(b.order) || 999)) || (Number(a.id) - Number(b.id)));
       els.forEach(el => {
-        el.innerHTML = json.data.map(b => `
+        el.innerHTML = SM.meta.batches.map(b => `
           <a href="batch.html?batch=${encodeURIComponent(b.slug)}" class="bg-white rounded-[14px] border border-slate-200 shadow-sm px-4 py-3 flex items-center gap-3 hover:shadow-md transition">
             <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background:${esc(b.color || '#4F46E5')}22">
               <i class="fa-solid fa-graduation-cap text-[17px]" style="color:${esc(b.color || '#4F46E5')}"></i>
@@ -302,22 +350,37 @@
             </div>
           </a>`).join('');
       });
+    };
+    try {
+      const cat = getCatalog();
+      if (cat && Array.isArray(cat.batches) && cat.batches.length) paint(cat.batches);
+    } catch (e) {}
+    try {
+      const json = await apiGet('/api/public/batches');
+      paint(json.data || []);
     } catch (err) {
-      els.forEach(el => { el.innerHTML = '<p class="text-[12px] text-slate-400">Could not load batches.</p>'; });
+      if (!SM.meta.batches.length) els.forEach(el => { el.innerHTML = '<p class="text-[12px] text-slate-400">Could not load batches.</p>'; });
     }
   }
 
   async function hydrateCategories() {
     const els = $$('[data-sm-categories]');
     if (!els.length) return;
-    try {
-      const json = await apiGet('/api/public/categories');
+    const paint = list => {
       els.forEach(el => {
-        el.innerHTML = json.data.map(c => `
+        el.innerHTML = list.map(c => `
           <a href="courses.html?category=${encodeURIComponent(c.slug)}" class="px-3 py-2 rounded-full text-[12px] font-bold text-[#0F2043] hover:opacity-80 transition" style="background:${esc(c.color || '#EDE9FF')}">
             <i class="fa-solid ${esc(c.icon || 'fa-tag')} mr-1 text-[#1A56FF]"></i>${esc(c.name)}
           </a>`).join('');
       });
+    };
+    try {
+      const cat = getCatalog();
+      if (cat && Array.isArray(cat.categories) && cat.categories.length) paint(cat.categories);
+    } catch (e) {}
+    try {
+      const json = await apiGet('/api/public/categories');
+      paint(json.data || []);
     } catch (err) {}
   }
 
@@ -380,6 +443,14 @@
         if (footerImg) footerImg.classList.add('hidden');
         if (footerFallback) footerFallback.classList.remove('hidden');
       }
+      try {
+        var __dl2 = (SM.settings.logoUrl && String(SM.settings.logoUrl).trim()) ? String(SM.settings.logoUrl).trim() : '';
+        if (__dl2 && typeof window.__smSetDeskLogo === 'function') window.__smSetDeskLogo(__dl2);
+        else if (__dl2) {
+          document.querySelectorAll('[data-sm-desk-logo]').forEach(function (img) { try{ img.src = __dl2; }catch(e){} img.classList.remove('hidden'); });
+          document.querySelectorAll('[data-sm-desk-logo-fb]').forEach(function (fb) { fb.classList.add('hidden'); });
+        }
+      } catch (e) {}
       const siteName = SM.settings.siteName;
       const headerName = document.getElementById('siteNameDisplay');
       const footerName = document.getElementById('siteFooterNameDisplay');
@@ -477,6 +548,8 @@
       barEl.classList.remove('hidden');
       barEl.classList.add('flex');
     })();
+    // no-bootstrap (file://) khetreo branding gate khule dao
+    try { if (typeof window.__smMarkReady === 'function') window.__smMarkReady('branding'); } catch (e) {}
   }
 
   /* ---------------- course detail page ---------------- */
@@ -875,7 +948,7 @@
     if (q) blocks.forEach(function (b) { b.dataset.smQ = q; });
   }
 
-  /* ---------------- init ---------------- */
+  /* ---------------- init (independent blocks load in parallel) ---------------- */
   async function init() {
     if (SMStarted) return;
     SMStarted = true;
@@ -883,10 +956,7 @@
       await hydrateSettings();
       applyUrlFilters();
       paintCartBadges();
-      await hydrateBatchPills();
-      await hydrateCategories();
-      await hydrateStats();
-      await hydrateCourseBlocks();
+      await Promise.allSettled([hydrateBatchPills(), hydrateCategories(), hydrateStats(), hydrateCourseBlocks()]);
       await hydrateCourseDetail();
       if ($('[data-sm-auth]') || $('[data-sm-myorders]')) {
         await loadMe();

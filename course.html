@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ACS Physics HSC 26 By Apurbo Mashrur Apar (Cycle-1) - StudyMart</title>
+<script>try{var __sm_t=localStorage.getItem('sm_theme')||'light';if(__sm_t==='dark'){document.documentElement.classList.add('sm-dark');document.documentElement.style.colorScheme='dark';}}catch(e){}</script>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -176,9 +177,10 @@
       </div>
       <!-- Secure player: src is set ONLY after the server verifies access -->
       <div id="currPlayer" class="hidden relative aspect-video bg-black select-none" oncontextmenu="return false">
-        <iframe id="currFrame" class="absolute inset-0 w-full h-full" src="" title="Class video" frameborder="0"
+        <iframe id="currFrame" class="absolute inset-0 w-full h-full hidden" src="" title="Class video" frameborder="0"
           referrerpolicy="strict-origin-when-cross-origin"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <video id="currVideo" class="absolute inset-0 w-full h-full hidden" controls playsinline preload="metadata" controlsList="nodownload"></video>
         <div id="currWatermark" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
         <button onclick="closePlayer()" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 text-white text-[12px] hover:bg-black/80"><i class="fa-solid fa-xmark"></i></button>
       </div>
@@ -190,8 +192,8 @@
 
 </main>
 
-<!-- Mobile Fixed Bottom Bar (sits above bottom nav) -->
-<div class="fixed bottom-[70px] lg:bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-3 flex gap-2 lg:hidden z-40" style="padding-bottom:calc(12px + env(safe-area-inset-bottom))">
+<!-- Mobile Fixed Bottom Bar -->
+<div class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-3 flex gap-2 lg:hidden z-40" style="padding-bottom:calc(12px + env(safe-area-inset-bottom))">
   <button id="mAddCartBtn" class="flex-1 border-2 border-[#1A56FF] text-[#1A56FF] font-bold text-[13px] py-3 rounded-[10px] flex items-center justify-center gap-2">
     <i class="fa-solid fa-cart-shopping"></i> Add to Cart
   </button>
@@ -200,35 +202,10 @@
   </button>
 </div>
 
-<!-- ===== Pro Mobile Bottom Nav (Android / Phone) ===== -->
-<style>
-.sm-bottom-nav{padding-bottom:env(safe-area-inset-bottom)}
-.sm-bottom-nav .bn-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;flex:1;padding:7px 2px 8px;border-radius:14px;color:#64748B;position:relative;transition:background .15s,color .15s}
-.sm-bottom-nav .bn-item i{font-size:19px;line-height:1}
-.sm-bottom-nav .bn-item span{font-size:11px;font-weight:600;white-space:nowrap;line-height:1}
-.sm-bottom-nav .bn-item.bn-active{background:#EAF0FF;color:#1A56FF}
-.sm-bottom-nav .bn-item.bn-active span{font-weight:700}
-.sm-bottom-nav .bn-item.bn-active::before{content:'';position:absolute;top:-9px;left:50%;transform:translateX(-50%);width:22px;height:3px;border-radius:9999px;background:linear-gradient(90deg,#1A56FF,#7C3AED)}
-</style>
-<nav class="sm-bottom-nav fixed bottom-0 left-0 right-0 z-[70] border-t border-slate-200/90 lg:hidden" style="background:rgba(255,255,255,.98);backdrop-filter:blur(12px);box-shadow:0 -6px 24px rgba(15,32,67,.08)">
-  <div class="grid grid-cols-5 gap-1 px-2 pt-2" style="padding-bottom:calc(8px + env(safe-area-inset-bottom))">
-    <a href="index.html" data-bn="home" class="bn-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
-    <a href="courses.html" data-bn="courses" class="bn-item"><i class="fa-regular fa-square"></i><span>Courses</span></a>
-    <a href="courses.html" data-bn="ebook" class="bn-item"><i class="fa-regular fa-file-lines"></i><span>E-Book</span></a>
-    <a href="cart.html" data-bn="cart" class="bn-item"><span class="relative"><i class="fa-solid fa-cart-shopping"></i><span data-sm-cart-count class="absolute -top-2 -right-3 min-w-[16px] h-4 px-1 bg-[#1A56FF] text-white text-[10px] font-bold rounded-full hidden items-center justify-center">0</span></span><span>Cart</span></a>
-    <a href="dashboard.html" data-bn="account" data-account-link class="bn-item"><i class="fa-regular fa-user"></i><span>Account</span></a>
-  </div>
-</nav>
+<!-- Mobile bottom nav removed -->
 <script>
 (function(){
   try{
-    var p=(location.pathname.split('/').pop()||'index.html').split('?')[0].toLowerCase();
-    var map={'index.html':'home','':'home','courses.html':'courses','batch.html':'courses','course.html':'courses','ebook.html':'ebook','cart.html':'cart','dashboard.html':'account','auth.html':'account'};
-    var key=map[p]||'home';
-    if(p==='courses.html' && /ebook/i.test(location.search+location.hash)) key='ebook';
-    document.querySelectorAll('.sm-bottom-nav [data-bn]').forEach(function(a){ if(a.dataset.bn===key) a.classList.add('bn-active'); });
-    var n=0; try{ n=(JSON.parse(localStorage.getItem('sm_cart'))||[]).length; }catch(e){}
-    document.querySelectorAll('.sm-bottom-nav [data-sm-cart-count]').forEach(function(el){ el.textContent=n; el.classList.toggle('hidden',!n); el.classList.toggle('flex',!!n); });
     // Smart Account routing: guest -> auth page, logged-in -> dashboard
     var hasTok=function(){ try{return !!(localStorage.getItem('sm_user_token')||sessionStorage.getItem('sm_user_token'));}catch(x){return false;} };
     if(!hasTok()) document.querySelectorAll('[data-account-link]').forEach(function(a){ a.href='auth.html?next='+encodeURIComponent('dashboard.html'); });
@@ -545,7 +522,7 @@ async function playPreview() {
     });
     const j = await r.json();
     if (!j.success) throw new Error(j.message);
-    openPlayer(j.data.embedUrl, j.data.title, j.data.watermark);
+    openPlayer(j.data, j.data.title, j.data.watermark);
   } catch (e) { showToast(e.message); }
 }
 
@@ -563,14 +540,30 @@ async function playLesson(lessonId) {
     });
     const j = await r.json();
     if (!j.success) throw new Error(j.message);
-    openPlayer(j.data.embedUrl, j.data.title, j.data.watermark);
+    openPlayer(j.data, j.data.title, j.data.watermark);
   } catch (e) { showToast(e.message); }
 }
 
-function openPlayer(embedUrl, title, watermark) {
+function openPlayer(data, title, watermark) {
   const player = document.getElementById('currPlayer');
   const frame = document.getElementById('currFrame');
-  frame.src = embedUrl + (embedUrl.includes('?') ? '&' : '?') + 'autoplay=1';
+  const video = document.getElementById('currVideo');
+  // stop previous source first
+  try { video.pause(); } catch (e) {}
+  video.removeAttribute('src'); video.load();
+  frame.src = '';
+  if (data && (data.source === 'upload' || (!data.embedUrl && data.videoUrl))) {
+    frame.classList.add('hidden');
+    video.classList.remove('hidden');
+    video.src = data.videoUrl;
+    video.load();
+    video.play().catch(function(){});
+  } else {
+    var embedUrl = (data && data.embedUrl) || data;
+    video.classList.add('hidden');
+    frame.classList.remove('hidden');
+    frame.src = embedUrl + (embedUrl.includes('?') ? '&' : '?') + 'autoplay=1';
+  }
   // watermark OFF for now (set WATERMARK_ON = true to re-enable)
   const wm = document.getElementById('currWatermark');
   if (typeof WATERMARK_ON !== 'undefined' && WATERMARK_ON) {
@@ -588,6 +581,9 @@ function openPlayer(embedUrl, title, watermark) {
 
 function closePlayer() {
   document.getElementById('currFrame').src = '';
+  var v = document.getElementById('currVideo');
+  try { v.pause(); } catch (e) {}
+  v.removeAttribute('src'); v.load();
   document.getElementById('currPlayer').classList.add('hidden');
 }
 

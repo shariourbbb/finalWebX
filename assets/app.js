@@ -258,7 +258,8 @@
             </div>
             <div class="flex items-center gap-1.5 flex-shrink-0">
               <button data-sm-add="${c.id}" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#E6F0FF] text-[#1A56FF] hover:bg-[#DDE8FF] transition" title="Add to cart"><i class="fa-solid fa-cart-plus text-[11px] sm:text-[12px]"></i></button>
-              <a href="course.html?id=${c.id}" class="hidden sm:inline-block px-3 py-1.5 rounded-full bg-[#1A56FF] hover:bg-[#1445D6] text-white text-[11px] font-bold">Details</a>
+              <button data-sm-buy="${c.id}" class="px-2.5 sm:px-3 py-1.5 rounded-full bg-[#1A56FF] hover:bg-[#1445D6] text-white text-[10px] sm:text-[11px] font-bold whitespace-nowrap">Buy Now</button>
+              <a href="course.html?id=${c.id}" class="hidden sm:inline-block px-3 py-1.5 rounded-full bg-white border border-[#1A56FF] text-[#1A56FF] text-[11px] font-bold">Details</a>
             </div>
           </div>
         </div>

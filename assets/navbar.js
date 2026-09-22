@@ -326,6 +326,49 @@
     } catch (e) {}
   }
 
+  /* Phone top bar quick links: Courses + Ebooks icon buttons next to the
+     other icons (visible on phone/tablet only, `lg:hidden`). Injected once
+     so every page gets them without editing each header. */
+  function addMobileQuickLinks() {
+    try {
+      if (document.querySelector('[data-sm-quicklinks]')) return;
+      var page = '';
+      try { page = (location.pathname.split('/').pop() || 'index.html').split('?')[0]; } catch (e) {}
+      var mk = function (href, icon, label) {
+        var a = document.createElement('a');
+        a.href = href;
+        a.title = label;
+        a.setAttribute('aria-label', label);
+        a.setAttribute('data-sm-quicklinks', '');
+        var active = (page === href);
+        a.className = 'w-9 h-9 items-center justify-center rounded-full transition flex-shrink-0 lg:hidden ' +
+          (active ? 'bg-[#E6F0FF] inline-flex' : 'hover:bg-slate-100 inline-flex');
+        a.innerHTML = '<i class="fa-solid ' + icon + ' text-[18px] ' + (active ? 'text-[#1A56FF]' : 'text-[#0F2043]') + '"></i>';
+        return a;
+      };
+      var coursesBtn = function () { return mk('courses.html', 'fa-book-open', 'Courses'); };
+      var ebooksBtn = function () { return mk('ebooks.html', 'fa-book', 'Ebooks'); };
+      var placed = false;
+      // 1) pages with a cart icon button: insert before it
+      document.querySelectorAll('a[href="cart.html"]').forEach(function (cart) {
+        if (!cart.querySelector('.fa-cart-shopping')) return;
+        if (!cart.parentElement) return;
+        cart.parentElement.insertBefore(ebooksBtn(), cart);
+        cart.parentElement.insertBefore(coursesBtn(), cart);
+        placed = true;
+      });
+      if (placed) return;
+      // 2) pages without a cart icon (courses.html, dashboard.html): after the visible telegram icon
+      var tgs = Array.prototype.slice.call(document.querySelectorAll('a[data-sm-telegram]'));
+      var tg = tgs.filter(function (a) { return a.offsetParent !== null; })[0] || tgs[0];
+      if (tg && tg.parentElement) {
+        var eb = ebooksBtn(), cb = coursesBtn();
+        tg.parentElement.insertBefore(cb, tg.nextSibling);
+        tg.parentElement.insertBefore(eb, cb.nextSibling);
+      }
+    } catch (e) {}
+  }
+
   /* Account pill label: guest -> "Login", logged-in -> first name / "Dashboard".
      Guest click goes straight to auth.html; logged-in click opens the dropdown. */
   function cachedFirstName() {
@@ -382,6 +425,7 @@
   function init() {
     unifyMobileMenu();
     compactDesktopBar();
+    addMobileQuickLinks();
     applyTheme();
     applyLang();
     paintAccount();

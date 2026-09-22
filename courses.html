@@ -99,13 +99,6 @@
 
 <main class="max-w-[1280px] mx-auto px-2.5 sm:px-6 lg:px-8 pb-20">
 
-  <!-- Top Filter Pills (dynamic: batch names from Admin Panel) -->
-  <section class="mt-2.5 sm:mt-5">
-    <div id="batchPills" class="flex gap-2 overflow-x-auto scrollbar-hide py-1 sm:grid sm:grid-cols-3 lg:grid-cols-5 sm:gap-3">
-      <p class="col-span-full text-[13px] text-slate-400 text-center py-2"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading batches...</p>
-    </div>
-  </section>
-
   <!-- Per-batch summary sections (dynamic, same design) -->
   <div id="batchSections"></div>
 
@@ -222,7 +215,7 @@ async function loadCoursePage(){
       if (__cc && Array.isArray(__cc.batches) && Array.isArray(__cc.courses)) {
         paintAll(__cc.batches, __cc.categories || [], __cc.courses);
         var __ck = 'cat:' + __cc.batches.length + ':' + (__cc.categories || []).length + ':' + __cc.courses.length;
-        pillsEl._smKey = __ck; secsEl._smKey = __ck;
+        if(pillsEl) pillsEl._smKey = __ck; if(secsEl) secsEl._smKey = __ck;
       }
     } catch (e) {}
     const [batches,cats,courses]=await Promise.all([
@@ -231,26 +224,22 @@ async function loadCoursePage(){
       fetch('/api/courses').then(r=>r.json()).then(unwrap)
     ]);
     var __k = 'cat:' + batches.length + ':' + (cats || []).length + ':' + courses.length + ':' + JSON.stringify((courses || []).slice(0, 20).map(c => c.id));
-    if (pillsEl._smKey !== __k || secsEl._smKey !== __k) paintAll(batches, cats, courses);
-    pillsEl._smKey = __k; secsEl._smKey = __k;
+    var __need = (pillsEl ? pillsEl._smKey !== __k : false) || (secsEl ? secsEl._smKey !== __k : true);
+    if (__need) paintAll(batches, cats, courses);
+    if(pillsEl) pillsEl._smKey = __k; if(secsEl) secsEl._smKey = __k;
   }catch(e){
-    if (!pillsEl._smKey) pillsEl.innerHTML='<p class="col-span-full text-[13px] text-red-400 text-center py-4">Failed to load batches</p>';
+    if (pillsEl && !pillsEl._smKey) pillsEl.innerHTML='<p class="col-span-full text-[13px] text-red-400 text-center py-4">Failed to load batches</p>';
   }
 }
 
 function paintAll(batches, cats, courses){
   const pillsEl=document.getElementById('batchPills');
   const secsEl=document.getElementById('batchSections');
+  if(!secsEl) return;
     const activeBatches=(Array.isArray(batches)?batches:[]).filter(b=>b.status!=='inactive'&&b.status!=='archived').sort((a,b)=>((Number(a.order)||999)-(Number(b.order)||999))||(Number(a.id)-Number(b.id)));
     const catById={};(Array.isArray(cats)?cats:[]).forEach(c=>{catById[c.id]=c.name||'General'});
 
-    // --- Top pills: compact scrollable pills on mobile, grid on desktop ---
-    pillsEl.innerHTML=activeBatches.map((b)=>{
-      return `<a href="#batch-${dynEsc(b.slug||b.id)}" class="flex-shrink-0 bg-white rounded-full sm:rounded-[14px] border border-slate-200/90 shadow-xs px-3 py-1.5 sm:px-4 sm:py-2.5 flex items-center gap-2 hover:border-[#1A56FF] hover:text-[#1A56FF] transition whitespace-nowrap">
-        <div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-[#EEF2FF] flex items-center justify-center flex-shrink-0"><i class="fa-solid ${batchIcon(b)} text-[#3B5BFE] text-[11px] sm:text-[13px]"></i></div>
-        <span class="text-[12px] sm:text-[13px] font-bold text-[#0F2043]">${dynEsc(b.name||'Batch')}</span>
-      </a>`;
-    }).join('')||'<p class="col-span-full text-[13px] text-slate-400 text-center py-2">No batches found</p>';
+    // --- Top pills removed ---
 
     // --- Per-batch summary sections: 3 columns on mobile ---
     secsEl.innerHTML=activeBatches.map((b,bi)=>{

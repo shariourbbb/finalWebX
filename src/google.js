@@ -6,6 +6,7 @@
 const crypto = require('crypto');
 
 const CERTS_URL = 'https://www.googleapis.com/oauth2/v3/certs';
+const CERTS_URL_V1 = 'https://www.googleapis.com/oauth2/v1/certs';
 let certCache = { keys: null, fetchedAt: 0 };
 const CERT_TTL_MS = 60 * 60 * 1000; // 1 hour
 
@@ -21,14 +22,22 @@ function b64urlToBuffer(part) {
   return Buffer.from(padded, 'base64');
 }
 
-async function getCerts() {
-  if (certCache.keys && Date.now() - certCache.fetchedAt < CERT_TTL_MS) return certCache.keys;
+async function getCerts(forceRefresh) {
+  if (!forceRefresh && certCache.keys && Date.now() - certCache.fetchedAt < CERT_TTL_MS) return certCache.keys;
   const res = await fetch(CERTS_URL);
   if (!res.ok) throw new Error('Could not reach Google (HTTP ' + res.status + ')');
   const json = await res.json();
   if (!json.keys || !json.keys.length) throw new Error('No Google signing keys received');
   certCache = { keys: json.keys, fetchedAt: Date.now() };
   return json.keys;
+}
+
+// Fallback: v1 endpoint returns { kid: pemCertificate } map
+async function getCertsV1() {
+  const res = await fetch(CERTS_URL_V1);
+  if (!res.ok) throw new Error('Could not reach Google (HTTP ' + res.status + ')');
+  const json = await res.json();
+  return Object.keys(json || {}).map(kid => ({ kid, pem: String(json[kid]) }));
 }
 
 function certToPem(certB64) {
@@ -68,14 +77,35 @@ async function verifyGoogleIdToken(idToken, expectedClientId) {
     // some accounts omit the flag but still carry a verified gmail; require email at minimum
     if (!payload.email) throw new Error('No verified email in Google account');
   }
-  // signature check against Google's certs
-  const keys = await getCerts();
-  const key = keys.find(k => k.kid === header.kid && k.x5c && k.x5c[0]);
-  if (!key) throw new Error('Unknown Google signing key - please try again');
-  const pem = certToPem(key.x5c[0]);
+  // signature check against Google's certs.
+  // Google rotates keys regularly — a cached set can miss a fresh kid,
+  // so on miss we force-refresh once, then try the v1 endpoint as fallback.
+  const signingInput = parts[0] + '.' + parts[1];
+  const signature = b64urlToBuffer(parts[2]);
+  const findPem = keys => {
+    const k = (keys || []).find(x => x && x.kid === header.kid);
+    if (!k) return null;
+    if (k.x5c && k.x5c[0]) return certToPem(k.x5c[0]);
+    if (k.pem) return k.pem;
+    return null;
+  };
+  let pem = findPem(await getCerts(false));
+  if (!pem) {
+    try { pem = findPem(await getCerts(true)); } catch (e) { pem = null; }
+  }
+  if (!pem) {
+    try { pem = findPem(await getCertsV1()); } catch (e) { pem = null; }
+  }
+  if (!pem) {
+    console.warn('[google-auth] Unknown kid: ' + header.kid + ' (alg: ' + header.alg + ')');
+    throw new Error('Unknown Google signing key - please try again');
+  }
+  if (String(header.alg || '').toUpperCase() !== 'RS256') {
+    throw new Error('Unsupported Google signing algorithm');
+  }
   const verifier = crypto.createVerify('RSA-SHA256');
-  verifier.update(parts[0] + '.' + parts[1]);
-  const ok = verifier.verify(pem, b64urlToBuffer(parts[2]));
+  verifier.update(signingInput);
+  const ok = verifier.verify(pem, signature);
   if (!ok) throw new Error('Invalid Google signature');
   return {
     id: payload.sub,

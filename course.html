@@ -122,7 +122,7 @@
             <span class="text-[16px] font-bold text-[#0F2043]">Price :</span>
             <span class="text-[20px] font-extrabold text-[#16A34A]">...</span>
           </div>
-          <p class="text-[11px] text-slate-500 mt-1">Coupon থাকলে cart-এ apply করতে পারবেন</p>
+          <p id="couponNote" class="text-[11px] text-slate-500 mt-1">Coupon থাকলে cart-এ apply করতে পারবেন</p>
 
           <!-- Enroll Button (real checkout via cart) -->
           <button id="enrollBtn" class="mt-3 w-full text-white font-bold text-[15px] py-3 rounded-[10px] hidden lg:flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(138,54,235,0.4)] transition hover:brightness-110" style="background:#8a36eb">
@@ -133,6 +133,20 @@
           <button id="addCartBtn" class="mt-2 w-full bg-white border-2 border-[#1A56FF] text-[#1A56FF] hover:bg-[#EEF2FF] font-bold text-[13px] py-2.5 rounded-[10px] hidden lg:flex items-center justify-center gap-2 transition">
             <i class="fa-solid fa-cart-shopping text-[13px]"></i> Add to Cart
           </button>
+
+          <!-- Enrolled state (replaces Enroll/Add to Cart when already enrolled) -->
+          <div id="enrolledBox" class="hidden mt-3 space-y-2.5">
+            <div class="flex items-center gap-2.5 px-3.5 py-3 rounded-[12px] border border-[#BBF7D0]" style="background:linear-gradient(135deg,#D9FBE3 0%,#E9FDF0 100%)">
+              <span class="w-8 h-8 rounded-full bg-[#16A34A] text-white flex items-center justify-center flex-shrink-0 shadow-[0_2px_8px_rgba(22,163,74,0.4)]"><i class="fa-solid fa-check text-[14px]"></i></span>
+              <div class="min-w-0">
+                <p class="text-[13.5px] font-extrabold text-[#15803D] leading-tight">You're enrolled in this course</p>
+                <p class="text-[11px] text-[#16A34A]/90 font-semibold mt-0.5">All classes unlocked — happy learning ✓</p>
+              </div>
+            </div>
+            <a id="enrolledTgBtn" href="#" target="_blank" class="hidden w-full py-3 rounded-[12px] bg-gradient-to-r from-[#229ED9] to-[#1A8AC0] hover:brightness-110 text-white font-extrabold text-[14px] items-center justify-center gap-2 shadow-[0_4px_14px_rgba(34,158,217,0.4)] transition">
+              <i class="fa-brands fa-telegram text-[18px]"></i> Open Telegram group <i class="fa-solid fa-arrow-up-right-from-square text-[12px] opacity-80"></i>
+            </a>
+          </div>
 
         </div>
         <div class="bg-[#F8F9FD] px-4 py-3 border-t border-slate-100">
@@ -146,7 +160,8 @@
     </div>
 
   </div>
-  <!-- ===== Telegram Groups (course link thakle sundor card-e dekhabe) ===== -->
+  <!-- ===== Telegram Groups (nicher card apadoto OFF — uporer EnrolledBox button tai same kaj kore) ===== -->
+  <!--
   <section id="tgCard" class="mt-5 hidden">
     <div class="rounded-[14px] overflow-hidden border border-[#CDEBFF] shadow-sm" style="background:linear-gradient(135deg,#EAF6FF 0%,#F4F9FF 60%,#EDF7FF 100%)">
       <div class="p-4">
@@ -160,6 +175,7 @@
       </div>
     </div>
   </section>
+  -->
   <!-- ===== Course Curriculum (classes load from Admin Panel, videos stay locked) ===== -->
   <section id="secCurriculum" class="mt-5">
     <div class="bg-white rounded-[14px] border border-slate-100 shadow-sm overflow-hidden">
@@ -193,13 +209,25 @@
 </main>
 
 <!-- Mobile Fixed Bottom Bar -->
-<div class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-3 flex gap-2 lg:hidden z-40" style="padding-bottom:calc(12px + env(safe-area-inset-bottom))">
+<div id="mobileBar" class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-3 flex gap-2 lg:hidden z-40" style="padding-bottom:calc(12px + env(safe-area-inset-bottom))">
   <button id="mAddCartBtn" class="flex-1 border-2 border-[#1A56FF] text-[#1A56FF] font-bold text-[13px] py-3 rounded-[10px] flex items-center justify-center gap-2">
     <i class="fa-solid fa-cart-shopping"></i> Add to Cart
   </button>
   <button id="mEnrollBtn" class="flex-[1.4] text-white font-bold text-[14px] py-3 rounded-[10px] flex items-center justify-center gap-2" style="background:#8a36eb">
     Enroll Now <i class="fa-solid fa-arrow-right text-[11px]"></i>
   </button>
+  <!-- Enrolled state (mobile) -->
+  <div id="mEnrolledWrap" class="hidden flex-1 gap-2">
+    <div class="flex-1 flex items-center justify-center gap-1.5 px-2 py-3 rounded-[10px] border border-[#BBF7D0] text-[#15803D] text-[12px] font-extrabold" style="background:linear-gradient(135deg,#D9FBE3 0%,#E9FDF0 100%)">
+      <i class="fa-solid fa-circle-check text-[#16A34A] text-[15px]"></i> Enrolled ✓
+    </div>
+    <a id="mEnrolledTgBtn" href="#" target="_blank" class="hidden flex-[1.3] py-3 rounded-[10px] bg-gradient-to-r from-[#229ED9] to-[#1A8AC0] text-white font-extrabold text-[13px] items-center justify-center gap-1.5 shadow transition">
+      <i class="fa-brands fa-telegram text-[16px]"></i> Telegram
+    </a>
+    <button onclick="document.getElementById('secCurriculum')?.scrollIntoView({behavior:'smooth'})" class="flex-1 py-3 rounded-[10px] bg-[#0F2043] text-white font-bold text-[13px] flex items-center justify-center gap-1.5">
+      <i class="fa-solid fa-play text-[11px] text-[#FACC15]"></i> Learn
+    </button>
+  </div>
 </div>
 
 <!-- Mobile bottom nav removed -->
@@ -362,11 +390,10 @@ async function initCoursePage(){
             if (!r.ok) throw new Error(j.message || 'Enrollment failed');
             currEnrolled = true;
             renderCurriculum();
-            b.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i> Enrolled! (Start Learning)';
-            b.onclick = () => { document.getElementById('curriculumCard')?.scrollIntoView({ behavior: 'smooth' }); };
-            toast('🎉 Free Enrollment Complete!');
+            renderEnrolledState();
+            showToast('🎉 Free Enrollment Complete!');
           } catch(err) {
-            toast(err.message);
+            showToast(err.message);
             b.disabled = false;
             b.innerHTML = '<i class="fa-solid fa-bolt mr-1"></i> Enroll Free';
           }
@@ -390,6 +417,54 @@ let currLessons = [];
 let currEnrolled = false;
 let currHasPreview = false;
 let currTgCanRefresh = false;
+let currTgGroups = [];
+
+/* ===== Enrolled state: hide Buy/Cart, show pro enrolled + telegram ===== */
+function renderEnrolledState(){
+  if(!currEnrolled) return;
+  // 1) hide all buy/cart buttons (desktop + mobile)
+  ['enrollBtn','addCartBtn','mEnrollBtn','mAddCartBtn'].forEach(function(id){
+    var b=document.getElementById(id);
+    if(b) b.style.display='none';
+  });
+  // 1b) hide Price + Coupon note (enroll korar pore ar dorkar nai)
+  var pr=document.getElementById('priceRow');
+  if(pr) pr.style.display='none';
+  var cp=document.getElementById('couponNote');
+  if(cp) cp.style.display='none';
+  // 2) show desktop enrolled box
+  var box=document.getElementById('enrolledBox');
+  if(box) box.classList.remove('hidden');
+  // 3) telegram button (only if link exists)
+  var tgBtn=document.getElementById('enrolledTgBtn');
+  var firstTg=(currTgGroups&&currTgGroups.length)?currTgGroups[0]:null;
+  if(tgBtn){
+    if(firstTg&&firstTg.url){
+      tgBtn.href=firstTg.url;
+      tgBtn.classList.remove('hidden');
+      tgBtn.classList.add('flex');
+      // multiple groups thakle count dekhao
+      if(currTgGroups.length>1){
+        tgBtn.innerHTML='<i class="fa-brands fa-telegram text-[18px]"></i> Open Telegram group ('+currTgGroups.length+') <i class="fa-solid fa-arrow-up-right-from-square text-[12px] opacity-80"></i>';
+      }
+    } else {
+      tgBtn.classList.add('hidden');
+    }
+  }
+  // 4) mobile bar
+  var mWrap=document.getElementById('mEnrolledWrap');
+  if(mWrap){ mWrap.classList.remove('hidden'); mWrap.classList.add('flex'); }
+  var mTg=document.getElementById('mEnrolledTgBtn');
+  if(mTg){
+    if(firstTg&&firstTg.url){
+      mTg.href=firstTg.url;
+      mTg.classList.remove('hidden');
+      mTg.classList.add('flex');
+    } else {
+      mTg.classList.add('hidden');
+    }
+  }
+}
 
 function renderTgCard(groups) {
   const card = document.getElementById('tgCard');
@@ -422,7 +497,9 @@ async function refreshTgInvite() {
     const j = await r.json();
     if (!r.ok) throw new Error(j.message || 'Invite banano jayni');
     // static gulo rekhe invite gulo notun diye replace
-    renderTgCard((window.__smStaticGroups || []).concat(j.data.telegramGroups || []));
+    currTgGroups = (window.__smStaticGroups || []).concat(j.data.telegramGroups || []);
+    renderTgCard(currTgGroups);
+    renderEnrolledState();
     showToast(j.message || 'Notun invite ready!');
   } catch (e) {
     showToast(e.message);
@@ -469,9 +546,11 @@ async function initCurriculum() {
           const groups = Array.isArray(j.data.telegramGroups) && j.data.telegramGroups.length
             ? j.data.telegramGroups
             : (j.data.telegramLink ? [{ label: 'Join Group', url: j.data.telegramLink, type: 'static' }] : []);
+          currTgGroups = groups || [];
           currTgCanRefresh = !!j.data.canRefresh;
           window.__smStaticGroups = groups.filter(g => g.type !== 'invite');
           renderTgCard(groups);
+          renderEnrolledState();
         }
       }
     } catch (e) { /* guest mode */ }

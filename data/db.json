@@ -147,6 +147,13 @@
         "limit": 4,
         "rows": 1
       },
+      "popularEbooks": {
+        "enabled": true,
+        "title": "Popular Ebooks",
+        "subtitle": "",
+        "limit": 4,
+        "rows": 1
+      },
       "featured": {
         "enabled": false,
         "title": "Featured Courses",
@@ -1156,6 +1163,32 @@
         ]
       },
       "telegramInviteAt": 1789792726063
+    },
+    {
+      "id": 9,
+      "createdAt": "2026-09-21T18:41:53.952Z",
+      "orderNo": "SM16113951",
+      "userId": 4,
+      "customer": {
+        "name": "user",
+        "email": "user@gmail.com",
+        "phone": ""
+      },
+      "items": [
+        {
+          "courseId": 5,
+          "title": "৩০ দিনে বায়োলজি খতম | BH",
+          "price": 0
+        }
+      ],
+      "subtotal": 0,
+      "discount": 0,
+      "couponCode": "",
+      "total": 0,
+      "paymentMethod": "free",
+      "note": "",
+      "status": "completed",
+      "paidAt": "2026-09-21T18:41:53.952Z"
     }
   ],
   "adminInvites": []

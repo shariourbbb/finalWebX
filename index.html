@@ -258,6 +258,9 @@ html.sm-ready #secHero,html.sm-ready #secCategories,html.sm-ready #secEbookCateg
 
   <!-- Categories - 1 line equal height + Arrow + Home Page control -->
   <section id="secCategories" class="mt-4 sm:mt-6 relative">
+    <div class="mb-3">
+      <h2 class="text-[16px] sm:text-[20px] font-extrabold text-[#0F2043]">Courses Category</h2>
+    </div>
     <div class="relative">
       <button id="catPrev" onclick="scrollCategories(-300)" class="hidden absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white rounded-full shadow-[0_2px_10px_rgba(0,0,0,0.12)] border border-slate-100 sm:flex items-center justify-center hover:bg-slate-50" aria-label="Previous"><i class="fa-solid fa-chevron-left text-xs text-slate-600"></i></button>
       <button id="catNext" onclick="scrollCategories(300)" class="hidden absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white rounded-full shadow-[0_2px_10px_rgba(0,0,0,0.12)] border border-slate-100 sm:flex items-center justify-center hover:bg-slate-50" aria-label="Next"><i class="fa-solid fa-chevron-right text-xs text-slate-600"></i></button>
@@ -734,7 +737,10 @@ function smHpLimit(secKey, defLimit){
             <div class="flex items-baseline gap-1 min-w-0">
               <span class="text-[#1A56FF] font-extrabold text-[13px] sm:text-[15px] truncate">৳${esc(c.price)}</span>${oldP}
             </div>
-            <button data-sm-add="${c.id}" onclick="event.stopPropagation()" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#EEF2FF] flex items-center justify-center hover:bg-[#1A56FF] hover:text-white text-[#1A56FF] transition flex-shrink-0"><i class="fa-solid fa-cart-shopping text-[11px] sm:text-[12px]"></i></button>
+            <div class="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+              <button data-sm-add="${c.id}" onclick="event.stopPropagation()" title="Add to cart" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#EEF2FF] flex items-center justify-center hover:bg-[#1A56FF] hover:text-white text-[#1A56FF] transition flex-shrink-0"><i class="fa-solid fa-cart-shopping text-[11px] sm:text-[12px]"></i></button>
+              <button data-sm-buy="${c.id}" onclick="event.stopPropagation()" class="px-2 sm:px-3 py-1.5 rounded-full bg-[#1A56FF] hover:bg-[#1445D6] text-white text-[10px] sm:text-[11px] font-bold transition whitespace-nowrap">Buy Now</button>
+            </div>
           </div>
         </div>
       </div>`;

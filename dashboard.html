@@ -93,7 +93,6 @@
       <a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Courses</a>
       <a href="dashboard.html" class="px-3 py-2.5 rounded-xl bg-[#EEF2FF] text-[#1A56FF]">Dashboard</a>
       <a href="#secOrders" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">My Orders</a>
-      <a href="#secProfile" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Profile</a>
     </nav>
   </div>
 </header>
@@ -114,9 +113,6 @@
       </a>
       <a href="#secOrders" class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-slate-50 text-slate-700 font-medium text-[13px]">
         <i class="fa-solid fa-bag-shopping w-5 text-center text-[14px]"></i> My Orders
-      </a>
-      <a href="#secProfile" class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-slate-50 text-slate-700 font-medium text-[13px]">
-        <i class="fa-regular fa-user w-5 text-center text-[14px]"></i> Profile
       </a>
       <div class="pt-3 mt-3 border-t border-slate-100">
         <button data-dash-logout class="w-full flex items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-red-50 text-slate-700 hover:text-red-600 font-medium text-[13px]">
@@ -170,32 +166,6 @@
           <p class="text-[13px] text-slate-400 text-center py-6"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading your orders...</p>
         </div>
       </section>
-      <!-- ===== My Profile (details + edit: photo, name, phone, password) ===== -->
-      <section id="secProfile" class="mt-5 scroll-mt-20">
-        <div class="flex items-center justify-between mb-3">
-          <h2 class="text-[14px] sm:text-[15px] font-extrabold text-[#0F2043]">My Profile</h2>
-        </div>
-        <div id="profileWrap" class="bg-white rounded-[14px] border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.04)] overflow-hidden">
-          <p class="text-[13px] text-slate-400 text-center py-6"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading profile...</p>
-        </div>
-      </section>
-      <!-- ===== Student account (login / register) ===== -->
-      <section id="secAccount" class="mt-5 scroll-mt-20">
-        <h2 class="text-[17px] sm:text-[19px] font-extrabold text-[#0F2043] mb-3">My Account</h2>
-        <div data-sm-auth>
-          <p class="text-[13px] text-slate-400 text-center py-6"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading account...</p>
-        </div>
-      </section>
-
-      <!-- ===== Recommended courses ===== -->
-      <section class="mt-5">
-        <h2 class="text-[17px] sm:text-[19px] font-extrabold text-[#0F2043] mb-3">Recommended For You</h2>
-        <div data-sm-courses data-sm-featured="true" data-sm-limit="4">
-          <p class="text-[13px] text-slate-400 text-center py-6"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading courses...</p>
-        </div>
-      </section>
-
-
     </main>
 
   </div>

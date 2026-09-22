@@ -138,7 +138,7 @@ function injectBootstrap(html) {
     return bootstrapScript + html;
   } catch (e) { return html; }
 }
-const BOOTSTRAP_PAGES = ['/', '/index.html', '/courses.html', '/course.html', '/batch.html', '/ebook.html', '/ebooks.html', '/ebbatch.html', '/auth.html', '/dashboard.html', '/cart.html', '/payment-success.html'];
+const BOOTSTRAP_PAGES = ['/', '/index.html', '/courses.html', '/course.html', '/batch.html', '/ebook.html', '/ebooks.html', '/ebbatch.html', '/my-courses.html', '/learn.html', '/my-ebooks.html', '/auth.html', '/dashboard.html', '/cart.html', '/payment-success.html'];
 
 /* ---------- Maintenance mode (Admin > Settings > Maintenance) ----------
  * ON thakle public pages maintenance.html dekhabe.

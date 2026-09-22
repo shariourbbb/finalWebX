@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learn - StudyMart</title>
+<script>try{var __sm_t=localStorage.getItem('sm_theme')||'light';if(__sm_t==='dark'){document.documentElement.classList.add('sm-dark');document.documentElement.style.colorScheme='dark';}}catch(e){}</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{font-family:'Inter',sans-serif}
+.bangla{font-family:'Hind Siliguri',sans-serif}
+.scrollbar-hide::-webkit-scrollbar{display:none}
+.scrollbar-hide{-ms-overflow-style:none;scrollbar-width:none}
+.lesson-row.active{background:#EEF2FF;border-color:#C7D9FF}
+.sec-body{display:none}
+.sec-open .sec-body{display:block}
+.sec-open .sec-chev{transform:rotate(180deg)}
+.sec-chev{transition:transform .2s}
+</style>
+</head>
+<body class="bg-[#F5F7FB] text-slate-900 antialiased pb-[88px] lg:pb-0">
+
+<!-- Header -->
+<link rel="stylesheet" href="assets/navbar.css">
+<header class="sticky top-0 z-40 bg-white border-b border-slate-100 shadow-sm">
+  <div class="hidden lg:block border-b border-slate-100">
+    <div class="max-w-[1400px] mx-auto px-6 h-[68px] flex items-center gap-4">
+      <button data-sm-desk-menu-btn class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-100 transition flex-shrink-0" aria-label="Menu"><i class="fa-solid fa-bars text-[20px] text-[#0F2043]"></i></button>
+      <a href="index.html" class="flex items-center gap-2 flex-shrink-0">
+        <img data-sm-desk-logo src="" alt="Logo" class="hidden w-10 h-10 object-contain rounded-lg">
+        <div data-sm-desk-logo-fb class="w-10 h-10 flex items-center justify-center"><svg width="40" height="40" viewBox="0 0 44 44" fill="none"><path d="M22 6 C16 10 8 12 8 20 C8 28 16 30 22 34 C28 30 36 28 36 20 C36 12 28 10 22 6Z" fill="#1A56FF"/><path d="M12 28 L22 38 L32 28" stroke="#1A56FF" stroke-width="2.5" fill="none" opacity="0.9"/><g><path d="M22 2 L32 7 L22 12 L12 7 Z" fill="#0F2043"/><rect x="21" y="7" width="2" height="8" fill="#FACC15"/></g></svg></div>
+        <span class="text-[22px] font-extrabold tracking-tight leading-none"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span>
+      </a>
+      <nav class="flex items-center gap-6 text-[14px] font-semibold flex-shrink-0 ml-2">
+        <a data-sm-nav="home" href="index.html" class="sm-desk-nav-link" data-i18n="home">Home</a>
+        <a data-sm-nav="courses" href="courses.html" class="sm-desk-nav-link" data-i18n="courses">Courses</a>
+        <a data-sm-nav="ebooks" href="ebooks.html" class="sm-desk-nav-link" data-i18n="ebooks">Ebooks</a>
+        <a data-sm-nav="free" href="courses.html?q=" class="sm-desk-nav-link" data-i18n="free">Free Resources</a>
+        <a data-sm-nav="telegram" href="#" data-sm-telegram class="sm-desk-nav-link" data-i18n="telegram">Telegram</a>
+      </nav>
+      <div class="flex-1"></div>
+      <div class="sm-desk-search w-[280px] xl:w-[320px] flex-shrink-0"><i class="fa-solid fa-magnifying-glass text-slate-400 text-[14px]"></i><input data-sm-desk-search data-i18n-ph="searchPh" type="text" placeholder="Search courses, subjects, ebooks..."><button data-sm-desk-search-btn class="text-slate-400 hover:text-[#1A56FF]" aria-label="Search"><i class="fa-solid fa-arrow-right text-[12px]"></i></button></div>
+      <div class="sm-desk-drop flex-shrink-0"><button data-sm-desk-lang-btn class="sm-desk-pill"><i class="fa-solid fa-globe text-[15px] text-slate-500"></i><span data-i18n="lang">বাংলা/English</span><i class="fa-solid fa-chevron-down text-[11px] text-slate-400"></i></button><div data-sm-desk-lang-menu class="sm-desk-menu hidden"><button type="button" class="sm-mi" data-sm-lang-pick="bn">বাংলা (Bangla)</button><button type="button" class="sm-mi" data-sm-lang-pick="en">English</button></div></div>
+      <button data-sm-theme-btn class="sm-desk-pill flex-shrink-0"><i data-sm-theme-icon class="fa-solid fa-sun text-[15px] text-[#F59E0B]"></i><span data-i18n="theme">Theme</span></button>
+      <div class="sm-desk-drop flex-shrink-0"><button data-sm-desk-account-btn class="sm-desk-pill"><i class="fa-regular fa-user text-[15px] text-slate-600"></i><span data-i18n="account">Account</span><i class="fa-solid fa-chevron-down text-[11px] text-slate-400"></i></button><div data-sm-desk-account-menu class="sm-desk-menu hidden"></div></div>
+    </div>
+  </div>
+  <div id="smDeskDrawer" class="hidden"><div class="sm-backdrop"></div><div class="sm-panel"><div class="flex items-center justify-between mb-3"><span class="text-[18px] font-extrabold"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span><button data-sm-drawer-close class="w-9 h-9 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-xmark"></i></button></div><nav class="flex flex-col gap-1 text-[14px] font-semibold"><a href="index.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Home</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Courses</a><a href="ebooks.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Ebooks</a><a href="my-courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">My Courses</a><a href="my-ebooks.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">My E-Books</a><a href="dashboard.html" data-account-link class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Account / Dashboard</a><a href="cart.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Cart (<span data-sm-cart-count>0</span>)</a></nav></div></div>
+  <div class="lg:hidden max-w-[1420px] mx-auto px-4 sm:px-6 h-[58px] flex items-center justify-between gap-3">
+    <div class="flex items-center gap-2 min-w-0">
+      <a href="my-courses.html" class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-100 flex-shrink-0">
+        <i class="fa-solid fa-arrow-left text-[18px] text-[#0F2043]"></i>
+      </a>
+      <span id="mTitle" class="text-[15px] font-extrabold text-[#0F2043] truncate">Learning...</span>
+    </div>
+    <a href="dashboard.html" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-slate-100 flex-shrink-0">
+      <i class="fa-solid fa-house text-[16px] text-[#0F2043]"></i>
+    </a>
+  </div>
+</header>
+
+<main class="max-w-[1280px] mx-auto px-3 sm:px-6 py-4">
+  <!-- Course head -->
+  <section id="learnHead" class="rounded-[16px] overflow-hidden relative" style="background:#0F2043">
+    <div class="absolute inset-0" style="background-image:radial-gradient(rgba(255,255,255,0.09) 1px,transparent 1.5px);background-size:18px 18px"></div>
+    <div class="relative px-4 sm:px-6 py-4 sm:py-5 flex items-center gap-3">
+      <a href="my-courses.html" class="hidden sm:flex w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 items-center justify-center text-white flex-shrink-0"><i class="fa-solid fa-arrow-left text-[14px]"></i></a>
+      <div class="min-w-0">
+        <div id="learnPills" class="flex items-center gap-1.5 flex-wrap mb-1"></div>
+        <h1 id="learnTitle" class="bangla text-white font-extrabold text-[17px] sm:text-[22px] leading-snug">Loading...</h1>
+        <p id="learnSub" class="text-white/60 text-[11px] sm:text-[12px] font-medium mt-0.5"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Telegram groups (big card + course image — sudhu link thakle show hobe) -->
+  <section id="tgSection" class="hidden mt-4">
+    <div class="rounded-[16px] overflow-hidden border border-[#CDEBFF] shadow-sm" style="background:linear-gradient(135deg,#EAF6FF 0%,#F4F9FF 60%,#EDF7FF 100%)">
+      <div class="grid grid-cols-1 sm:grid-cols-[230px_1fr]">
+        <div id="tgImgWrap" class="relative min-h-[150px] sm:min-h-full bg-[#0F2043]">
+          <img id="tgCourseImg" src="" alt="Course" class="absolute inset-0 w-full h-full object-contain">
+        </div>
+        <div class="p-4 sm:p-5">
+          <div class="flex items-center gap-2.5">
+            <span class="w-11 h-11 rounded-full bg-[#229ED9] text-white flex items-center justify-center shadow flex-shrink-0"><i class="fa-brands fa-telegram text-[22px]"></i></span>
+            <div class="min-w-0">
+              <h2 class="text-[16px] sm:text-[18px] font-extrabold text-[#0F2043]">Join Telegram Groups</h2>
+              <p class="text-[11.5px] sm:text-[12px] text-slate-500 font-medium">Class updates, PDFs & discussions — all in one place</p>
+            </div>
+          </div>
+          <div id="tgBigBtns" class="flex flex-col sm:flex-row sm:flex-wrap gap-2 mt-3"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="learnBody" class="grid grid-cols-1 lg:grid-cols-[1.7fr_0.9fr] gap-4 mt-4">
+    <!-- Left: player + now playing + telegram -->
+    <div class="space-y-4 order-1">
+      <div class="bg-white rounded-[14px] border border-slate-100 shadow-sm overflow-hidden">
+        <div id="playerBox" class="relative aspect-video bg-black flex items-center justify-center">
+          <p class="text-[13px] text-slate-400 text-center px-6"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading player...</p>
+        </div>
+        <div class="p-4 sm:p-5">
+          <h2 id="nowTitle" class="font-extrabold text-[15px] sm:text-[17px] text-[#0F2043] leading-snug">Select a class to start</h2>
+          <p id="nowMeta" class="text-[11px] sm:text-[12px] text-slate-500 mt-1"></p>
+          <div class="flex items-center gap-2 mt-4">
+            <button id="prevBtn" class="flex-1 py-2.5 rounded-[10px] border border-slate-200 text-slate-600 font-bold text-[12.5px] flex items-center justify-center gap-1.5 hover:bg-slate-50 disabled:opacity-40" disabled>
+              <i class="fa-solid fa-backward-step text-[13px]"></i> Previous
+            </button>
+            <button id="nextBtn" class="flex-1 py-2.5 rounded-[10px] bg-[#1A56FF] hover:bg-[#1445D6] text-white font-bold text-[12.5px] flex items-center justify-center gap-1.5 disabled:opacity-40" disabled>
+              Next <i class="fa-solid fa-forward-step text-[13px]"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: topic-by-topic curriculum -->
+    <div class="order-2 lg:sticky lg:top-[80px] h-fit">
+      <div class="bg-white rounded-[14px] border border-slate-100 shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-slate-100">
+          <h2 class="text-[15px] sm:text-[16px] font-extrabold text-[#0F2043]"><i class="fa-solid fa-list-check text-[#1A56FF] mr-1"></i> Course Content</h2>
+          <p id="currSub" class="text-[11.5px] text-slate-500 mt-0.5">Loading classes...</p>
+        </div>
+        <div id="currList" class="max-h-[70vh] overflow-y-auto">
+          <p class="text-[13px] text-slate-400 text-center py-8"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading classes...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+(function(){
+  try{
+    var hasTok=function(){ try{return !!(localStorage.getItem('sm_user_token')||sessionStorage.getItem('sm_user_token'));}catch(x){return false;} };
+    if(!hasTok()) document.querySelectorAll('[data-account-link]').forEach(function(a){ a.href='auth.html?next='+encodeURIComponent('dashboard.html'); });
+  }catch(e){}
+  document.addEventListener('click',function(e){
+    var a=e.target&&e.target.closest?e.target.closest('[data-account-link]'):null;
+    if(!a) return;
+    var t=''; try{t=localStorage.getItem('sm_user_token')||sessionStorage.getItem('sm_user_token')||'';}catch(x){}
+    if(!t){ e.preventDefault(); location.href='auth.html?next='+encodeURIComponent('dashboard.html'); }
+  });
+})();
+</script>
+
+<script>
+(function(){
+  'use strict';
+  var esc = function(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); };
+  var $ = function(id){ return document.getElementById(id); };
+  var courseId = '';
+  try{ courseId = new URLSearchParams(window.location.search).get('course') || new URLSearchParams(window.location.search).get('id') || ''; }catch(e){}
+  var lessons = [];
+  var enrolled = false;
+  var playingId = null;
+  var tgGroups = [];
+  var courseThumb = '';
+  var courseTitle = '';
+
+  function token(){ try{ return localStorage.getItem('sm_user_token')||sessionStorage.getItem('sm_user_token')||''; }catch(e){ return ''; } }
+  function headers(){ var t=token(); return t ? { 'Authorization':'Bearer '+t } : {}; }
+  function toast(msg){
+    var t = document.createElement('div');
+    t.className = 'fixed bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 bg-[#0F2043] text-white px-5 py-3 rounded-full text-[13px] font-semibold shadow-xl z-50';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(function(){ t.remove(); }, 2200);
+  }
+  function lastKey(){ return 'sm_last_lesson_' + courseId; }
+  function saveLast(id){ try{ localStorage.setItem(lastKey(), String(id)); }catch(e){} }
+  function readLast(){ try{ return localStorage.getItem(lastKey()) || ''; }catch(e){ return ''; } }
+
+  function groupLessons(){
+    var groups = [], map = {};
+    lessons.forEach(function(l){
+      var s = l.section || 'All Classes';
+      if(!map[s]){ map[s] = { name: s, items: [] }; groups.push(map[s]); }
+      map[s].items.push(l);
+    });
+    return groups;
+  }
+
+  function renderCurriculum(){
+    var box = $('currList');
+    var free = lessons.filter(function(l){ return l.isFree; }).length;
+    $('currSub').textContent = lessons.length
+      ? (lessons.length + ' classes' + (free ? ' • ' + free + ' free' : '') + (enrolled ? ' • Unlocked ✓' : ''))
+      : 'No classes added yet';
+    if(!lessons.length){
+      box.innerHTML = '<p class="text-[13px] text-slate-400 text-center py-8">Classes coming soon.</p>';
+      return;
+    }
+    var groups = groupLessons();
+    var n = 0;
+    box.innerHTML = groups.map(function(g, gi){
+      var rows = g.items.map(function(l){
+        n++;
+        var open = l.isFree || enrolled;
+        var active = String(l.id) === String(playingId);
+        return '<button data-lesson="'+l.id+'" class="lesson-row w-full flex items-center gap-3 px-4 py-3 hover:bg-[#F8F9FD] text-left transition border-l-[3px] '+(active ? 'active border-[#1A56FF]' : 'border-transparent')+'">'
+          + '<span class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-[12px] font-extrabold '+(active ? 'bg-[#1A56FF] text-white' : (open ? 'bg-[#E6F0FF] text-[#1A56FF]' : 'bg-slate-100 text-slate-400'))+'">'
+          + (open ? (active ? '<i class="fa-solid fa-pause text-[11px]"></i>' : n) : '<i class="fa-solid fa-lock text-[11px]"></i>') + '</span>'
+          + '<span class="flex-1 min-w-0"><span class="block text-[13px] font-bold '+(active ? 'text-[#1A56FF]' : 'text-[#0F2043]')+' truncate">'+esc(l.title)+'</span>'
+          + '<span class="block text-[11px] text-slate-500 mt-0.5">'+esc(l.duration || '')+(l.isFree ? ' • <span class="text-[#16A34A] font-bold">FREE</span>' : '')+'</span></span>'
+          + (open ? '<i class="fa-solid fa-play text-[#C7D9FF] text-[12px] flex-shrink-0"></i>' : '')
+          + '</button>';
+      }).join('');
+      var openCls = (gi === 0 || g.items.some(function(l){ return String(l.id) === String(playingId); })) ? ' sec-open' : '';
+      return '<div class="sec-wrap border-b border-slate-100 last:border-0'+openCls+'">'
+        + '<button data-sec="'+gi+'" class="w-full flex items-center gap-2 px-4 py-3 bg-[#F8F9FD]/70 hover:bg-[#F1F5F9] text-left transition">'
+        + '<span class="flex-1 min-w-0"><span class="block text-[13px] font-extrabold text-[#0F2043] truncate">'+esc(g.name)+'</span>'
+        + '<span class="block text-[10.5px] text-slate-500 font-semibold">'+g.items.length+' class'+(g.items.length>1?'es':'')+'</span></span>'
+        + '<i class="fa-solid fa-chevron-down sec-chev text-slate-400 text-[12px] flex-shrink-0"></i></button>'
+        + '<div class="sec-body divide-y divide-slate-50">'+rows+'</div></div>';
+    }).join('');
+    updateNav();
+  }
+
+  function updateNav(){
+    var openList = lessons.filter(function(l){ return l.isFree || enrolled; });
+    var idx = openList.findIndex(function(l){ return String(l.id) === String(playingId); });
+    var pv = $('prevBtn'), nx = $('nextBtn');
+    if(pv) pv.disabled = !(idx > 0);
+    if(nx) nx.disabled = !(idx >= 0 && idx < openList.length - 1);
+  }
+
+  function stopPlayer(){
+    var box = $('playerBox');
+    box.innerHTML = '';
+  }
+
+  function playLesson(id){
+    var l = lessons.find(function(x){ return String(x.id) === String(id); });
+    if(!l) return;
+    if(!l.isFree && !enrolled){
+      toast('Ei class locked — enroll korle dekhte parbe');
+      return;
+    }
+    playingId = l.id;
+    saveLast(l.id);
+    $('nowTitle').textContent = l.title || '';
+    $('nowMeta').textContent = (l.section ? l.section + ' • ' : '') + (l.duration || '');
+    renderCurriculum();
+    var secEl = null;
+    try{
+      var btn = document.querySelector('[data-lesson="'+l.id+'"]');
+      if(btn){ var wrap = btn.closest('.sec-wrap'); if(wrap && !wrap.classList.contains('sec-open')) wrap.classList.add('sec-open'); }
+    }catch(e){}
+    var box = $('playerBox');
+    box.innerHTML = '<p class="text-[13px] text-slate-400 text-center px-6"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading video...</p>';
+    fetch('/api/my/lessons/' + encodeURIComponent(l.id) + '/watch', { headers: token() ? headers() : {} })
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        if(!j.success) throw new Error(j.message);
+        var d = j.data;
+        stopPlayer();
+        if(d && (d.source === 'upload' || (!d.embedUrl && d.videoUrl))){
+          box.innerHTML = '<video id="learnVideo" class="absolute inset-0 w-full h-full" controls playsinline preload="metadata" controlsList="nodownload" src="'+esc(d.videoUrl)+'"></video>';
+          var v = $('learnVideo');
+          if(v){ try{ v.play().catch(function(){}); }catch(e){} }
+        } else {
+          var url = (d && d.embedUrl) || '';
+          box.innerHTML = '<iframe class="absolute inset-0 w-full h-full" src="'+esc(url)+(url.indexOf('?')>-1?'&':'?')+'autoplay=1" title="Class video" frameborder="0" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+        }
+      })
+      .catch(function(e){ box.innerHTML = '<p class="text-[13px] text-red-400 text-center px-6">'+esc(e.message || 'Video load hoyni')+'</p>'; });
+  }
+
+  function goStep(dir){
+    var openList = lessons.filter(function(l){ return l.isFree || enrolled; });
+    var idx = openList.findIndex(function(l){ return String(l.id) === String(playingId); });
+    var nxt = openList[idx + dir];
+    if(nxt) playLesson(nxt.id);
+  }
+
+  async function boot(){
+    if(!courseId){
+      $('learnTitle').textContent = 'No course selected';
+      $('playerBox').innerHTML = '<p class="text-[13px] text-slate-400 text-center px-6">Course select koro</p>';
+      return;
+    }
+    // 1) course info (public)
+    try{
+      var r = await fetch('/api/public/courses/' + encodeURIComponent(courseId));
+      var j = await r.json();
+      if(!j.success) throw new Error(j.message || 'Course not found');
+      var c = j.data;
+      document.title = c.title + ' - Learn - StudyMart';
+      $('learnTitle').textContent = c.title;
+      $('mTitle').textContent = c.title;
+      courseThumb = c.thumbnail || '';
+      courseTitle = c.title || 'Course';
+      var hb = document.getElementById('learnHead');
+      if(hb && c.bannerColor) hb.style.background = c.bannerColor;
+      $('learnPills').innerHTML = (c.batchName ? '<span class="px-2 py-0.5 rounded-full bg-white/15 border border-white/20 text-white text-[10px] font-bold">'+esc(c.batchName)+'</span>' : '')
+        + (c.categoryName ? '<span class="px-2 py-0.5 rounded-full bg-white/15 border border-white/20 text-white text-[10px] font-bold">'+esc(c.categoryName)+'</span>' : '')
+        + '<span class="px-2 py-0.5 rounded-full bg-[#16A34A] text-white text-[10px] font-bold"><i class="fa-solid fa-check mr-0.5 text-[8px]"></i>Enrolled</span>';
+      $('learnSub').textContent = (c.teacher ? 'By ' + c.teacher : '');
+    }catch(e){
+      $('learnTitle').textContent = e.message;
+      return;
+    }
+    // 2) curriculum (public titles)
+    try{
+      var rc = await fetch('/api/public/courses/' + encodeURIComponent(courseId) + '/curriculum');
+      var jc = await rc.json();
+      if(jc.success) lessons = jc.data.lessons || [];
+    }catch(e){ lessons = []; }
+    // 3) access (enrolled + telegram)
+    if(token()){
+      try{
+        var ra = await fetch('/api/my/courses/' + encodeURIComponent(courseId) + '/access', { headers: headers() });
+        var ja = await ra.json();
+        if(ja.success && ja.data){
+          enrolled = !!ja.data.enrolled;
+          tgGroups = Array.isArray(ja.data.telegramGroups) && ja.data.telegramGroups.length
+            ? ja.data.telegramGroups
+            : (ja.data.telegramLink ? [{ label: 'Join Group', url: ja.data.telegramLink, type: 'static' }] : []);
+        }
+      }catch(e){}
+    }
+    if(!enrolled){
+      $('playerBox').innerHTML = '<div class="text-center px-6 py-10">'
+        + '<div class="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center mx-auto"><i class="fa-solid fa-lock text-white/70 text-[20px]"></i></div>'
+        + '<p class="text-white font-bold text-[14px] mt-4">Tumi ei course e enroll koro nai</p>'
+        + '<a href="course.html?id='+encodeURIComponent(courseId)+'" class="inline-flex items-center gap-1.5 mt-4 px-5 py-2.5 rounded-[10px] bg-[#1A56FF] text-white font-bold text-[12.5px]">Enroll Now <i class="fa-solid fa-arrow-right text-[11px]"></i></a></div>';
+    }
+    // telegram: boro card + pase course image (link thakle tobei show)
+    if(tgGroups.length){
+      var sec = $('tgSection');
+      if(sec) sec.classList.remove('hidden');
+      var img = $('tgCourseImg'), wrap = $('tgImgWrap');
+      if(img){
+        if(courseThumb){ img.src = courseThumb; img.alt = courseTitle; }
+        else if(wrap){ wrap.innerHTML = '<div class="absolute inset-0 flex items-center justify-center" style="background:linear-gradient(135deg,#1A56FF 0%,#0F2043 100%)"><i class="fa-solid fa-book-open text-white/30 text-[40px]"></i></div>'; }
+      }
+      var big = $('tgBigBtns');
+      if(big) big.innerHTML = tgGroups.map(function(g){
+        var invite = g.type === 'invite';
+        return '<a href="'+esc(g.url||'#')+'" target="_blank" class="flex-1 min-w-[180px] inline-flex items-center justify-center gap-2 px-5 py-3 rounded-[12px] text-white text-[13.5px] font-extrabold shadow hover:opacity-90 transition '+(invite?'bg-[#16A34A]':'bg-[#229ED9]')+'">'
+          + '<i class="fa-brands fa-telegram text-[18px]"></i> '+esc(g.label||'Join Group')+'</a>';
+      }).join('');
+    }
+    renderCurriculum();
+    // auto-resume: last lesson (jodi playable hoy), nahole first playable
+    var playable = lessons.filter(function(l){ return l.isFree || enrolled; });
+    var last = readLast();
+    var target = playable.find(function(l){ return String(l.id) === String(last); }) || playable[0];
+    if(target) playLesson(target.id);
+    else if(!enrolled) $('nowTitle').textContent = 'No preview available';
+  }
+
+  document.addEventListener('click', function(e){
+    var lb = e.target.closest ? e.target.closest('[data-lesson]') : null;
+    if(lb){ e.preventDefault(); playLesson(lb.dataset.lesson); return; }
+    var sb = e.target.closest ? e.target.closest('[data-sec]') : null;
+    if(sb){
+      var wrap = sb.closest('.sec-wrap');
+      if(wrap) wrap.classList.toggle('sec-open');
+      return;
+    }
+  });
+  $('prevBtn').addEventListener('click', function(){ goStep(-1); });
+  $('nextBtn').addEventListener('click', function(){ goStep(1); });
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot);
+  else boot();
+})();
+</script>
+<script src="assets/navbar.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

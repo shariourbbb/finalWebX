@@ -30,7 +30,7 @@
       <nav class="flex items-center gap-6 text-[14px] font-semibold flex-shrink-0 ml-2">
         <a data-sm-nav="home" href="index.html" class="sm-desk-nav-link" data-i18n="home">Home</a>
         <a data-sm-nav="courses" href="courses.html" class="sm-desk-nav-link" data-i18n="courses">Courses</a>
-        <a data-sm-nav="ebooks" href="index.html#secEbooks" class="sm-desk-nav-link" data-i18n="ebooks">Ebooks</a>
+        <a data-sm-nav="ebooks" href="ebooks.html" class="sm-desk-nav-link" data-i18n="ebooks">Ebooks</a>
         <a data-sm-nav="free" href="courses.html?q=" class="sm-desk-nav-link" data-i18n="free">Free Resources</a>
         <a data-sm-nav="telegram" href="#" data-sm-telegram class="sm-desk-nav-link" data-i18n="telegram">Telegram</a>
       </nav>
@@ -41,7 +41,7 @@
       <div class="sm-desk-drop flex-shrink-0"><button data-sm-desk-account-btn class="sm-desk-pill"><i class="fa-regular fa-user text-[15px] text-slate-600"></i><span data-i18n="account">Account</span><i class="fa-solid fa-chevron-down text-[11px] text-slate-400"></i></button><div data-sm-desk-account-menu class="sm-desk-menu hidden"></div></div>
     </div>
   </div>
-  <div id="smDeskDrawer" class="hidden"><div class="sm-backdrop"></div><div class="sm-panel"><div class="flex items-center justify-between mb-3"><span class="text-[18px] font-extrabold"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span><button data-sm-drawer-close class="w-9 h-9 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-xmark"></i></button></div><nav class="flex flex-col gap-1 text-[14px] font-semibold"><a href="index.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Home</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Courses</a><a href="index.html#secEbooks" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Ebooks</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Free Resources</a><a href="#" data-sm-telegram class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Telegram</a><a href="dashboard.html" data-account-link class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Account / Dashboard</a><a href="cart.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Cart (<span data-sm-cart-count>0</span>)</a></nav></div></div>
+  <div id="smDeskDrawer" class="hidden"><div class="sm-backdrop"></div><div class="sm-panel"><div class="flex items-center justify-between mb-3"><span class="text-[18px] font-extrabold"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span><button data-sm-drawer-close class="w-9 h-9 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-xmark"></i></button></div><nav class="flex flex-col gap-1 text-[14px] font-semibold"><a href="index.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Home</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Courses</a><a href="ebooks.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Ebooks</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Free Resources</a><a href="#" data-sm-telegram class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Telegram</a><a href="dashboard.html" data-account-link class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Account / Dashboard</a><a href="cart.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Cart (<span data-sm-cart-count>0</span>)</a></nav></div></div>
   <!-- phone bar (unchanged) -->
   <div class="lg:hidden max-w-[1420px] mx-auto px-4 sm:px-6 lg:px-6 h-[58px] lg:h-[62px] flex items-center justify-between gap-4">
     <div class="flex items-center gap-3">
@@ -92,6 +92,8 @@
       <a href="index.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Home</a>
       <a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Courses</a>
       <a href="dashboard.html" class="px-3 py-2.5 rounded-xl bg-[#EEF2FF] text-[#1A56FF]">Dashboard</a>
+      <a href="my-courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">My Courses</a>
+      <a href="my-ebooks.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">My E-Books</a>
       <a href="#secOrders" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">My Orders</a>
     </nav>
   </div>
@@ -108,8 +110,11 @@
       <a href="courses.html" class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-slate-50 text-slate-700 font-medium text-[13px]">
         <i class="fa-solid fa-book-open w-5 text-center text-[14px]"></i> Courses
       </a>
-      <a href="#secCourses" class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-slate-50 text-slate-700 font-medium text-[13px]">
+      <a href="my-courses.html" class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-slate-50 text-slate-700 font-medium text-[13px]">
         <i class="fa-regular fa-circle-play w-5 text-center text-[14px]"></i> My Courses
+      </a>
+      <a href="my-ebooks.html" class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-slate-50 text-slate-700 font-medium text-[13px]">
+        <i class="fa-solid fa-book w-5 text-center text-[14px]"></i> My E-Books
       </a>
       <a href="#secOrders" class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-slate-50 text-slate-700 font-medium text-[13px]">
         <i class="fa-solid fa-bag-shopping w-5 text-center text-[14px]"></i> My Orders
@@ -144,7 +149,7 @@
       <section id="secCourses" class="mt-5 scroll-mt-20">
         <div class="flex items-center justify-between mb-3">
           <h2 class="text-[14px] sm:text-[15px] font-extrabold text-[#0F2043]">My Courses <span id="myCoursesCount" class="ml-1 px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#1A56FF] text-[11px] font-bold"></span></h2>
-          <a href="courses.html" class="text-[#1A56FF] font-bold text-[11px] sm:text-[12px]">View All</a>
+          <a href="my-courses.html" class="text-[#1A56FF] font-bold text-[11px] sm:text-[12px]">View All</a>
         </div>
         <!-- Mobile List (dynamic) -->
         <div id="myCoursesMobile" class="lg:hidden bg-white rounded-[14px] border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.04)] divide-y divide-slate-100 overflow-hidden">
@@ -217,8 +222,8 @@ document.getElementById('bellBtn').addEventListener('click',()=>{document.getEle
   function thumbHTML(c, size){
     // size: 'continue' | 'row' | 'grid' — same UI as before, real thumbnail or gradient
     if(c.thumbnail){
-      if(size==='continue') return '<div class="w-[112px] sm:w-[132px] h-[112px] sm:h-[108px] rounded-[10px] flex-shrink-0 overflow-hidden relative bg-[#0F2043]"><img src="'+esc(c.thumbnail)+'" alt="'+esc(c.title)+'" class="w-full h-full object-contain" loading="lazy"></div>';
-      if(size==='row') return '<div class="w-[64px] h-[64px] rounded-[10px] flex-shrink-0 overflow-hidden relative bg-[#0F2043]"><img src="'+esc(c.thumbnail)+'" alt="'+esc(c.title)+'" class="w-full h-full object-contain" loading="lazy"></div>';
+      if(size==='continue') return '<div class="w-[150px] sm:w-[180px] aspect-video rounded-[10px] flex-shrink-0 self-center overflow-hidden relative bg-[#0F2043]"><img src="'+esc(c.thumbnail)+'" alt="'+esc(c.title)+'" class="w-full h-full object-contain" loading="lazy"></div>';
+      if(size==='row') return '<div class="w-[64px] h-[64px] rounded-[10px] flex-shrink-0 overflow-hidden relative bg-[#0F2043]"><img src="'+esc(c.thumbnail)+'" alt="'+esc(c.title)+'" class="w-full h-full object-cover" loading="lazy"></div>';
       return '<div class="aspect-video relative overflow-hidden bg-[#0F2043]"><img src="'+esc(c.thumbnail)+'" alt="'+esc(c.title)+'" class="w-full h-full object-cover" loading="lazy"></div>';
     }
     var g = GRADS[String(c.id||'').length % GRADS.length];
@@ -248,12 +253,12 @@ document.getElementById('bellBtn').addEventListener('click',()=>{document.getEle
 
   function renderContinue(list, loggedIn){
     var box = $('continueWrap'); if(!box) return;
-    if(!loggedIn){ box.innerHTML = '<div class="bg-[#F8F7FF] rounded-[12px] border border-[#EDE9FF] p-3">'+guestCTA('Login to continue learning','Login kore tomar enrolled course ekhane dekhte parbe','Login')+'</div>'; return; }
+    if(!loggedIn){ box.innerHTML = '<div class="bg-[#F8F7FF] rounded-[12px] border border-[#EDE9FF] p-3">'+guestCTA('Log in to continue learning','Your enrolled courses will appear here after you log in','Log In')+'</div>'; return; }
     if(!list.length){
       box.innerHTML = '<div class="bg-[#F8F7FF] rounded-[12px] border border-[#EDE9FF] p-3 text-center py-8 px-4">'
         + '<div class="w-12 h-12 rounded-full bg-[#EEF2FF] flex items-center justify-center mx-auto"><i class="fa-solid fa-book-open text-[#1A56FF] text-[18px]"></i></div>'
         + '<p class="text-[13px] font-bold text-[#0F2043] mt-3">No enrolled courses yet</p>'
-        + '<p class="text-[11.5px] text-slate-500 mt-1">Course kine enrollment complete korlei ekhane show korbe</p>'
+        + '<p class="text-[11.5px] text-slate-500 mt-1">Your courses will show up here once your enrollment is complete</p>'
         + '<a href="courses.html" class="inline-flex items-center gap-1.5 mt-4 px-5 py-2.5 rounded-[10px] bg-[#1A56FF] hover:bg-[#1445D6] text-white font-bold text-[12.5px]">Browse Courses <i class="fa-solid fa-arrow-right text-[11px]"></i></a></div>';
       return;
     }
@@ -265,7 +270,7 @@ document.getElementById('bellBtn').addEventListener('click',()=>{document.getEle
       + '<p class="text-[11px] text-slate-500 font-medium mt-0.5 truncate">'+esc(c.batchName||c.categoryName||'')+'</p>'
       + '<div class="mt-auto flex flex-col lg:flex-row lg:items-end lg:justify-between gap-3 pt-2">'
       + '<span class="w-fit px-2.5 py-1 rounded-full bg-[#E6F4EA] text-[#16A34A] text-[10.5px] font-bold"><i class="fa-solid fa-check mr-1 text-[9px]"></i>Enrolled</span>'
-      + '<a href="course.html?id='+c.id+'" class="inline-flex items-center justify-center gap-1.5 bg-[#1438E0] hover:bg-[#102FB8] text-white font-semibold text-[11px] sm:text-[12px] px-4 py-2 rounded-[6px] w-full lg:w-auto whitespace-nowrap"><i class="fa-solid fa-play text-[9px]"></i> Continue Learning</a>'
+      + '<a href="learn.html?course='+c.id+'" class="inline-flex items-center justify-center gap-1.5 bg-[#1438E0] hover:bg-[#102FB8] text-white font-semibold text-[11px] sm:text-[12px] px-4 py-2 rounded-[6px] w-full lg:w-auto whitespace-nowrap"><i class="fa-solid fa-play text-[9px]"></i> Continue Learning</a>'
       + '</div></div></div>';
   }
 
@@ -273,15 +278,15 @@ document.getElementById('bellBtn').addEventListener('click',()=>{document.getEle
     var mob = $('myCoursesMobile'), desk = $('myCoursesDesktop'), cnt = $('myCoursesCount');
     if(cnt) cnt.textContent = loggedIn && list.length ? list.length : '';
     if(!loggedIn){
-      var g = guestCTA('Login required','Login korle tomar kena course gulo ekhane dekhabe','Login');
+      var g = guestCTA('Log in required','Log in to see your purchased courses here','Log In');
       if(mob) mob.innerHTML = g;
       if(desk) desk.innerHTML = '<div class="col-span-3 bg-white rounded-[12px] border border-slate-100">'+g+'</div>';
       return;
     }
     if(!list.length){
       var e = '<div class="text-center py-8 px-4"><div class="w-12 h-12 rounded-full bg-[#EEF2FF] flex items-center justify-center mx-auto"><i class="fa-solid fa-book-open text-[#1A56FF] text-[18px]"></i></div>'
-        + '<p class="text-[13px] font-bold text-[#0F2043] mt-3">Akono kono course keno nai</p>'
-        + '<p class="text-[11.5px] text-slate-500 mt-1">Pochonder course kine ekhan theke continue koro</p>'
+        + '<p class="text-[13px] font-bold text-[#0F2043] mt-3">No courses yet</p>'
+        + '<p class="text-[11.5px] text-slate-500 mt-1">Purchase a course to continue learning right from here</p>'
         + '<a href="courses.html" class="inline-flex items-center gap-1.5 mt-4 px-5 py-2.5 rounded-[10px] bg-[#1A56FF] hover:bg-[#1445D6] text-white font-bold text-[12.5px]">Browse Courses <i class="fa-solid fa-arrow-right text-[11px]"></i></a></div>';
       if(mob) mob.innerHTML = e;
       if(desk) desk.innerHTML = '<div class="col-span-3 bg-white rounded-[12px] border border-slate-100">'+e+'</div>';
@@ -293,14 +298,14 @@ document.getElementById('bellBtn').addEventListener('click',()=>{document.getEle
         + '<div class="flex-1 min-w-0"><h3 class="font-bold text-[13px] text-[#0F2043] truncate">'+esc(c.title)+'</h3>'
         + '<p class="text-[11px] text-slate-500 truncate">'+esc(c.batchName||c.categoryName||'')+'</p>'
         + '<span class="inline-block mt-1.5 px-2 py-0.5 rounded-full bg-[#E6F4EA] text-[#16A34A] text-[10px] font-bold"><i class="fa-solid fa-check mr-0.5 text-[8px]"></i>Enrolled</span></div>'
-        + '<a href="course.html?id='+c.id+'" class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-[8px] border border-[#1A56FF] text-[#1A56FF] font-bold text-[11px]"><i class="fa-solid fa-play text-[9px]"></i> Continue</a></div>';
+        + '<a href="learn.html?course='+c.id+'" class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-[8px] border border-[#1A56FF] text-[#1A56FF] font-bold text-[11px]"><i class="fa-solid fa-play text-[9px]"></i> Continue</a></div>';
     }).join('');
     if(desk) desk.innerHTML = list.map(function(c){
       return '<div class="bg-white rounded-[12px] border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.04)] overflow-hidden">'
         + thumbHTML(c,'grid')
         + '<div class="p-3"><h4 class="font-bold text-[12px] text-[#0F2043] truncate">'+esc(c.title)+'</h4>'
         + '<p class="text-[10.5px] text-slate-500 truncate mt-0.5">'+esc(c.teacher||c.batchName||'')+'</p>'
-        + '<a href="course.html?id='+c.id+'" class="mt-3 w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-[8px] border border-[#D0D9FF] text-[#1A56FF] font-semibold text-[12px] hover:bg-[#EEF2FF]"><i class="fa-solid fa-play text-[10px]"></i> Continue</a></div></div>';
+        + '<a href="learn.html?course='+c.id+'" class="mt-3 w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-[8px] border border-[#D0D9FF] text-[#1A56FF] font-semibold text-[12px] hover:bg-[#EEF2FF]"><i class="fa-solid fa-play text-[10px]"></i> Continue</a></div></div>';
     }).join('');
   }
 
@@ -317,11 +322,11 @@ document.getElementById('bellBtn').addEventListener('click',()=>{document.getEle
     if(dot) dot.classList.toggle('hidden', !(loggedIn && pending>0));
     if(cnt) cnt.textContent = loggedIn && orders.length ? orders.length : '';
     if(!box) return;
-    if(!loggedIn){ box.innerHTML = guestCTA('Login to see your orders','Order korar por ekhane payment status dekhte parbe','Login to View Orders'); return; }
+    if(!loggedIn){ box.innerHTML = guestCTA('Log in to see your orders','Track your payment status here after placing an order','Log In to View Orders'); return; }
     if(!orders.length){
       box.innerHTML = '<div class="text-center py-8 px-4"><div class="w-12 h-12 rounded-full bg-[#EEF2FF] flex items-center justify-center mx-auto"><i class="fa-solid fa-bag-shopping text-[#1A56FF] text-[18px]"></i></div>'
-        + '<p class="text-[13px] font-bold text-[#0F2043] mt-3">Akono kono order nai</p>'
-        + '<p class="text-[11.5px] text-slate-500 mt-1">Course pochondo kore order koro</p>'
+        + '<p class="text-[13px] font-bold text-[#0F2043] mt-3">No orders yet</p>'
+        + '<p class="text-[11.5px] text-slate-500 mt-1">Choose a course and place your order</p>'
         + '<a href="courses.html" class="inline-flex items-center gap-1.5 mt-4 px-5 py-2.5 rounded-[10px] bg-[#1A56FF] hover:bg-[#1445D6] text-white font-bold text-[12.5px]">Browse Courses <i class="fa-solid fa-arrow-right text-[11px]"></i></a></div>';
       return;
     }

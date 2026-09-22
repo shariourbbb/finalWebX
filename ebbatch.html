@@ -200,12 +200,56 @@ const TAB_ICONS = {
 };
 const TAB_ORDER = ['academic', 'admission', 'revision'];
 
+// Admin -> Home Page -> Category Tabs (batch-wise position order + columns). Bootstrap theke sync, fallback fetch.
+function getCtabCfg(){
+  try{
+    var hp = (window.__SM_BOOTSTRAP__ && window.__SM_BOOTSTRAP__.homePage) || window.__SM_HP__ || null;
+    var ct = hp && hp.sections ? hp.sections.categoryTabs : null;
+    if(ct){
+      var ord = Array.isArray(ct.tabOrder) && ct.tabOrder.length
+        ? ct.tabOrder.map(function(s){ return String(s).toLowerCase(); })
+        : TAB_ORDER.slice();
+      var cols = Math.min(6, Math.max(1, parseInt(ct.cols, 10) || 3));
+      // oi batch er nijer position setting thakle setai age
+      try{
+        var per = ct.perBatch || {};
+        var bi = (typeof ebBatchInfo !== 'undefined' && ebBatchInfo) ? ebBatchInfo : null;
+        var bid = bi ? String(bi.id || '') : '';
+        var bslug = bi ? String(bi.slug || '').toLowerCase() : '';
+        var custom = (bid && per['eb:' + bid]) || (bslug && per['eb:' + bslug]) || (bid && per[bid]) || null;
+        if(Array.isArray(custom) && custom.length) ord = custom.map(function(s){ return String(s).toLowerCase(); });
+      }catch(e){}
+      return { order: ord, cols: cols };
+    }
+  }catch(e){}
+  return { order: TAB_ORDER.slice(), cols: 3 };
+}
+async function refreshCtabCfg(){
+  try{
+    var r = await fetch('/api/public/homepage');
+    var j = await r.json();
+    if(j && j.success && j.data){
+      window.__SM_HP__ = j.data;
+      var cfg = getCtabCfg();
+      var key = cfg.order.join('|') + ':' + cfg.cols;
+      if(key !== window.__ctabKey){ buildTabs(); }
+    }
+  }catch(e){}
+}
+
 function esc(s){
   return String(s == null ? '' : s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
 
 function selectCategory(slug){
   selectedCategory = slug;
+  try {
+    var __qs = new URLSearchParams(window.location.search);
+    __qs.set('category', slug);
+    if (ebBatchParam) __qs.set('ebookBatch', ebBatchParam);
+    history.replaceState(null, '', window.location.pathname + '?' + __qs.toString());
+    ebCatParam = String(slug || '').toLowerCase();
+  } catch (e) {}
   document.querySelectorAll('#categoryTabs [data-tab]').forEach(b => {
     const on = b.dataset.tab === slug;
     b.className = (on ? 'tab-active' : 'tab-inactive') + ' flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] font-bold text-[12px] sm:text-[13px]' + (on ? ' shadow-sm' : '');
@@ -306,8 +350,10 @@ function buildTabs(){
     seen[slug] = true;
     tabList.push({ slug, name: b.categoryName || slug });
   });
+  const cfg = getCtabCfg();
+  window.__ctabKey = cfg.order.join('|') + ':' + cfg.cols;
   tabList.sort((a, b) => {
-    const ia = TAB_ORDER.indexOf(a.slug), ib = TAB_ORDER.indexOf(b.slug);
+    const ia = cfg.order.indexOf(a.slug), ib = cfg.order.indexOf(b.slug);
     if (ia === -1 && ib === -1) return a.name.localeCompare(b.name);
     if (ia === -1) return 1;
     if (ib === -1) return -1;
@@ -321,15 +367,18 @@ function buildTabs(){
     render();
     return;
   }
-  const cols = Math.min(tabList.length, 3);
+  const cols = Math.min(tabList.length, cfg.cols);
   wrap.className = 'grid gap-2 bg-[#F1F5F9] p-1.5 rounded-[12px] grid-cols-' + cols;
   wrap.innerHTML = tabList.map(t => ''
     + '<button data-tab="'+esc(t.slug)+'" onclick="selectCategory(\''+esc(t.slug)+'\')" class="tab-inactive flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] font-bold text-[12px] sm:text-[13px]">'
     +   '<i class="fa-solid '+(TAB_ICONS[t.slug] || 'fa-layer-group')+' text-[13px]"></i> '+esc(t.name)
     + '</button>').join('');
-  // ?category= thakle oita preselect (courses batch er moto Academic default)
-  let preferred = tabList.some(t => t.slug === 'academic') ? 'academic' : tabList[0].slug;
-  if (ebCatParam && tabList.some(t => t.slug === ebCatParam)) preferred = ebCatParam;
+  // ?category= thakle oita preselect (slug ba name — jeta mile), nahole admin position er prothom tab
+  let preferred = tabList[0].slug;
+  if (ebCatParam) {
+    const hit = tabList.find(t => String(t.slug).toLowerCase() === ebCatParam || String(t.name).toLowerCase() === ebCatParam);
+    if (hit) preferred = hit.slug;
+  }
   selectCategory(preferred);
 }
 
@@ -409,6 +458,7 @@ async function init(){
     }
     buildAuthors();
     buildTabs(); // calls render() via selectCategory
+    refreshCtabCfg(); // homepage config (no bootstrap/file://) hole re-apply
   } catch (e) {
     document.getElementById('ebookCount').textContent = '0';
     listEl.innerHTML = '';

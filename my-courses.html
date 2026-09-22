@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Courses - StudyMart</title>
+<script>try{var __sm_t=localStorage.getItem('sm_theme')||'light';if(__sm_t==='dark'){document.documentElement.classList.add('sm-dark');document.documentElement.style.colorScheme='dark';}}catch(e){}</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{font-family:'Inter',sans-serif}
+.scrollbar-hide::-webkit-scrollbar{display:none}
+.scrollbar-hide{-ms-overflow-style:none;scrollbar-width:none}
+.learn-card{transition:all .2s}
+.learn-card:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(26,86,255,0.12)}
+</style>
+</head>
+<body class="bg-[#F5F7FB] text-slate-900 antialiased pb-[88px] lg:pb-0">
+
+<!-- Header -->
+<link rel="stylesheet" href="assets/navbar.css">
+<header class="sticky top-0 z-40 bg-white border-b border-slate-100 shadow-sm">
+  <div class="hidden lg:block border-b border-slate-100">
+    <div class="max-w-[1400px] mx-auto px-6 h-[68px] flex items-center gap-4">
+      <button data-sm-desk-menu-btn class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-100 transition flex-shrink-0" aria-label="Menu"><i class="fa-solid fa-bars text-[20px] text-[#0F2043]"></i></button>
+      <a href="index.html" class="flex items-center gap-2 flex-shrink-0">
+        <img data-sm-desk-logo src="" alt="Logo" class="hidden w-10 h-10 object-contain rounded-lg">
+        <div data-sm-desk-logo-fb class="w-10 h-10 flex items-center justify-center"><svg width="40" height="40" viewBox="0 0 44 44" fill="none"><path d="M22 6 C16 10 8 12 8 20 C8 28 16 30 22 34 C28 30 36 28 36 20 C36 12 28 10 22 6Z" fill="#1A56FF"/><path d="M12 28 L22 38 L32 28" stroke="#1A56FF" stroke-width="2.5" fill="none" opacity="0.9"/><g><path d="M22 2 L32 7 L22 12 L12 7 Z" fill="#0F2043"/><rect x="21" y="7" width="2" height="8" fill="#FACC15"/></g></svg></div>
+        <span class="text-[22px] font-extrabold tracking-tight leading-none"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span>
+      </a>
+      <nav class="flex items-center gap-6 text-[14px] font-semibold flex-shrink-0 ml-2">
+        <a data-sm-nav="home" href="index.html" class="sm-desk-nav-link" data-i18n="home">Home</a>
+        <a data-sm-nav="courses" href="courses.html" class="sm-desk-nav-link" data-i18n="courses">Courses</a>
+        <a data-sm-nav="ebooks" href="ebooks.html" class="sm-desk-nav-link" data-i18n="ebooks">Ebooks</a>
+        <a data-sm-nav="free" href="courses.html?q=" class="sm-desk-nav-link" data-i18n="free">Free Resources</a>
+        <a data-sm-nav="telegram" href="#" data-sm-telegram class="sm-desk-nav-link" data-i18n="telegram">Telegram</a>
+      </nav>
+      <div class="flex-1"></div>
+      <div class="sm-desk-search w-[280px] xl:w-[320px] flex-shrink-0"><i class="fa-solid fa-magnifying-glass text-slate-400 text-[14px]"></i><input data-sm-desk-search data-i18n-ph="searchPh" type="text" placeholder="Search courses, subjects, ebooks..."><button data-sm-desk-search-btn class="text-slate-400 hover:text-[#1A56FF]" aria-label="Search"><i class="fa-solid fa-arrow-right text-[12px]"></i></button></div>
+      <div class="sm-desk-drop flex-shrink-0"><button data-sm-desk-lang-btn class="sm-desk-pill"><i class="fa-solid fa-globe text-[15px] text-slate-500"></i><span data-i18n="lang">বাংলা/English</span><i class="fa-solid fa-chevron-down text-[11px] text-slate-400"></i></button><div data-sm-desk-lang-menu class="sm-desk-menu hidden"><button type="button" class="sm-mi" data-sm-lang-pick="bn">বাংলা (Bangla)</button><button type="button" class="sm-mi" data-sm-lang-pick="en">English</button></div></div>
+      <button data-sm-theme-btn class="sm-desk-pill flex-shrink-0"><i data-sm-theme-icon class="fa-solid fa-sun text-[15px] text-[#F59E0B]"></i><span data-i18n="theme">Theme</span></button>
+      <div class="sm-desk-drop flex-shrink-0"><button data-sm-desk-account-btn class="sm-desk-pill"><i class="fa-regular fa-user text-[15px] text-slate-600"></i><span data-i18n="account">Account</span><i class="fa-solid fa-chevron-down text-[11px] text-slate-400"></i></button><div data-sm-desk-account-menu class="sm-desk-menu hidden"></div></div>
+    </div>
+  </div>
+  <div id="smDeskDrawer" class="hidden"><div class="sm-backdrop"></div><div class="sm-panel"><div class="flex items-center justify-between mb-3"><span class="text-[18px] font-extrabold"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span><button data-sm-drawer-close class="w-9 h-9 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-xmark"></i></button></div><nav class="flex flex-col gap-1 text-[14px] font-semibold"><a href="index.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Home</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Courses</a><a href="ebooks.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Ebooks</a><a href="my-courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">My Courses</a><a href="my-ebooks.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">My E-Books</a><a href="dashboard.html" data-account-link class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Account / Dashboard</a><a href="cart.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Cart (<span data-sm-cart-count>0</span>)</a></nav></div></div>
+  <div class="lg:hidden max-w-[1420px] mx-auto px-4 sm:px-6 h-[58px] flex items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <a href="dashboard.html" class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-100">
+        <i class="fa-solid fa-arrow-left text-[18px] text-[#0F2043]"></i>
+      </a>
+      <span class="text-[18px] font-extrabold tracking-tight"><span class="text-[#0F2043]">My</span> <span class="text-[#1A56FF]">Courses</span></span>
+    </div>
+    <a href="dashboard.html" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-slate-100">
+      <i class="fa-solid fa-house text-[16px] text-[#0F2043]"></i>
+    </a>
+  </div>
+</header>
+
+<!-- Main Layout -->
+<div class="max-w-[1420px] mx-auto flex">
+  <!-- Left Sidebar - Desktop -->
+  <aside class="hidden lg:block w-[220px] flex-shrink-0 sticky top-[69px] h-[calc(100vh-69px)] bg-white border-r border-slate-100 overflow-y-auto">
+    <nav class="p-3 space-y-1">
+      <a href="dashboard.html" class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-slate-50 text-slate-700 font-medium text-[13px]">
+        <i class="fa-solid fa-house w-5 text-center text-[14px]"></i> Dashboard
+      </a>
+      <a href="courses.html" class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-slate-50 text-slate-700 font-medium text-[13px]">
+        <i class="fa-solid fa-book-open w-5 text-center text-[14px]"></i> Courses
+      </a>
+      <a href="my-courses.html" class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] bg-[#EEF2FF] text-[#1A56FF] font-semibold text-[13px]">
+        <i class="fa-regular fa-circle-play w-5 text-center text-[14px]"></i> My Courses
+      </a>
+      <a href="my-ebooks.html" class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-slate-50 text-slate-700 font-medium text-[13px]">
+        <i class="fa-solid fa-book w-5 text-center text-[14px]"></i> My E-Books
+      </a>
+      <a href="dashboard.html#secOrders" class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-slate-50 text-slate-700 font-medium text-[13px]">
+        <i class="fa-solid fa-bag-shopping w-5 text-center text-[14px]"></i> My Orders
+      </a>
+      <div class="pt-3 mt-3 border-t border-slate-100">
+        <button data-dash-logout class="w-full flex items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-red-50 text-slate-700 hover:text-red-600 font-medium text-[13px]">
+          <i class="fa-solid fa-arrow-right-from-bracket w-5 text-center text-[14px]"></i> Logout
+        </button>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Content -->
+  <main class="flex-1 min-w-0 px-3 sm:px-6 py-4 sm:py-6">
+    <div class="mb-4 flex items-center justify-between gap-3 flex-wrap">
+      <div>
+        <h1 class="text-[20px] sm:text-[22px] font-extrabold text-[#0F2043]">My Courses <span id="mcCount" class="ml-1 px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#1A56FF] text-[11px] font-bold align-middle"></span></h1>
+        <p class="text-[12px] sm:text-[13px] text-slate-500 font-medium mt-0.5">Enroll kora sob course — class korte course e tap koro</p>
+      </div>
+      <div class="relative w-full sm:w-[260px]">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[13px]"></i>
+        <input id="mcSearch" placeholder="Search my courses..." class="w-full bg-white border border-slate-200 rounded-[12px] pl-10 pr-3 py-2.5 text-[13px] outline-none focus:border-[#1A56FF]">
+      </div>
+    </div>
+    <div id="mcList" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+      <p class="col-span-full text-[13px] text-slate-400 text-center py-12"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading your courses...</p>
+    </div>
+  </main>
+</div>
+
+<script>
+(function(){
+  try{
+    var hasTok=function(){ try{return !!(localStorage.getItem('sm_user_token')||sessionStorage.getItem('sm_user_token'));}catch(x){return false;} };
+    if(!hasTok()) document.querySelectorAll('[data-account-link]').forEach(function(a){ a.href='auth.html?next='+encodeURIComponent('dashboard.html'); });
+  }catch(e){}
+  document.addEventListener('click',function(e){
+    var a=e.target&&e.target.closest?e.target.closest('[data-account-link]'):null;
+    if(!a) return;
+    var t=''; try{t=localStorage.getItem('sm_user_token')||sessionStorage.getItem('sm_user_token')||'';}catch(x){}
+    if(!t){ e.preventDefault(); location.href='auth.html?next='+encodeURIComponent('dashboard.html'); }
+  });
+})();
+</script>
+
+<script>
+(function(){
+  'use strict';
+  var esc = function(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); };
+  var $ = function(id){ return document.getElementById(id); };
+  function token(){ try{ return localStorage.getItem('sm_user_token')||sessionStorage.getItem('sm_user_token')||''; }catch(e){ return ''; } }
+  function headers(){ var t=token(); return t ? { 'Authorization':'Bearer '+t } : {}; }
+  var GRADS = [
+    'linear-gradient(135deg, #1E0E62 0%, #3B2F8A 60%, #1E135E 100%)',
+    'linear-gradient(135deg, #0B3D2E 0%, #165A3A 100%)',
+    'linear-gradient(135deg, #0B2E7A 0%, #1A4ABF 100%)',
+    'linear-gradient(135deg, #4A2000 0%, #8B3D00 100%)',
+    'linear-gradient(135deg, #2A0A4A 0%, #6D28D9 100%)'
+  ];
+  var all = [];
+
+  function thumb(c){
+    if(c.thumbnail) return '<div class="aspect-video relative overflow-hidden bg-[#0F2043]"><img src="'+esc(c.thumbnail)+'" alt="'+esc(c.title)+'" class="w-full h-full object-cover" loading="lazy">'
+      + '<span class="absolute inset-0 m-auto w-12 h-12 rounded-full bg-black/45 backdrop-blur border border-white/30 flex items-center justify-center"><i class="fa-solid fa-play text-white text-[16px] ml-0.5"></i></span></div>';
+    var g = GRADS[String(c.id||'').length % GRADS.length];
+    return '<div class="aspect-video relative overflow-hidden flex flex-col justify-center px-4" style="background:'+g+';">'
+      + '<span class="w-fit px-2 py-0.5 rounded-full bg-white/15 border border-white/20 text-white text-[9px] font-bold">'+esc(c.batchName||'Course')+'</span>'
+      + '<h3 class="text-white font-black text-[17px] leading-tight mt-2 line-clamp-2">'+esc(c.title||'')+'</h3>'
+      + '<span class="absolute inset-0 m-auto w-12 h-12 rounded-full bg-black/45 backdrop-blur border border-white/30 flex items-center justify-center"><i class="fa-solid fa-play text-white text-[16px] ml-0.5"></i></span></div>';
+  }
+
+  function render(){
+    var box = $('mcList'), cnt = $('mcCount');
+    var q = '';
+    try{ q = ($('mcSearch').value||'').toLowerCase().trim(); }catch(e){}
+    var list = all.filter(function(c){
+      if(!q) return true;
+      return ((c.title||'')+' '+(c.teacher||'')+' '+(c.batchName||'')).toLowerCase().indexOf(q) !== -1;
+    });
+    if(cnt) cnt.textContent = all.length ? all.length : '';
+    if(!token()){
+      box.innerHTML = '<div class="col-span-full text-center py-12 px-4"><div class="w-14 h-14 rounded-full bg-[#EEF2FF] flex items-center justify-center mx-auto"><i class="fa-regular fa-user text-[#1A56FF] text-[20px]"></i></div>'
+        + '<p class="text-[14px] font-bold text-[#0F2043] mt-4">Login to see your courses</p>'
+        + '<a href="auth.html?next='+encodeURIComponent('my-courses.html')+'" class="inline-flex items-center gap-1.5 mt-4 px-5 py-2.5 rounded-[10px] bg-[#1A56FF] text-white font-bold text-[12.5px]">Login <i class="fa-solid fa-arrow-right text-[11px]"></i></a></div>';
+      return;
+    }
+    if(!list.length){
+      box.innerHTML = '<div class="col-span-full text-center py-12 px-4"><div class="w-14 h-14 rounded-full bg-[#EEF2FF] flex items-center justify-center mx-auto"><i class="fa-solid fa-book-open text-[#1A56FF] text-[20px]"></i></div>'
+        + '<p class="text-[14px] font-bold text-[#0F2043] mt-4">'+(all.length ? 'Kono course mileni' : 'Akono kono course keno nai')+'</p>'
+        + '<p class="text-[12px] text-slate-500 mt-1">Pochonder course kine ekhan theke class koro</p>'
+        + '<a href="courses.html" class="inline-flex items-center gap-1.5 mt-4 px-5 py-2.5 rounded-[10px] bg-[#1A56FF] text-white font-bold text-[12.5px]">Browse Courses <i class="fa-solid fa-arrow-right text-[11px]"></i></a></div>';
+      return;
+    }
+    box.innerHTML = list.map(function(c){
+      var last = '';
+      try{ last = localStorage.getItem('sm_last_lesson_'+c.id) || ''; }catch(e){}
+      return '<div class="learn-card bg-white rounded-[14px] border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col cursor-pointer" onclick="window.location.href=\'learn.html?course='+c.id+'\'">'
+        + thumb(c)
+        + '<div class="p-3.5 flex flex-col flex-1">'
+        + '<div class="flex items-center gap-1.5 flex-wrap mb-1.5">'
+        + (c.batchName ? '<span class="px-2 py-0.5 rounded-full bg-[#EDE9FF] text-[#4F46E5] text-[10px] font-bold">'+esc(c.batchName)+'</span>' : '')
+        + '<span class="px-2 py-0.5 rounded-full bg-[#E6F4EA] text-[#16A34A] text-[10px] font-bold"><i class="fa-solid fa-check mr-0.5 text-[8px]"></i>Enrolled</span></div>'
+        + '<h3 class="font-bold text-[13.5px] text-[#0F2043] leading-snug line-clamp-2 min-h-[38px]">'+esc(c.title)+'</h3>'
+        + '<p class="text-[11px] text-slate-500 mt-1 truncate">'+esc(c.teacher||c.categoryName||'')+'</p>'
+        + '<div class="mt-3 pt-3 border-t border-slate-100 flex items-center gap-2">'
+        + '<span class="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] bg-[#1A56FF] hover:bg-[#1445D6] text-white font-bold text-[12.5px]"><i class="fa-solid fa-play text-[10px]"></i> '+(last ? 'Resume Class' : 'Start Learning')+'</span>'
+        + '<span onclick="event.stopPropagation();window.location.href=\'course.html?id='+c.id+'\'" title="Course details" class="w-10 h-10 rounded-[10px] border border-slate-200 flex items-center justify-center text-slate-500 hover:text-[#1A56FF] hover:border-[#1A56FF] flex-shrink-0"><i class="fa-solid fa-circle-info text-[14px]"></i></span>'
+        + '</div></div></div>';
+    }).join('');
+  }
+
+  async function boot(){
+    if(!token()){ render(); return; }
+    try{
+      var r = await fetch('/api/public/my/courses',{headers:headers()});
+      if(r.status===401||r.status===404){ try{localStorage.removeItem('sm_user_token');sessionStorage.removeItem('sm_user_token');}catch(e){} render(); return; }
+      var j = await r.json();
+      all = Array.isArray(j.data) ? j.data : [];
+    }catch(e){ all = []; }
+    render();
+  }
+  document.getElementById('mcSearch').addEventListener('input', render);
+  document.querySelectorAll('[data-dash-logout]').forEach(function(b){ b.addEventListener('click', async function(){
+    try{ await fetch('/api/public/auth/logout',{method:'POST',headers:headers()}); }catch(e){}
+    try{ localStorage.removeItem('sm_user_token'); sessionStorage.removeItem('sm_user_token'); }catch(e){}
+    location.href = 'index.html';
+  }); });
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot);
+  else boot();
+})();
+</script>
+<script src="assets/navbar.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

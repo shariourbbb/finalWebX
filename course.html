@@ -30,7 +30,7 @@
       <nav class="flex items-center gap-6 text-[14px] font-semibold flex-shrink-0 ml-2">
         <a data-sm-nav="home" href="index.html" class="sm-desk-nav-link" data-i18n="home">Home</a>
         <a data-sm-nav="courses" href="courses.html" class="sm-desk-nav-link" data-i18n="courses">Courses</a>
-        <a data-sm-nav="ebooks" href="index.html#secEbooks" class="sm-desk-nav-link" data-i18n="ebooks">Ebooks</a>
+        <a data-sm-nav="ebooks" href="ebooks.html" class="sm-desk-nav-link" data-i18n="ebooks">Ebooks</a>
         <a data-sm-nav="free" href="courses.html?q=" class="sm-desk-nav-link" data-i18n="free">Free Resources</a>
         <a data-sm-nav="telegram" href="#" data-sm-telegram class="sm-desk-nav-link" data-i18n="telegram">Telegram</a>
       </nav>
@@ -41,7 +41,7 @@
       <div class="sm-desk-drop flex-shrink-0"><button data-sm-desk-account-btn class="sm-desk-pill"><i class="fa-regular fa-user text-[15px] text-slate-600"></i><span data-i18n="account">Account</span><i class="fa-solid fa-chevron-down text-[11px] text-slate-400"></i></button><div data-sm-desk-account-menu class="sm-desk-menu hidden"></div></div>
     </div>
   </div>
-  <div id="smDeskDrawer" class="hidden"><div class="sm-backdrop"></div><div class="sm-panel"><div class="flex items-center justify-between mb-3"><span class="text-[18px] font-extrabold"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span><button data-sm-drawer-close class="w-9 h-9 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-xmark"></i></button></div><nav class="flex flex-col gap-1 text-[14px] font-semibold"><a href="index.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Home</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Courses</a><a href="index.html#secEbooks" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Ebooks</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Free Resources</a><a href="#" data-sm-telegram class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Telegram</a><a href="dashboard.html" data-account-link class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Account / Dashboard</a><a href="cart.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Cart (<span data-sm-cart-count>0</span>)</a></nav></div></div>
+  <div id="smDeskDrawer" class="hidden"><div class="sm-backdrop"></div><div class="sm-panel"><div class="flex items-center justify-between mb-3"><span class="text-[18px] font-extrabold"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span><button data-sm-drawer-close class="w-9 h-9 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-xmark"></i></button></div><nav class="flex flex-col gap-1 text-[14px] font-semibold"><a href="index.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Home</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Courses</a><a href="ebooks.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Ebooks</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Free Resources</a><a href="#" data-sm-telegram class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Telegram</a><a href="dashboard.html" data-account-link class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Account / Dashboard</a><a href="cart.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Cart (<span data-sm-cart-count>0</span>)</a></nav></div></div>
   <!-- phone bar (unchanged) -->
   <div class="lg:hidden max-w-[1280px] mx-auto px-4 sm:px-6 h-[56px] flex items-center justify-between gap-3">
     <div class="flex items-center gap-2">
@@ -143,13 +143,11 @@
                 <p class="text-[11px] text-[#16A34A]/90 font-semibold mt-0.5">All classes unlocked — happy learning ✓</p>
               </div>
             </div>
-            <a id="enrolledTgBtn" href="#" target="_blank" class="hidden w-full py-3 rounded-[12px] bg-gradient-to-r from-[#229ED9] to-[#1A8AC0] hover:brightness-110 text-white font-extrabold text-[14px] items-center justify-center gap-2 shadow-[0_4px_14px_rgba(34,158,217,0.4)] transition">
-              <i class="fa-brands fa-telegram text-[18px]"></i> Open Telegram group <i class="fa-solid fa-arrow-up-right-from-square text-[12px] opacity-80"></i>
-            </a>
+            <div id="enrolledTgBtns" class="hidden space-y-2"></div>
           </div>
 
         </div>
-        <div class="bg-[#F8F9FD] px-4 py-3 border-t border-slate-100">
+        <div class="bg-[#F8F9FD] px-4 py-3 border-t border-slate-100 hidden">
           <div id="courseInfoRow" class="flex items-center gap-2 text-[11px] font-semibold text-slate-600">
             <i class="fa-solid fa-circle-play text-[#1A56FF]"></i> Loading course info...
           </div>
@@ -358,8 +356,8 @@ async function initCoursePage(){
     priceRow.innerHTML = `<span class="text-[16px] font-bold text-[#0F2043]">Price :</span>
       <span class="text-[22px] font-extrabold text-[#16A34A]">৳${courseEsc(c.price)}</span>`;
   }
-  document.getElementById('courseInfoRow').innerHTML =
-    `<i class="fa-solid fa-circle-play text-[#1A56FF]"></i> ${(c.lessonsCount || currLessons.length || 0)} Lessons • ${courseEsc(c.batchName || '')}`;
+  // Info row (0 Lessons • Batch) hidden — na dekhanoi thakbe
+  try { document.getElementById('courseInfoRow').parentElement.classList.add('hidden'); } catch (e) {}
 
   // Buy / Enroll buttons
   if (isFree) {
@@ -435,20 +433,19 @@ function renderEnrolledState(){
   // 2) show desktop enrolled box
   var box=document.getElementById('enrolledBox');
   if(box) box.classList.remove('hidden');
-  // 3) telegram button (only if link exists)
-  var tgBtn=document.getElementById('enrolledTgBtn');
+  // 3) telegram buttons — sob group er jonno alada button
+  var tgWrap=document.getElementById('enrolledTgBtns');
   var firstTg=(currTgGroups&&currTgGroups.length)?currTgGroups[0]:null;
-  if(tgBtn){
-    if(firstTg&&firstTg.url){
-      tgBtn.href=firstTg.url;
-      tgBtn.classList.remove('hidden');
-      tgBtn.classList.add('flex');
-      // multiple groups thakle count dekhao
-      if(currTgGroups.length>1){
-        tgBtn.innerHTML='<i class="fa-brands fa-telegram text-[18px]"></i> Open Telegram group ('+currTgGroups.length+') <i class="fa-solid fa-arrow-up-right-from-square text-[12px] opacity-80"></i>';
-      }
+  if(tgWrap){
+    if(currTgGroups&&currTgGroups.length){
+      tgWrap.innerHTML=currTgGroups.map(function(g){
+        var invite=g.type==='invite';
+        return '<a href="'+currEsc(g.url||'#')+'" target="_blank" class="w-full py-3 rounded-[12px] text-white font-extrabold text-[14px] flex items-center justify-center gap-2 shadow transition hover:brightness-110 '+(invite?'bg-gradient-to-r from-[#16A34A] to-[#15803D]':'bg-gradient-to-r from-[#229ED9] to-[#1A8AC0]')+'">'
+          +'<i class="fa-brands fa-telegram text-[18px]"></i> '+currEsc(g.label||'Open Telegram group')+' <i class="fa-solid fa-arrow-up-right-from-square text-[12px] opacity-80"></i></a>';
+      }).join('');
+      tgWrap.classList.remove('hidden');
     } else {
-      tgBtn.classList.add('hidden');
+      tgWrap.classList.add('hidden');
     }
   }
   // 4) mobile bar
@@ -560,14 +557,17 @@ async function initCurriculum() {
 }
 
 function renderCurriculum() {
+  const sec = document.getElementById('secCurriculum');
+  // Class input na thakle puro Curriculum section hide — thakle show
+  if (!currLessons.length) {
+    if (sec) sec.classList.add('hidden');
+    return;
+  }
+  if (sec) sec.classList.remove('hidden');
   const list = document.getElementById('currList');
   const free = currLessons.filter(l => l.isFree).length;
   document.getElementById('currSub').textContent =
     currLessons.length ? (currLessons.length + ' classes' + (free ? ' • ' + free + ' free preview' : '') + (currEnrolled ? ' • Unlocked ✓' : '')) : 'No classes added yet';
-  if (!currLessons.length) {
-    list.innerHTML = '<p class="text-[13px] text-slate-400 text-center py-8">Classes coming soon.</p>';
-    return;
-  }
   let lastSection = null;
   list.innerHTML = currLessons.map((l, i) => {
     const open = l.isFree || currEnrolled;

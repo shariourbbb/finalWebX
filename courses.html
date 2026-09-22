@@ -40,7 +40,7 @@
       <nav class="flex items-center gap-6 text-[14px] font-semibold flex-shrink-0 ml-2">
         <a data-sm-nav="home" href="index.html" class="sm-desk-nav-link" data-i18n="home">Home</a>
         <a data-sm-nav="courses" href="courses.html" class="sm-desk-nav-link" data-i18n="courses">Courses</a>
-        <a data-sm-nav="ebooks" href="index.html#secEbooks" class="sm-desk-nav-link" data-i18n="ebooks">Ebooks</a>
+        <a data-sm-nav="ebooks" href="ebooks.html" class="sm-desk-nav-link" data-i18n="ebooks">Ebooks</a>
         <a data-sm-nav="free" href="courses.html?q=" class="sm-desk-nav-link" data-i18n="free">Free Resources</a>
         <a data-sm-nav="telegram" href="#" data-sm-telegram class="sm-desk-nav-link" data-i18n="telegram">Telegram</a>
       </nav>
@@ -51,7 +51,7 @@
       <div class="sm-desk-drop flex-shrink-0"><button data-sm-desk-account-btn class="sm-desk-pill"><i class="fa-regular fa-user text-[15px] text-slate-600"></i><span data-i18n="account">Account</span><i class="fa-solid fa-chevron-down text-[11px] text-slate-400"></i></button><div data-sm-desk-account-menu class="sm-desk-menu hidden"></div></div>
     </div>
   </div>
-  <div id="smDeskDrawer" class="hidden"><div class="sm-backdrop"></div><div class="sm-panel"><div class="flex items-center justify-between mb-3"><span class="text-[18px] font-extrabold"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span><button data-sm-drawer-close class="w-9 h-9 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-xmark"></i></button></div><nav class="flex flex-col gap-1 text-[14px] font-semibold"><a href="index.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Home</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Courses</a><a href="index.html#secEbooks" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Ebooks</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Free Resources</a><a href="#" data-sm-telegram class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Telegram</a><a href="dashboard.html" data-account-link class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Account / Dashboard</a><a href="cart.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Cart (<span data-sm-cart-count>0</span>)</a></nav></div></div>
+  <div id="smDeskDrawer" class="hidden"><div class="sm-backdrop"></div><div class="sm-panel"><div class="flex items-center justify-between mb-3"><span class="text-[18px] font-extrabold"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span><button data-sm-drawer-close class="w-9 h-9 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-xmark"></i></button></div><nav class="flex flex-col gap-1 text-[14px] font-semibold"><a href="index.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Home</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Courses</a><a href="ebooks.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Ebooks</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Free Resources</a><a href="#" data-sm-telegram class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Telegram</a><a href="dashboard.html" data-account-link class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Account / Dashboard</a><a href="cart.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Cart (<span data-sm-cart-count>0</span>)</a></nav></div></div>
   <!-- phone bar (unchanged) -->
   <div class="lg:hidden max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 h-[60px] sm:h-[62px] flex items-center justify-between gap-3">
     <div class="flex items-center gap-3">
@@ -102,15 +102,15 @@
   <!-- Per-batch summary sections (dynamic, same design) -->
   <div id="batchSections"></div>
 
-  <!-- DYNAMIC-SECTIONS-START -->
-  <!-- ===== Live data from Admin Panel ===== -->
-  <section class="mt-6 sm:mt-7">
-    <h2 class="text-[18px] sm:text-[20px] font-extrabold text-[#0F2043] mb-1">All Courses</h2>
-    <p class="text-[12px] text-slate-500 mb-3">Every course added from the Admin Panel appears here automatically</p>
+  <!-- Search/filter results (shown only when ?q / ?batch / ?category is present, e.g. navbar search) -->
+  <div id="courseResults" class="hidden mt-6 sm:mt-7">
     <div data-sm-courses data-sm-limit="40">
       <p class="text-[13px] text-slate-400 text-center py-8"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading courses...</p>
     </div>
-  </section>
+  </div>
+  <script>
+  (function(){try{var q=new URLSearchParams(location.search);if(q.get('q')||q.get('batch')||q.get('category')){var el=document.getElementById('courseResults');if(el)el.classList.remove('hidden');}}catch(e){}})();
+  </script>
 
   <!-- <section class="mt-6 sm:mt-7 grid grid-cols-1 lg:grid-cols-2 gap-4">
     <div class="bg-white rounded-[16px] border border-slate-100 shadow-sm p-4 sm:p-5">
@@ -237,7 +237,7 @@ function paintAll(batches, cats, courses){
   const secsEl=document.getElementById('batchSections');
   if(!secsEl) return;
     const activeBatches=(Array.isArray(batches)?batches:[]).filter(b=>b.status!=='inactive'&&b.status!=='archived').sort((a,b)=>((Number(a.order)||999)-(Number(b.order)||999))||(Number(a.id)-Number(b.id)));
-    const catById={};(Array.isArray(cats)?cats:[]).forEach(c=>{catById[c.id]=c.name||'General'});
+    const catById={};const catSlugById={};(Array.isArray(cats)?cats:[]).forEach(c=>{catById[c.id]=c.name||'General';catSlugById[c.id]=String(c.slug||c.name||'General').toLowerCase()});
 
     // --- Top pills removed ---
 
@@ -245,14 +245,17 @@ function paintAll(batches, cats, courses){
     secsEl.innerHTML=activeBatches.map((b,bi)=>{
       const slug=dynEsc(b.slug||b.id);
       const list=(Array.isArray(courses)?courses:[]).filter(c=>String(c.batchId)===String(b.id)&&c.status!=='inactive');
-      const groups={};const order=[];
-      list.forEach(c=>{const cn=catById[c.categoryId]||'General';if(!groups[cn]){groups[cn]=0;order.push(cn)}groups[cn]++});
+      const groups={};const slugByName={};const order=[];
+      list.forEach(c=>{
+        const cn=catById[c.categoryId]||c.categoryName||'General';
+        const cs=String(c.categorySlug||catSlugById[c.categoryId]||cn).toLowerCase();
+        if(!groups[cn]){groups[cn]=0;order.push(cn);slugByName[cn]=cs}groups[cn]++});
       const cols=Math.max(1,Math.min(order.length||1,3));
       const isMulti = order.length > 3;
 
       const cards=order.length?order.map((cn,ci)=>{
         const st=catStyle(cn,ci);const n=groups[cn];
-        const catParam=encodeURIComponent(cn);
+        const catParam=encodeURIComponent(slugByName[cn]||String(cn).toLowerCase());
         return `<a href="batch.html?batch=${slug}&category=${catParam}" class="group ${st.box} rounded-[12px] sm:rounded-[14px] p-2 sm:p-3.5 flex flex-col justify-between transition-all duration-150 active:scale-[0.98] hover:shadow-md ${isMulti ? 'w-[calc(33.333%-5px)] min-w-[98px] flex-shrink-0 snap-start' : 'w-full'}">
           <div>
             <div class="flex items-center justify-between gap-1.5 mb-1 sm:mb-2">

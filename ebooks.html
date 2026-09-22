@@ -103,16 +103,6 @@
   <!-- Per-ebookBatch summary sections (dynamic, same design as courses) -->
   <div id="ebBatchSections"></div>
 
-  <!-- DYNAMIC-SECTIONS-START -->
-  <!-- ===== Live data from Admin Panel ===== -->
-  <section class="mt-6 sm:mt-7">
-    <h2 id="allEbTitle" class="text-[18px] sm:text-[20px] font-extrabold text-[#0F2043] mb-1">All E-Books</h2>
-    <p class="text-[12px] text-slate-500 mb-3">Every e-book added from the Admin Panel appears here automatically</p>
-    <div id="allEbooksGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
-      <p class="col-span-full text-[13px] text-slate-400 text-center py-8"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading e-books...</p>
-    </div>
-  </section>
-
 </main>
 
 <!-- Footer same as index -->
@@ -267,7 +257,7 @@ function paintAllEb(ebBatches, cats, ebooks, fBatch, fCat, fQ){
   const secsEl=document.getElementById('ebBatchSections');
   const gridEl=document.getElementById('allEbooksGrid');
   const titleEl=document.getElementById('allEbTitle');
-  if(!secsEl||!gridEl) return;
+  if(!secsEl) return;
   const activeBatches=(Array.isArray(ebBatches)?ebBatches:[]).filter(b=>b.status!=='inactive'&&b.status!=='archived').sort((a,b)=>((Number(a.order)||999)-(Number(b.order)||999))||(Number(a.id)-Number(b.id)));
   const catById={};(Array.isArray(cats)?cats:[]).forEach(c=>{catById[c.id]=c.name||'General'});
 
@@ -317,15 +307,21 @@ function paintAllEb(ebBatches, cats, ebooks, fBatch, fCat, fQ){
     }).join('');
   }
 
-  // --- All E-Books grid (filter by ?ebookBatch & ?category & ?q like courses) ---
+  // --- Filtered results (?ebookBatch / ?category / ?q): grid section thakle okhane, nahole batch area-tei dekhao ---
   const filtered=listAll.filter(e=>ebMatchesParams(e,fBatch,fCat,fQ));
-  if(titleEl){
-    if(fBatch||fCat) titleEl.textContent=(fBatch?fBatch+' ':'')+(fCat?('• '+fCat+' '):'')+'E-Books';
-    else titleEl.textContent='All E-Books';
+  if(gridEl){
+    if(titleEl){
+      if(fBatch||fCat) titleEl.textContent=(fBatch?fBatch+' ':'')+(fCat?('• '+fCat+' '):'')+'E-Books';
+      else titleEl.textContent='All E-Books';
+    }
+    gridEl.innerHTML=filtered.length
+      ? filtered.map(ebCard).join('')
+      : '<p class="col-span-full text-[13px] text-slate-400 text-center py-8">No e-books found.</p>';
+  } else if(isFiltered){
+    secsEl.innerHTML=filtered.length
+      ? '<div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 mt-3 sm:mt-5">'+filtered.map(ebCard).join('')+'</div>'
+      : '<p class="text-[13px] text-slate-400 text-center py-8">No e-books found.</p>';
   }
-  gridEl.innerHTML=filtered.length
-    ? filtered.map(ebCard).join('')
-    : '<p class="col-span-full text-[13px] text-slate-400 text-center py-8">No e-book found here yet. Add e-books from the Admin Panel.</p>';
 }
 document.addEventListener('DOMContentLoaded',loadEbookPage);
 </script>

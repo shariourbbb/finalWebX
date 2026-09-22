@@ -246,6 +246,14 @@ router.get('/courses/:idOrSlug', (req, res) => {
 function couponItemMeta(item) {
   const id = String(item.courseId != null ? item.courseId : (item.ebookId != null ? item.ebookId : (item.id != null ? item.id : '')));
   if (!id) return { id: '', batchIds: [], categoryId: '' };
+  // E-book item hole e-book age lookup (ID collision-e course mile jeto)
+  if (item.ebookId != null || item.type === 'ebook') {
+    const ebookFirst = store.find('ebooks', id);
+    if (ebookFirst) {
+      const bids = [String(ebookFirst.batchId || ''), String(ebookFirst.ebookBatchId || '')].filter(Boolean);
+      return { id, batchIds: bids, categoryId: String(ebookFirst.categoryId || '') };
+    }
+  }
   const course = store.find('courses', id);
   if (course) {
     return {
@@ -618,13 +626,53 @@ router.put('/auth/password', auth.requireUser, (req, res) => {
 });
 
 /* ---------- Orders (checkout) ---------- */
-router.post('/orders', auth.optionalUser, async (req, res) => {
-  const { items, couponCode, name, email, phone, paymentMethod, note } = req.body || {};
+// Sequential human-readable order number: ORD-0001, ORD-0002, ...
+// Legacy SM* numbers stay untouched; counter starts after existing orders.
+function nextOrderNo() {
+  const orders = store.all('orders');
+  let max = 0;
+  orders.forEach(o => {
+    const m = String(o.orderNo || '').match(/^ORD-(\d+)$/);
+    if (m) max = Math.max(max, parseInt(m[1], 10) || 0);
+  });
+  max = Math.max(max, orders.length);
+  let n = max + 1, no = '';
+  for (;; n++) {
+    no = 'ORD-' + String(n).padStart(4, '0');
+    if (!orders.some(o => String(o.orderNo) === no)) return no;
+  }
+}
+router.post('/orders', auth.requireUser, async (req, res) => {
+  const { items, couponCode, phone, paymentMethod, note } = req.body || {};
+  // Login required: req.session is guaranteed by requireUser (user or admin)
+  // Fresh DB record theke name/email/phone naw (session stale hote pare)
+  let buyerId = req.session.id;
+  let buyerName = req.session.name || '';
+  let buyerEmail = req.session.email || '';
+  let buyerPhone = phone || req.session.phone || '';
+  try {
+    const dbUser = store.find('users', req.session.id);
+    if (dbUser) {
+      buyerName = dbUser.name || buyerName;
+      buyerEmail = dbUser.email || buyerEmail;
+      buyerPhone = dbUser.phone || buyerPhone;
+    }
+  } catch (e) {}
   if (!Array.isArray(items) || !items.length) {
     return res.status(400).json({ success: false, message: 'Order must contain at least one item' });
   }
   const detailed = [];
   for (const raw of items) {
+    const obj = (raw && typeof raw === 'object') ? raw : {};
+    // E-book ID ar Course ID same number hote pare — explicit type thakle
+    // sothik collection age lookup koro, nahole bhul item order hoye jabe
+    if (obj.ebookId || obj.type === 'ebook') {
+      const eid = obj.ebookId || obj.id || obj.courseId;
+      const ebook = store.find('ebooks', eid);
+      if (!ebook) return res.status(400).json({ success: false, message: 'Item not found: ' + eid });
+      detailed.push({ ebookId: ebook.id, title: ebook.title, price: Number(ebook.price) || 0 });
+      continue;
+    }
     const id = typeof raw === 'object' ? (raw.id || raw.courseId || raw.ebookId) : raw;
     const course = store.find('courses', id);
     if (course) {
@@ -641,27 +689,26 @@ router.post('/orders', auth.optionalUser, async (req, res) => {
   const subtotal = detailed.reduce((sum, i) => sum + i.price, 0);
   let discount = 0;
   let appliedCoupon = null;
-  const isStudent = req.session && req.session.role === 'user';
   if (couponCode) {
     const check = validateCoupon(couponCode, subtotal, detailed, couponBuyerOf(
-      { email, phone, userId: isStudent ? req.session.id : null },
-      isStudent ? { id: req.session.id, email: req.session.email, phone: req.session.phone } : null
+      { email: buyerEmail, phone: buyerPhone, userId: buyerId },
+      { id: buyerId, email: buyerEmail, phone: buyerPhone }
     ));
     if (!check.valid) return res.status(400).json({ success: false, message: check.message });
     discount = check.discount;
     appliedCoupon = check.coupon;
   }
-  const orderNo = 'SM' + Date.now().toString().slice(-8);
+  const orderNo = nextOrderNo();
   const finalTotal = Math.max(0, subtotal - discount);
   const isFree = finalTotal <= 0;
 
   const order = store.insert('orders', {
     orderNo,
-    userId: isStudent ? req.session.id : null,
+    userId: buyerId,
     customer: {
-      name: (isStudent ? req.session.name : name) || 'Guest',
-      email: (isStudent ? req.session.email : email) || '',
-      phone: phone || ''
+      name: buyerName || 'Student',
+      email: buyerEmail || '',
+      phone: buyerPhone || ''
     },
     items: detailed,
     subtotal,
@@ -683,6 +730,7 @@ router.post('/orders', auth.optionalUser, async (req, res) => {
 
   // Instant response for free orders (no gateway or manual approval needed)
   if (isFree) {
+    try { auth.grantOrderAccess(store.find('orders', order.id) || order); } catch (e) {}
     try { require('../email').notifyOrder(store.find('orders', order.id) || order, 'completed'); } catch (e) {}
     return res.status(201).json({
       success: true,
@@ -737,6 +785,7 @@ function markPipraPaid(order, tx, ppId) {
     const cp = store.findBy('coupons', 'code', order.couponCode);
     if (cp) store.update('coupons', cp.id, { used: Number(cp.used || 0) + 1 });
   }
+  try { auth.grantOrderAccess(store.find('orders', order.id) || order); } catch (e) {}
   try { require('../email').notifyOrder(store.find('orders', order.id) || order, 'confirmed'); } catch (e) {}
   return store.find('orders', order.id);
 }
@@ -1008,7 +1057,9 @@ router.post('/my/courses/:id/invite', auth.requireUser, async (req, res) => {
   }
 });
 
-/* Student-er confirmed order theke invite ber kore, na thakle same Bot token diye banay. */
+/* Student-er confirmed order theke invite ber kore, na thakle same Bot token diye banay.
+ * Admin pore notun Group ID add korle sudhu missing gulor invite baniye ager
+ * gulor sathe merge kore — tai sob group-er button eksathe show kore. */
 async function getMyInvites(userId, course) {
   const cid = String(course.id);
   const orders = store.all('orders').filter(o =>
@@ -1020,26 +1071,28 @@ async function getMyInvites(userId, course) {
   // sobcheye recent order-er invite naw
   const order = orders[orders.length - 1];
   const saved = order.telegramInvites && order.telegramInvites[cid];
-  if (Array.isArray(saved) && saved.some(x => x.inviteLink)) {
-    return saved.filter(x => x.inviteLink).map(x => ({
-      label: x.label || 'Private Group', url: x.inviteLink, type: 'invite', chatId: x.chatId
-    }));
-  }
-  // invite nai kintu course-e Group ID ache -> ekhanei generate (first view-tei pabe)
+  const savedList = Array.isArray(saved) ? saved.filter(x => x && x.inviteLink) : [];
+  const savedByChat = {};
+  savedList.forEach(x => { savedByChat[String(x.chatId || '').trim()] = x; });
   const chatIds = Array.isArray(course.telegramChatIds) ? course.telegramChatIds : [];
-  if (!chatIds.length) return [];
-  try {
-    const telegram = require('../telegram');
-    if (!telegram.getBotToken()) return [];
-    const invites = await telegram.createMultiInvites(chatIds, order.orderNo || order.id);
-    const good = invites.filter(x => x.inviteLink);
-    if (good.length) {
-      const prev = (order.telegramInvites && typeof order.telegramInvites === 'object') ? order.telegramInvites : {};
-      prev[cid] = invites;
-      store.update('orders', order.id, { telegramInvites: prev });
-    }
-    return good.map(x => ({ label: x.label || 'Private Group', url: x.inviteLink, type: 'invite', chatId: x.chatId }));
-  } catch (e) { return []; }
+  const chatIdOf = x => String((x && typeof x === 'object' ? (x.chatId || x.id) : x) || '').trim();
+  // Admin pore add kora group (saved-e nai) -> sudhu ogular invite banaw
+  const missing = chatIds.filter(x => { const id = chatIdOf(x); return id && !savedByChat[id]; });
+  let merged = savedList.slice();
+  if (missing.length) {
+    try {
+      const telegram = require('../telegram');
+      if (telegram.getBotToken()) {
+        const fresh = await telegram.createMultiInvites(missing, order.orderNo || order.id);
+        const good = fresh.filter(x => x.inviteLink);
+        const prev = (order.telegramInvites && typeof order.telegramInvites === 'object') ? order.telegramInvites : {};
+        prev[cid] = savedList.concat(fresh);
+        store.update('orders', order.id, { telegramInvites: prev });
+        merged = merged.concat(good);
+      }
+    } catch (e) { /* notun group-er invite fail hole ager gulai return hobe */ }
+  }
+  return merged.map(x => ({ label: x.label || 'Private Group', url: x.inviteLink, type: 'invite', chatId: x.chatId }));
 }
 
 // Secure player URL for ONE class (or the free intro preview)

@@ -228,12 +228,30 @@ function loginUser(email, password) {
   return { token, user: publicUser(user) };
 }
 
+// Order approve/confirm/completed hole oi course gulo revoke-list theke soraw.
+// Approval = explicit grant, purono revoke-ke override kore — nahole taka
+// dewar porেও course dashboard / My Courses-e show kore na (bug).
+// Ebook item-e courseId thake na, tai sudhu courseId gulo clear hoy.
+function grantOrderAccess(order) {
+  try {
+    if (!order || !order.userId) return false;
+    const user = store.find('users', order.userId);
+    if (!user || !Array.isArray(user.revokedCourses) || !user.revokedCourses.length) return false;
+    const ids = new Set((order.items || []).map(i => String(i.courseId || '')).filter(Boolean));
+    if (!ids.size) return false;
+    const kept = user.revokedCourses.map(String).filter(id => !ids.has(id));
+    if (kept.length === user.revokedCourses.length) return false;
+    store.update('users', user.id, { revokedCourses: kept });
+    return true;
+  } catch (e) { return false; }
+}
+
 module.exports = {
   hashPassword, verifyPassword,
   createSession, destroySession, getSession, getToken,
-  requireAdmin, requireUser, optionalUser,
-  requirePermission, hasPermission, normalizePermissions, ADMIN_PERMISSIONS,
+  requireAdmin, requireUser, optionalUser, requirePermission,
+  hasPermission, normalizePermissions,
   publicAdmin, publicUser,
-  loginAdmin, loginUser,
+  loginAdmin, loginUser, grantOrderAccess,
   sessions
 };

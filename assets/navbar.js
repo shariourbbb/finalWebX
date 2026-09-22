@@ -438,13 +438,9 @@
     document.querySelectorAll('[data-sm-desk-account-btn]').forEach(function (btn) {
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
+        // login kora thakle dropdown menu nai — direct dashboard
         if (!getToken()) { location.href = 'auth.html'; return; }
-        var menu = btn.parentElement.querySelector('[data-sm-desk-account-menu]');
-        if (!menu) return;
-        var willOpen = menu.classList.contains('hidden');
-        closeAllMenus(menu);
-        menu.classList.toggle('hidden', !willOpen);
-        if (willOpen) paintAccount();
+        location.href = 'dashboard.html';
       });
     });
     document.querySelectorAll('[data-sm-desk-lang-btn]').forEach(function (btn) {

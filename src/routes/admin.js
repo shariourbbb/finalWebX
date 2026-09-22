@@ -13,7 +13,7 @@ router.use(auth.requireAdmin);
 const FIELDS = {
   batches: ['name', 'slug', 'icon', 'iconUrl', 'color', 'status', 'order'],
   ebookBatches: ['name', 'slug', 'icon', 'iconUrl', 'color', 'status', 'order'],
-  categories: ['name', 'slug', 'icon', 'color', 'status'],
+  categories: ['name', 'slug', 'icon', 'color', 'status', 'for'],
   platforms: ['name', 'status'],
   courses: ['title', 'slug', 'batchId', 'categoryId', 'platformId', 'teacher', 'price', 'oldPrice',
     'duration', 'totalClass', 'thumbnail', 'description', 'featured', 'status',
@@ -42,6 +42,19 @@ function pick(entity, body) {
 function slugify(text) {
   return String(text || '').toLowerCase().trim()
     .replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
+}
+
+/* ---------- Slug: khali thakle name/title theke auto + unique rakho ----------
+ * Admin slug field khali rekhe save korle ("slug: -") public link/lookup
+ * nosto hoy. Tai empty slug auto-generate + same entity-te clash hole -2/-3. */
+function ensureUniqueSlug(entity, data, ignoreId) {
+  if (!data.slug && (data.name || data.title)) data.slug = slugify(data.name || data.title);
+  if (!data.slug) return;
+  const all = store.all(entity);
+  const base = String(data.slug);
+  let slug = base, n = 2;
+  while (all.some(x => String(x.id) !== String(ignoreId) && String(x.slug) === slug)) slug = base + '-' + (n++);
+  data.slug = slug;
 }
 
 /* ---------- Image fields: base64 ele file banaw (db + API light rakhar jonno) ---------- */
@@ -301,7 +314,7 @@ Object.keys(FIELDS).filter(entity => entity !== 'lessons').forEach(entity => {
     if (entity !== 'courses' && entity !== 'coupons' && entity !== 'ebooks' && !data.name) {
       return res.status(400).json({ success: false, message: 'Name is required' });
     }
-    if (data.slug === undefined && (data.name || data.title)) data.slug = slugify(data.name || data.title);
+    ensureUniqueSlug(entity, data, null);
     if (data.status === undefined) data.status = 'active';
     if (entity === 'batches' || entity === 'ebookBatches') {
       if (data.order === undefined || data.order === 0) {
@@ -342,11 +355,32 @@ Object.keys(FIELDS).filter(entity => entity !== 'lessons').forEach(entity => {
     }
     lightenImages(entity, data, null);
     const item = store.insert(entity, data);
+    // Notun batch create hole Home > Courses Category-te auto show koro:
+    // manual tick mode-e (batchIds non-empty) thakleo notun batch auto-tick hobe.
+    if (entity === 'batches') {
+      try {
+        const db = store.load();
+        const cat = db.homePage && db.homePage.sections && db.homePage.sections.categories;
+        if (cat && Array.isArray(cat.batchIds) && cat.batchIds.length && !cat.batchIds.map(String).includes(String(item.id))) {
+          cat.batchIds.push(String(item.id));
+          store.save();
+        }
+      } catch (e) { /* home auto-tick fail korleo batch create success */ }
+    }
     res.status(201).json({ success: true, message: 'Created successfully', data: item });
   });
 
   router.put('/' + entity + '/:id', need, (req, res) => {
     const data = pick(entity, req.body || {});
+    // Slug khali kore save korle name theke regenerate + unique rakho
+    if (data.slug !== undefined && !String(data.slug).trim()) {
+      const prev = store.find(entity, req.params.id) || {};
+      const tmp = { slug: '', name: data.name !== undefined ? data.name : prev.name, title: data.title !== undefined ? data.title : prev.title };
+      ensureUniqueSlug(entity, tmp, req.params.id);
+      data.slug = tmp.slug;
+    } else if (data.slug) {
+      ensureUniqueSlug(entity, data, req.params.id);
+    }
     if (entity === 'courses') {
       if (data.telegramLinks !== undefined || data.telegramLink !== undefined) {
         const prev = store.find('courses', req.params.id) || {};
@@ -645,7 +679,7 @@ router.post('/courses/:id/duplicate', auth.requirePermission('courses'), (req, r
     const v = src[k];
     copy[k] = (v && typeof v === 'object') ? JSON.parse(JSON.stringify(v)) : v;
   });
-  copy.title = (b.title && String(b.title).trim()) || (src.title + ' (Copy)');
+  copy.title = (b.title && String(b.title).trim()) || src.title;
   if (b.batchId !== undefined && String(b.batchId) !== '') copy.batchId = Number(b.batchId) || b.batchId;
   if (b.categoryId !== undefined && String(b.categoryId) !== '') copy.categoryId = Number(b.categoryId) || b.categoryId;
   if (b.platformId !== undefined && String(b.platformId) !== '') copy.platformId = b.platformId;
@@ -981,6 +1015,11 @@ router.put('/orders/:id', auth.requirePermission('orders'), async (req, res) => 
   if (paymentMethod !== undefined) data.paymentMethod = paymentMethod;
   const order = store.update('orders', req.params.id, data);
   if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+  // Approve (confirmed/completed) = explicit grant: revoke-list theke course soraw,
+  // nahole approved order-er course dashboard-e show kore na
+  if (status === 'confirmed' || status === 'completed') {
+    try { auth.grantOrderAccess(store.find('orders', order.id)); } catch (e) {}
+  }
   // Status change hole template onujayi auto email (fail korleo response atkabe na)
   if (status !== undefined && ['confirmed', 'completed', 'cancelled'].includes(status)) {
     try { sendOrderStatusMail(store.find('orders', order.id)); } catch (e) {}

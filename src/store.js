@@ -52,7 +52,9 @@ function defaultHomePage() {
       howToBuy: { enabled: true, title: 'How To Buy', subtitle: 'Course kinar sohoj niyom', description: '1. Pochonder course select kore <b>Buy Now</b> chap dao<br>2. bKash / Nagad / Rocket diye payment complete koro<br>3. Admin confirm korlei course tomar <b>Dashboard</b> e peye jabe', videoUrl: '', btnText: 'Browse Courses', btnLink: 'courses.html' },
       stats: { enabled: true, title: 'StudyMart at a Glance' },
       batchesSection: { enabled: false, title: 'Our Batches' },
-      browseCategory: { enabled: false, title: 'Browse by Category' }
+      browseCategory: { enabled: false, title: 'Browse by Category' },
+      // Batch page (batch.html + ebbatch.html) category tabs: position order + grid columns
+      categoryTabs: { tabOrder: ['academic', 'admission', 'revision'], cols: 3 }
     }
   };
 }

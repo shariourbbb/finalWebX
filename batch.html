@@ -39,7 +39,7 @@
       <nav class="flex items-center gap-6 text-[14px] font-semibold flex-shrink-0 ml-2">
         <a data-sm-nav="home" href="index.html" class="sm-desk-nav-link" data-i18n="home">Home</a>
         <a data-sm-nav="courses" href="courses.html" class="sm-desk-nav-link" data-i18n="courses">Courses</a>
-        <a data-sm-nav="ebooks" href="index.html#secEbooks" class="sm-desk-nav-link" data-i18n="ebooks">Ebooks</a>
+        <a data-sm-nav="ebooks" href="ebooks.html" class="sm-desk-nav-link" data-i18n="ebooks">Ebooks</a>
         <a data-sm-nav="free" href="courses.html?q=" class="sm-desk-nav-link" data-i18n="free">Free Resources</a>
         <a data-sm-nav="telegram" href="#" data-sm-telegram class="sm-desk-nav-link" data-i18n="telegram">Telegram</a>
       </nav>
@@ -50,7 +50,7 @@
       <div class="sm-desk-drop flex-shrink-0"><button data-sm-desk-account-btn class="sm-desk-pill"><i class="fa-regular fa-user text-[15px] text-slate-600"></i><span data-i18n="account">Account</span><i class="fa-solid fa-chevron-down text-[11px] text-slate-400"></i></button><div data-sm-desk-account-menu class="sm-desk-menu hidden"></div></div>
     </div>
   </div>
-  <div id="smDeskDrawer" class="hidden"><div class="sm-backdrop"></div><div class="sm-panel"><div class="flex items-center justify-between mb-3"><span class="text-[18px] font-extrabold"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span><button data-sm-drawer-close class="w-9 h-9 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-xmark"></i></button></div><nav class="flex flex-col gap-1 text-[14px] font-semibold"><a href="index.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Home</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Courses</a><a href="index.html#secEbooks" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Ebooks</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Free Resources</a><a href="#" data-sm-telegram class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Telegram</a><a href="dashboard.html" data-account-link class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Account / Dashboard</a><a href="cart.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Cart (<span data-sm-cart-count>0</span>)</a></nav></div></div>
+  <div id="smDeskDrawer" class="hidden"><div class="sm-backdrop"></div><div class="sm-panel"><div class="flex items-center justify-between mb-3"><span class="text-[18px] font-extrabold"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span><button data-sm-drawer-close class="w-9 h-9 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-xmark"></i></button></div><nav class="flex flex-col gap-1 text-[14px] font-semibold"><a href="index.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Home</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Courses</a><a href="ebooks.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Ebooks</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Free Resources</a><a href="#" data-sm-telegram class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Telegram</a><a href="dashboard.html" data-account-link class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Account / Dashboard</a><a href="cart.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Cart (<span data-sm-cart-count>0</span>)</a></nav></div></div>
   <!-- phone bar (unchanged) -->
   <div class="lg:hidden max-w-[720px] lg:max-w-[1000px] mx-auto px-3 sm:px-4 h-[56px] flex items-center justify-between gap-2">
     <div class="flex items-center gap-2">
@@ -190,6 +190,8 @@
 
 <script>
 const batchParam = (new URLSearchParams(window.location.search).get('batch') || '').trim();
+let catParam = '';
+try { catParam = (new URLSearchParams(window.location.search).get('category') || '').trim().toLowerCase(); } catch (e) {}
 let batchInfo = null;
 let allCourses = [];
 let tabList = [];
@@ -206,12 +208,56 @@ const TAB_ICONS = {
 };
 const TAB_ORDER = ['academic', 'admission', 'revision'];
 
+// Admin -> Home Page -> Category Tabs (batch-wise position order + columns). Bootstrap theke sync, fallback fetch.
+function getCtabCfg(){
+  try{
+    var hp = (window.__SM_BOOTSTRAP__ && window.__SM_BOOTSTRAP__.homePage) || window.__SM_HP__ || null;
+    var ct = hp && hp.sections ? hp.sections.categoryTabs : null;
+    if(ct){
+      var ord = Array.isArray(ct.tabOrder) && ct.tabOrder.length
+        ? ct.tabOrder.map(function(s){ return String(s).toLowerCase(); })
+        : TAB_ORDER.slice();
+      var cols = Math.min(6, Math.max(1, parseInt(ct.cols, 10) || 3));
+      // oi batch er nijer position setting thakle setai age
+      try{
+        var per = ct.perBatch || {};
+        var bi = (typeof batchInfo !== 'undefined' && batchInfo) ? batchInfo : null;
+        var bid = bi ? String(bi.id || '') : '';
+        var bslug = bi ? String(bi.slug || '').toLowerCase() : '';
+        var custom = (bid && per['c:' + bid]) || (bslug && per['c:' + bslug]) || (bid && per[bid]) || null;
+        if(Array.isArray(custom) && custom.length) ord = custom.map(function(s){ return String(s).toLowerCase(); });
+      }catch(e){}
+      return { order: ord, cols: cols };
+    }
+  }catch(e){}
+  return { order: TAB_ORDER.slice(), cols: 3 };
+}
+async function refreshCtabCfg(){
+  try{
+    var r = await fetch('/api/public/homepage');
+    var j = await r.json();
+    if(j && j.success && j.data){
+      window.__SM_HP__ = j.data;
+      var cfg = getCtabCfg();
+      var key = cfg.order.join('|') + ':' + cfg.cols;
+      if(key !== window.__ctabKey){ buildTabs(); }
+    }
+  }catch(e){}
+}
+
 function esc(s){
   return String(s == null ? '' : s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
 
 function selectCategory(slug){
   selectedCategory = slug;
+  try {
+    var __qs = new URLSearchParams(window.location.search);
+    __qs.set('category', slug);
+    if (batchParam) __qs.set('batch', batchParam);
+    history.replaceState(null, '', window.location.pathname + '?' + __qs.toString());
+    catParam = String(slug || '').toLowerCase();
+  } catch (e) {}
   document.querySelectorAll('#categoryTabs [data-tab]').forEach(b => {
     const on = b.dataset.tab === slug;
     b.className = (on ? 'tab-active' : 'tab-inactive') + ' flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] font-bold text-[12px] sm:text-[13px]' + (on ? ' shadow-sm' : '');
@@ -236,7 +282,12 @@ function sortCourses(){
 
 function getFiltered(){
   let list = allCourses.filter(c => {
-    if (selectedCategory && String(c.categorySlug || '').toLowerCase() !== String(selectedCategory).toLowerCase()) return false;
+    if (selectedCategory) {
+      var sel = String(selectedCategory).toLowerCase();
+      var cSlug = String(c.categorySlug || '').toLowerCase();
+      var cName = String(c.categoryName || '').toLowerCase();
+      if (cSlug !== sel && cName !== sel) return false;
+    }
     if (platformFilter !== 'All' && String(c.platformName || '') !== platformFilter) return false;
     return true;
   });
@@ -313,8 +364,10 @@ function buildTabs(){
     seen[slug] = true;
     tabList.push({ slug, name: c.categoryName || slug });
   });
+  const cfg = getCtabCfg();
+  window.__ctabKey = cfg.order.join('|') + ':' + cfg.cols;
   tabList.sort((a, b) => {
-    const ia = TAB_ORDER.indexOf(a.slug), ib = TAB_ORDER.indexOf(b.slug);
+    const ia = cfg.order.indexOf(a.slug), ib = cfg.order.indexOf(b.slug);
     if (ia === -1 && ib === -1) return a.name.localeCompare(b.name);
     if (ia === -1) return 1;
     if (ib === -1) return -1;
@@ -327,13 +380,18 @@ function buildTabs(){
     selectedCategory = '';
     return;
   }
-  const cols = Math.min(tabList.length, 3);
+  const cols = Math.min(tabList.length, cfg.cols);
   wrap.className = 'grid gap-2 bg-[#F1F5F9] p-1.5 rounded-[12px] grid-cols-' + cols;
   wrap.innerHTML = tabList.map(t => `
     <button data-tab="${esc(t.slug)}" onclick="selectCategory('${esc(t.slug)}')" class="tab-inactive flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] font-bold text-[12px] sm:text-[13px]">
       <i class="fa-solid ${TAB_ICONS[t.slug] || 'fa-layer-group'} text-[13px]"></i> ${esc(t.name)}
     </button>`).join('');
-  const preferred = tabList.some(t => t.slug === 'academic') ? 'academic' : tabList[0].slug;
+  // ?category= thakle oita preselect (slug ba name — jeta mile), nahole prothom tab
+  let preferred = tabList[0].slug;
+  if (catParam) {
+    const hit = tabList.find(t => String(t.slug).toLowerCase() === catParam || String(t.name).toLowerCase() === catParam);
+    if (hit) preferred = hit.slug;
+  }
   selectCategory(preferred);
 }
 
@@ -400,6 +458,7 @@ async function init(){
     }
     buildPlatforms();
     buildTabs(); // calls render() via selectCategory
+    refreshCtabCfg(); // homepage config (no bootstrap/file://) hole re-apply
   } catch (e) {
     document.getElementById('courseCount').textContent = '0';
     listEl.innerHTML = '';

@@ -708,13 +708,19 @@
   async function checkout() {
     const msg = $('#smOrderMsg');
     if (!SM.cart.length) { toast('Your cart is empty', false); return; }
+    // Login required — guest order blocked
+    var _tok = SM.token || currentToken();
+    if (!_tok) {
+      toast('Please login first to place order', false);
+      setTimeout(function(){ window.location.href = 'auth.html?next=' + encodeURIComponent('cart.html'); }, 800);
+      return;
+    }
     try {
+      var _phEl = $('#smPhone');
       const json = await apiSend('/api/public/orders', 'POST', {
-        items: SM.cart.map(c => ({ courseId: c.id })),
+        items: SM.cart.map(c => (c.type === 'ebook' ? { ebookId: c.id } : { courseId: c.id })),
         couponCode: SM.coupon ? SM.coupon.code : '',
-        name: $('#smName').value.trim(),
-        email: $('#smEmail').value.trim(),
-        phone: $('#smPhone').value.trim()
+        phone: _phEl ? _phEl.value.trim() : ''
       });
       SM.cart = [];
       SM.coupon = null;
@@ -723,6 +729,10 @@
       toast(json.message);
       if ($('[data-sm-myorders]')) loadMyOrders();
     } catch (err) {
+      if (err && (err.status === 401 || /login/i.test(err.message || ''))) {
+        toast('Please login first to place order', false);
+        setTimeout(function(){ window.location.href = 'auth.html?next=' + encodeURIComponent('cart.html'); }, 800);
+      }
       if (msg) {
         msg.textContent = err.message;
         msg.className = 'mt-3 text-[12px] font-semibold rounded-lg px-3 py-2 bg-red-50 text-red-600 border border-red-100';
@@ -897,29 +907,36 @@
     const regBtn = t.closest('[data-sm-register]');
     const logoutBtn = t.closest('[data-sm-logout]');
 
-    function fetchAnyItem(id) {
+    function fetchAnyItem(id, kind) {
+      // Course ID ar E-Book ID same number hote pare (1,2,3...) — tai kind
+      // onujayi sothik endpoint age try koro, nahole bhul item cart-e dhuke
+      if (kind === 'ebook') {
+        return apiGet('/api/public/ebooks/' + id).catch(function () { return apiGet('/api/public/courses/' + id); });
+      }
       // courses first, then e-books (both are buyable)
       return apiGet('/api/public/courses/' + id).catch(function () { return apiGet('/api/public/ebooks/' + id); });
     }
     if (addBtn) {
       e.preventDefault();
       const id = addBtn.dataset.smAdd;
-      const found = SM.courses.find(c => String(c.id) === String(id));
+      const kind = addBtn.dataset.smKind || '';
+      const found = kind !== 'ebook' && SM.courses.find(c => String(c.id) === String(id));
       if (found) addToCart(found);
-      else fetchAnyItem(id).then(function (j) { addToCart(j.data); }).catch(function (err) { toast(err.message, false); });
+      else fetchAnyItem(id, kind).then(function (j) { addToCart(j.data); }).catch(function (err) { toast(err.message, false); });
       return;
     }
     if (buyBtn) {
       e.preventDefault();
       const id = buyBtn.dataset.smBuy;
-      const found = SM.courses.find(c => String(c.id) === String(id));
+      const kind = buyBtn.dataset.smKind || '';
+      const found = kind !== 'ebook' && SM.courses.find(c => String(c.id) === String(id));
       const after = function (course) {
         SM.cart = [cartItemOf(course)];
         saveCart();
         window.location.href = 'cart.html';
       };
       if (found) after(found);
-      else fetchAnyItem(id).then(function (j) { after(j.data); }).catch(function (err) { toast(err.message, false); });
+      else fetchAnyItem(id, kind).then(function (j) { after(j.data); }).catch(function (err) { toast(err.message, false); });
       return;
     }
     if (openBtn) { e.preventDefault(); window.location.href = 'cart.html'; return; }

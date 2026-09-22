@@ -589,6 +589,8 @@
     batch: () => state.meta.batches.map(b => ({ value: b.id, label: b.name })),
     ebookBatch: () => (state.meta.ebookBatches || []).map(b => ({ value: b.id, label: b.name })),
     category: () => state.meta.categories.map(c => ({ value: c.id, label: c.name })),
+    courseCategory: () => state.meta.categories.filter(c => !c.for || c.for === 'both' || c.for === 'course').map(c => ({ value: c.id, label: c.name })),
+    ebookCategory: () => state.meta.categories.filter(c => !c.for || c.for === 'both' || c.for === 'ebook').map(c => ({ value: c.id, label: c.name })),
     platform: () => state.meta.platforms.map(p => ({ value: p.id, label: p.name })),
     status: () => [{ value: 'active', label: 'Active' }, { value: 'inactive', label: 'Inactive' }]
   };
@@ -712,11 +714,18 @@
       columns: [
         { key: 'id', label: '#', cell: r => `<span class="text-slate-400 font-bold">${r.id}</span>` },
         { key: 'name', label: 'Category', cell: r => `<div class="font-bold text-[#0F2043]"><i class="fa-solid ${esc(r.icon || 'fa-tag')} mr-1 text-[#1A56FF]"></i>${esc(r.name)}</div><div class="text-[11px] text-slate-500">slug: ${esc(r.slug || '-')}</div>` },
+        { key: 'for', label: 'Used For', cell: r => {
+          const v = r.for || 'both';
+          const map = { both: ['Both', 'bg-[#EDE9FF] text-[#4F46E5]'], course: ['Course', 'bg-[#E6F0FF] text-[#1A56FF]'], ebook: ['E-Book', 'bg-[#E0F2FE] text-[#0284C7]'] };
+          const m = map[v] || map.both;
+          return `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold whitespace-nowrap ${m[1]}">${m[0]}</span>`;
+        } },
         { key: 'color', label: 'Color', cell: r => `<span class="inline-flex items-center gap-2"><span class="w-4 h-4 rounded" style="background:${esc(r.color || '#EDE9FF')};border:1px solid #E2E8F0"></span>${esc(r.color || '-')}</span>` },
         { key: 'status', label: 'Status', cell: r => badge(r.status || 'active') }
       ],
       fields: [
         { name: 'name', label: 'Category Name', type: 'text', required: true, placeholder: 'Academic' },
+        { name: 'for', label: 'Used For (Course / E-Book)', type: 'select', options: () => [{ value: 'both', label: 'Both (Course + E-Book)' }, { value: 'course', label: 'Course only' }, { value: 'ebook', label: 'E-Book only' }] },
         { name: 'icon', label: 'FontAwesome Icon', type: 'text', placeholder: 'fa-graduation-cap' },
         { name: 'slug', label: 'Slug (auto)', type: 'text', placeholder: 'academic' },
         { name: 'color', label: 'Background Color', type: 'color' },
@@ -749,6 +758,7 @@
           if (r.batchId) return `<span class="px-2 py-0.5 rounded-full bg-[#EDE9FF] text-[#4F46E5] text-[11px] font-bold whitespace-nowrap">${esc(relName('batch', r.batchId))}</span>`;
           return '<span class="text-slate-400 text-[11px]">—</span>';
         } },
+        { key: 'categoryId', label: 'Category', cell: r => esc(relName('category', r.categoryId)) },
         { key: 'title', label: 'E-Book', cell: r => `
           <div class="flex items-center gap-2.5">
             <div class="w-10 h-12 rounded-[6px] bg-[#F8F9FD] border border-slate-200 overflow-hidden flex-shrink-0 flex items-center justify-center">
@@ -769,6 +779,10 @@
             : `<span class="px-2 py-0.5 rounded-full bg-[#E6F4EA] text-[#16A34A] text-[11px] font-bold">FREE</span>`) },
         { key: 'downloads', label: 'Downloads', cell: r => `<span class="font-bold text-[#0F2043]">${Number(r.downloads || 0)}</span>` },
         { key: 'status', label: 'Status', cell: r => badge(r.status || 'active') }
+      ],
+      filters: [
+        { field: 'ebookBatchId', allLabel: 'All E-Book Batches', options: () => REL.ebookBatch() },
+        { field: 'categoryId', allLabel: 'All Categories', options: () => REL.category() }
       ],
       fields: []
     },
@@ -1006,7 +1020,7 @@
     const item = id ? state.lists[key].find(x => String(x.id) === String(id)) : null;
     const defaults = {
       status: 'active', featured: false, type: key === 'coupons' ? 'percent' : 'web',
-      color: key === 'batches' ? '#4F46E5' : '#EDE9FF'
+      color: key === 'batches' ? '#4F46E5' : '#EDE9FF', for: 'both'
     };
     const data = Object.assign({}, defaults, item || {});
 
@@ -1566,9 +1580,9 @@
         </h3>
       </div>
       <div class="p-5 sm:p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div class="sm:col-span-2">${lbl('New Course Title')}<input id="dTitle" value="${esc(src.title + ' (Copy)')}" class="${base} mt-1"></div>
+        <div class="sm:col-span-2">${lbl('New Course Title')}<input id="dTitle" value="${esc(src.title)}" class="${base} mt-1"></div>
         <div>${lbl('Target Batch')}<select id="dBatch" class="${base} mt-1">${opts(REL.batch(), src.batchId)}</select></div>
-        <div>${lbl('Target Category')}<select id="dCategory" class="${base} mt-1">${opts(REL.category(), src.categoryId)}</select></div>
+        <div>${lbl('Target Category')}<select id="dCategory" class="${base} mt-1">${opts(REL.courseCategory(), src.categoryId)}</select></div>
         <p id="dupError" class="hidden sm:col-span-2 text-[12px] font-semibold text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2"></p>
       </div>
       <div class="flex justify-end gap-2 px-5 sm:px-6 py-4 border-t border-slate-100">
@@ -1673,7 +1687,7 @@
           <div>${lbl('Teacher Name')}<input id="wTeacher" value="${esc(c.teacher)}" placeholder="Apurbo Sir" class="${base} mt-1"></div>
           <div>${lbl('Duration')}<input id="wDuration" value="${esc(c.duration)}" placeholder="3 Months" class="${base} mt-1"></div>
           <div>${lbl('Batch <span class="text-red-500">*</span>')}<select id="wBatch" class="${base} mt-1">${selOpts(REL.batch(), c.batchId)}</select></div>
-          <div>${lbl('Category <span class="text-slate-400 normal-case font-semibold">(optional)</span>')}<select id="wCategory" class="${base} mt-1">${selOpts(REL.category(), c.categoryId)}</select></div>
+          <div>${lbl('Category <span class="text-slate-400 normal-case font-semibold">(optional)</span>')}<select id="wCategory" class="${base} mt-1">${selOpts(REL.courseCategory(), c.categoryId)}</select></div>
           <div>${lbl('Platform')}<select id="wPlatform" class="${base} mt-1">${selOpts(REL.platform(), c.platformId)}</select></div>
           <div>${lbl('Status')}<select id="wStatus" class="${base} mt-1">${selOpts(REL.status(), c.status)}</select></div>
           <div>${lbl('Price (৳)')}<input id="wPrice" type="number" min="0" value="${esc(c.price)}" placeholder="500" class="${base} mt-1"></div>
@@ -1736,10 +1750,6 @@
             </div>
             <button type="button" id="wAddTgId" class="mt-2 px-3 py-1.5 rounded-[8px] bg-[#E6F4EA] text-[#16A34A] font-bold text-[12px] hover:bg-[#D3EBD8]"><i class="fa-solid fa-plus mr-1"></i> Add Group / Channel ID</button>
             <p class="text-[10px] text-slate-400 mt-1">Bot-ke oi group/channel-e Admin + <b>Invite Users</b> permission daw. ID ber koro @getmyid_bot diye. Same BOT_TOKEN use hobe, Bot code-e hat dite hobe na.</p>
-          </div>
-          <div class="sm:col-span-2">${lbl('Preview / Intro YouTube Link (free for everyone)')}
-            <input id="wPreview" value="${esc(c.previewYoutube)}" placeholder="https://www.youtube.com/watch?v=..." class="${base} mt-1">
-            <p class="text-[10px] text-slate-400 mt-1"><i class="fa-solid fa-lock mr-0.5"></i> Only the video ID is stored. Keep the video <b>Unlisted</b> so outsiders can't find it.</p>
           </div>
         </div>`;
       }
@@ -1866,13 +1876,9 @@
           telegramLinks: tgLinks,
           telegramChatIds: tgIds,
           telegramLink: tgLinks.length ? String(tgLinks[0].url || '').trim() : '',
-          previewYoutube: v('wPreview'),
           features: $('wFeatures').value, tags: v('wTags'),
           bannerColor: ($('wBannerColorText').value.trim() || $('wBannerColor').value || '#5745f7')
         });
-        if (wiz.course.previewYoutube && !wizYtId(wiz.course.previewYoutube)) {
-          return 'Preview link is not a valid YouTube link';
-        }
       }
       if (wiz.step === 3) collectLessons();
       return '';
@@ -2189,7 +2195,7 @@
           <div class="sm:col-span-2">${lbl('Details')}<textarea id="ebDetails" rows="3" placeholder="What's inside this book?" class="${base} mt-1">${esc(d.details)}</textarea></div>
           <div>${lbl('Author')}<input id="ebAuthor" value="${esc(d.author)}" placeholder="Author name" class="${base} mt-1"></div>
           <div>${lbl('E-Book Batch (alada — E-Book Batch menu theke create korun)')}<select id="ebBatch" class="${base} mt-1">${ebOpts(REL.ebookBatch(), d.ebookBatchId)}</select></div>
-          <div>${lbl('Category')}<select id="ebCategory" class="${base} mt-1">${ebOpts(REL.category(), d.categoryId)}</select></div>
+          <div>${lbl('Category')}<select id="ebCategory" class="${base} mt-1">${ebOpts(REL.ebookCategory(), d.categoryId)}</select></div>
           <div class="grid grid-cols-2 gap-3">
             <div>${lbl('Price (৳) — 0 = Free')}<input id="ebPrice" type="number" min="0" value="${esc(d.price)}" placeholder="0" class="${base} mt-1"></div>
             <div>${lbl('Old Price (৳)')}<input id="ebOldPrice" type="number" min="0" value="${esc(d.oldPrice)}" placeholder="" class="${base} mt-1"></div>
@@ -3921,26 +3927,37 @@
     const sec = hp.sections || {};
 
     view.innerHTML = `
-      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <div>
-          <h2 class="text-[16px] font-extrabold text-[#0F2043]">Pages &rarr; Home Page Edit / Modify</h2>
-          <p class="text-[12px] text-slate-500">Home page er sob element control koro - text, image, section on/off</p>
-        </div>
-        <div class="flex items-center gap-2">
-          <a href="index.html" target="_blank" class="px-3 py-2 rounded-[10px] bg-white border border-slate-200 text-[12px] font-bold text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-eye mr-1"></i> Preview Home</a>
-          <button id="hpReset" class="px-3 py-2 rounded-[10px] bg-white border border-red-200 text-[12px] font-bold text-red-600 hover:bg-red-50"><i class="fa-solid fa-rotate-left mr-1"></i> Reset Default</button>
-          <button id="hpSave" class="px-5 py-2.5 rounded-[10px] bg-[#1A56FF] hover:bg-[#1445D6] text-white font-bold text-[13px]"><i class="fa-solid fa-floppy-disk mr-1"></i> Save Changes</button>
+      <div class="sticky top-2 z-20 mb-4 rounded-[16px] p-4 sm:p-5 text-white shadow-lg" style="background:linear-gradient(135deg,#1A56FF 0%,#4F46E5 55%,#7C3AED 100%)">
+        <div class="flex flex-wrap items-center gap-3">
+          <div class="w-11 h-11 rounded-[12px] bg-white/20 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-house-chimney text-white text-[18px]"></i></div>
+          <div class="flex-1 min-w-[180px]">
+            <h2 class="text-[17px] font-extrabold leading-tight">Home Page Editor</h2>
+            <p class="text-[12px] text-white/80 font-medium">Hero • Category Tabs • Page Sections — 3 step e manage koro</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <a href="index.html" target="_blank" class="px-3 py-2 rounded-[10px] bg-white/15 hover:bg-white/25 text-[12px] font-bold text-white transition"><i class="fa-solid fa-eye mr-1"></i> Preview</a>
+            <button id="hpReset" class="px-3 py-2 rounded-[10px] bg-white/15 hover:bg-white/25 text-[12px] font-bold text-white transition"><i class="fa-solid fa-rotate-left mr-1"></i> Reset</button>
+            <button id="hpSave" class="px-5 py-2.5 rounded-[10px] bg-white hover:bg-[#F0F4FF] text-[#1A56FF] font-extrabold text-[13px] shadow transition"><i class="fa-solid fa-floppy-disk mr-1"></i> Save Changes</button>
+          </div>
         </div>
       </div>
 
-      <!-- Hero Section -->
-      <div class="bg-white rounded-[14px] border border-slate-100 shadow-sm p-5 mb-4">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-[15px] font-extrabold text-[#0F2043]"><i class="fa-solid fa-star text-[#F59E0B] mr-1"></i> Hero Section</h3>
-          <label class="flex items-center gap-2 text-[12px] font-bold text-slate-700">
-            <input id="hpHeroEnabled" type="checkbox" ${hero.enabled !== false ? 'checked' : ''} class="w-4 h-4 accent-[#1A56FF]"> Show Hero
+      <!-- 01 · Hero Section -->
+      <div class="bg-white rounded-[14px] border border-slate-100 shadow-sm mb-4 overflow-hidden">
+        <div data-sec-head class="flex items-center gap-3 p-5 pb-4 cursor-pointer select-none">
+          <span class="w-8 h-8 rounded-[10px] text-[12px] font-extrabold flex items-center justify-center flex-shrink-0" style="background:#FFF2E6;color:#C2410C">01</span>
+          <span class="w-9 h-9 rounded-[10px] bg-[#FFF7ED] border border-orange-100 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-star text-[#F59E0B] text-[15px]"></i></span>
+          <span class="min-w-0 flex-1">
+            <span class="block text-[15px] font-extrabold text-[#0F2043]">Hero Section</span>
+            <span class="block text-[11px] text-slate-500 font-medium">Top banner — title, text, button & image</span>
+          </span>
+          <label class="relative inline-flex cursor-pointer items-center flex-shrink-0" title="Show / Hide hero">
+            <input id="hpHeroEnabled" type="checkbox" ${hero.enabled !== false ? 'checked' : ''} class="peer sr-only">
+            <span class="block w-10 h-[22px] rounded-full bg-slate-200 peer-checked:bg-[#16A34A] transition relative after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:w-4 after:h-4 after:bg-white after:rounded-full after:shadow after:transition peer-checked:after:translate-x-[18px]"></span>
           </label>
+          <i class="fa-solid fa-chevron-down text-slate-300 text-[12px] transition-transform" data-sec-chev></i>
         </div>
+        <div data-sec-body class="px-5 pb-5">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div class="space-y-3">
             <div><label class="text-[11px] font-bold text-slate-600 uppercase">Badge Text</label><input id="hpBadge" value="${esc(hero.badge || '')}" class="${baseCls} mt-1" placeholder="Smart Learning, Better Future"></div>
@@ -3981,30 +3998,84 @@
               </div>
               <div class="mt-3"><label class="text-[11px] font-bold text-slate-600 uppercase">Image Alt Text</label><input id="hpImageAlt" value="${esc(hero.imageAlt || '')}" class="${baseCls} mt-1"></div>
             </div>
-            <div class="bg-[#EDE9FF] rounded-[10px] p-3 text-[11px] text-[#4F46E5] font-semibold">
-              <i class="fa-solid fa-circle-info mr-1"></i> Tip: Text gulo change kore "Save Changes" dile Home Page instant update hobe.
-            </div>
           </div>
+        </div>
         </div>
       </div>
 
-      <!-- Sections Control -->
+      <!-- 02 · Batch Page Category Tabs -->
+      <div class="bg-white rounded-[14px] border border-slate-100 shadow-sm mb-4 overflow-hidden">
+        <div data-sec-head class="flex items-center gap-3 p-5 pb-4 cursor-pointer select-none">
+          <span class="w-8 h-8 rounded-[10px] text-[12px] font-extrabold flex items-center justify-center flex-shrink-0" style="background:#E0F2FE;color:#0284C7">02</span>
+          <span class="w-9 h-9 rounded-[10px] bg-[#F0F9FF] border border-sky-100 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-arrow-down-up-across-line text-[#0284C7] text-[15px]"></i></span>
+          <span class="min-w-0 flex-1">
+            <span class="block text-[15px] font-extrabold text-[#0F2043]">Category Tabs — Position & Column</span>
+            <span class="block text-[11px] text-slate-500 font-medium">batch.html / ebbatch.html tab order — Up/Down diye sajao</span>
+          </span>
+          <i class="fa-solid fa-chevron-down text-slate-300 text-[12px] transition-transform" data-sec-chev></i>
+        </div>
+        <div data-sec-body class="px-5 pb-5">
+        ${(() => {
+          const ct = sec.categoryTabs || {};
+          const cols = Math.min(6, Math.max(1, parseInt(ct.cols, 10) || 3));
+          const cBatches = (state.meta.batches || []).filter(b => (b.status || 'active') === 'active');
+          const eBatches = (state.meta.ebookBatches || []).filter(b => (b.status || 'active') === 'active');
+          const opt = (b, tag) => `<option value="${tag}:${esc(b.id)}">${esc(b.name)} (${tag === 'eb' ? 'E-Book' : 'Course'})</option>`;
+          return `<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div>
+              <label class="text-[11px] font-bold text-slate-600 uppercase">Batch Select koro</label>
+              <select id="ctabBatchSel" class="${baseCls} mt-2">
+                <option value="__default">All Batches (default position)</option>
+                ${cBatches.length ? `<optgroup label="Course Batches">${cBatches.map(b => opt(b, 'c')).join('')}</optgroup>` : ''}
+                ${eBatches.length ? `<optgroup label="E-Book Batches">${eBatches.map(b => opt(b, 'eb')).join('')}</optgroup>` : ''}
+              </select>
+              <label class="text-[11px] font-bold text-slate-600 uppercase mt-3 block">Tab Position (Up / Down diye age-piche koro)</label>
+              <div id="ctabList" class="mt-2 space-y-2">
+                <p class="text-[12px] text-slate-400 py-3 text-center"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading...</p>
+              </div>
+              <p id="ctabHint" class="text-[10px] text-slate-400 mt-2"></p>
+            </div>
+            <div>
+              <label class="text-[11px] font-bold text-slate-600 uppercase">Column</label>
+              <input id="ctabCols" type="number" min="1" max="6" value="${cols}" class="${baseCls} mt-2 max-w-[220px]">
+            </div>
+          </div>`;
+        })()}
+        </div>
+      </div>
+
+      <!-- 03 · Page Sections -->
       <div class="bg-white rounded-[14px] border border-slate-100 shadow-sm p-5">
-        <h3 class="text-[15px] font-extrabold text-[#0F2043] mb-4"><i class="fa-solid fa-layer-group text-[#1A56FF] mr-1"></i> Home Page Sections - Show / Hide & Title Edit</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="w-8 h-8 rounded-[10px] text-[12px] font-extrabold flex items-center justify-center flex-shrink-0" style="background:#EDE9FF;color:#4F46E5">03</span>
+          <span class="w-9 h-9 rounded-[10px] bg-[#F5F3FF] border border-violet-100 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-layer-group text-[#4F46E5] text-[15px]"></i></span>
+          <span class="min-w-0 flex-1">
+            <span class="block text-[15px] font-extrabold text-[#0F2043]">Page Sections</span>
+            <span class="block text-[11px] text-slate-500 font-medium">Switch diye show/hide • card e click kore expand</span>
+          </span>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 mb-4 bg-[#F8F9FD] border border-slate-100 rounded-[12px] px-3 py-2.5">
+          <span id="secVisibleCount" class="px-3 py-1.5 rounded-full bg-[#EDE9FF] text-[#4F46E5] text-[11px] font-extrabold"></span>
+          <span class="flex-1"></span>
+          <button id="secAllOn" class="px-3 py-1.5 rounded-[8px] bg-[#E6F4EA] text-[#15803D] text-[11px] font-bold hover:bg-[#D5EDDB] transition"><i class="fa-solid fa-eye mr-1"></i>Show all</button>
+          <button id="secAllOff" class="px-3 py-1.5 rounded-[8px] bg-slate-100 text-slate-600 text-[11px] font-bold hover:bg-slate-200 transition"><i class="fa-solid fa-eye-slash mr-1"></i>Hide all</button>
+          <button id="secExpandAll" class="px-3 py-1.5 rounded-[8px] bg-[#E6F0FF] text-[#1A56FF] text-[11px] font-bold hover:bg-[#D6E4FF] transition"><i class="fa-solid fa-angles-down mr-1"></i>Expand</button>
+          <button id="secCollapseAll" class="px-3 py-1.5 rounded-[8px] bg-[#E6F0FF] text-[#1A56FF] text-[11px] font-bold hover:bg-[#D6E4FF] transition"><i class="fa-solid fa-angles-up mr-1"></i>Collapse</button>
+        </div>
+        <div id="secGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
           ${[
-            {key:'categories', label:'Categories Pills', icon:'fa-tags', hasTitle:false},
-            {key:'ebookCategory', label:'E-Book Category (Popular-এর উপরে)', icon:'fa-book-open', hasTitle:true, hasRows:true},
-            {key:'popular', label:'Popular Courses', icon:'fa-fire', hasTitle:true, hasRows:true},
-            {key:'latest', label:'Latest Courses', icon:'fa-clock', hasTitle:true, hasRows:true},
-            {key:'ebooks', label:'Ebooks', icon:'fa-book-open', hasTitle:true, hasRows:true},
-            {key:'popularEbooks', label:'Popular Ebooks (downloads)', icon:'fa-fire', hasTitle:true, hasRows:true},
-            {key:'featured', label:'Featured Courses (dynamic)', icon:'fa-star', hasTitle:true, hasSubtitle:true},
-            {key:'howToBuy', label:'How To Buy (text + video)', icon:'fa-circle-play', hasTitle:true, hasSubtitle:true},
-            {key:'browseCategory', label:'Browse by Category', icon:'fa-table-cells', hasTitle:true},
-            {key:'stats', label:'StudyMart at a Glance (stats)', icon:'fa-chart-simple', hasTitle:true},
-            {key:'batchesSection', label:'Our Batches', icon:'fa-layer-group', hasTitle:true},
-          ].map(s => {
+            {key:'categories', label:'Categories Pills', icon:'fa-tags', hasTitle:false, hint:'Pills row — batch theke auto', acc:'background:#EDE9FF;color:#4F46E5'},
+            {key:'ebookCategory', label:'E-Book Category', icon:'fa-book-open', hasTitle:true, hasRows:true, hint:'E-book category row', acc:'background:#E0F2FE;color:#0284C7'},
+            {key:'popular', label:'Popular Courses', icon:'fa-fire', hasTitle:true, hasRows:true, hint:'Popular courses row', acc:'background:#FFF2E6;color:#C2410C'},
+            {key:'latest', label:'Latest Courses', icon:'fa-clock', hasTitle:true, hasRows:true, hint:'Latest courses row', acc:'background:#E6F4EA;color:#15803D'},
+            {key:'ebooks', label:'Ebooks', icon:'fa-book-open', hasTitle:true, hasRows:true, hint:'E-books row', acc:'background:#E0F2FE;color:#0284C7'},
+            {key:'popularEbooks', label:'Popular Ebooks', icon:'fa-fire', hasTitle:true, hasRows:true, hint:'Most downloaded e-books', acc:'background:#FFF2E6;color:#C2410C'},
+            {key:'featured', label:'Featured Courses', icon:'fa-star', hasTitle:true, hasSubtitle:true, hint:'Hand-picked featured', acc:'background:#FCE7F3;color:#BE185D'},
+            {key:'howToBuy', label:'How To Buy', icon:'fa-circle-play', hasTitle:true, hasSubtitle:true, hint:'Steps + video guide', acc:'background:#E6F4EA;color:#15803D'},
+            {key:'browseCategory', label:'Browse by Category', icon:'fa-table-cells', hasTitle:true, hint:'Shop by category', acc:'background:#EDE9FF;color:#4F46E5'},
+            {key:'stats', label:'Stats Counters', icon:'fa-chart-simple', hasTitle:true, hint:'Students / courses counter', acc:'background:#E0F2FE;color:#0284C7'},
+            {key:'batchesSection', label:'Our Batches', icon:'fa-layer-group', hasTitle:true, hint:'Batch cards row', acc:'background:#FCE7F3;color:#BE185D'},
+          ].map((s, idx) => {
             const cfg = sec[s.key] || {};
             let extra = '';
             if (s.key === 'howToBuy') {
@@ -4045,7 +4116,6 @@
                         </label>
                       `).join('') : '<p class="text-[11px] text-slate-400 py-2">No batches yet — Batch Manage e batch create korun</p>'}
                     </div>
-                    <p class="text-[10px] text-slate-400 mt-2">Tick kora batch gulo Home Page e dekhabe. Auto tick thakle notun batch auto add hobe. Limit diye kotogulo dekhabe control korun.</p>
                   </div>
                 </div>`;
             }
@@ -4058,20 +4128,28 @@
                     <div><label class="text-[10px] font-bold text-slate-500 uppercase">Koita Row Show Korbe</label><select data-sec-rows="${s.key}" class="${baseCls} mt-1"><option value="1" ${String(curRows)==='1'?'selected':''}>1 Row (4 ta)</option><option value="2" ${String(curRows)==='2'?'selected':''}>2 Rows (8 ta)</option><option value="3" ${String(curRows)==='3'?'selected':''}>3 Rows (12 ta)</option></select></div>
                     <div><label class="text-[10px] font-bold text-slate-500 uppercase">Limit (koita item)</label><input data-sec-limit="${s.key}" type="number" min="1" max="20" value="${esc(curLimit)}" class="${baseCls} mt-1"></div>
                   </div>
-                  <p class="text-[10px] text-slate-400">Desktop e 1 row = 4 ta card. Row change korle limit auto hobe (4/8/12), chaile limit alada kore dite parben. Mobile e scroll hobe.</p>
                 </div>`;
             }
             return `
-            <div class="border border-slate-100 rounded-[12px] p-4 bg-[#F8F9FD]/50">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-[13px] font-bold text-[#0F2043]"><i class="fa-solid ${s.icon} text-[#1A56FF] mr-1"></i>${s.label}</span>
-                <label class="flex items-center gap-2 text-[11px] font-bold text-slate-600">
-                  <input data-sec-enabled="${s.key}" type="checkbox" ${cfg.enabled !== false ? 'checked' : ''} class="w-4 h-4 accent-[#1A56FF]"> Show
+            <div class="bg-white border border-slate-200 rounded-[12px] overflow-hidden transition hover:border-[#1A56FF]/40 hover:shadow-sm">
+              <div data-sec-head class="flex items-center gap-2.5 px-3.5 py-3 cursor-pointer select-none">
+                <span class="w-6 h-6 rounded-[8px] text-[10px] font-extrabold flex items-center justify-center flex-shrink-0" style="${s.acc}">${String(idx+1).padStart(2,'0')}</span>
+                <span class="w-8 h-8 rounded-[10px] bg-[#F8F9FD] border border-slate-100 flex items-center justify-center flex-shrink-0"><i class="fa-solid ${s.icon} text-[#1A56FF] text-[14px]"></i></span>
+                <span class="min-w-0 flex-1">
+                  <span class="block text-[13px] font-bold text-[#0F2043] truncate">${s.label}</span>
+                  <span class="block text-[10px] text-slate-400 font-medium truncate">${s.hint} • <span data-sec-status></span></span>
+                </span>
+                <label class="relative inline-flex cursor-pointer items-center flex-shrink-0" title="Show / Hide">
+                  <input data-sec-enabled="${s.key}" type="checkbox" ${cfg.enabled !== false ? 'checked' : ''} class="peer sr-only">
+                  <span class="block w-10 h-[22px] rounded-full bg-slate-200 peer-checked:bg-[#16A34A] transition relative after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:w-4 after:h-4 after:bg-white after:rounded-full after:shadow after:transition peer-checked:after:translate-x-[18px]"></span>
                 </label>
+                <i class="fa-solid fa-chevron-down text-slate-300 text-[12px] transition-transform" data-sec-chev></i>
               </div>
+              <div data-sec-body class="px-3.5 pb-3.5 hidden">
               ${s.hasTitle ? `<div><label class="text-[10px] font-bold text-slate-500 uppercase">Section Title</label><input data-sec-title="${s.key}" value="${esc(cfg.title || '')}" class="${baseCls} mt-1" placeholder="${esc(s.label)}"></div>` : '<p class="text-[11px] text-slate-400">No title needed — pills auto</p>'}
               ${s.hasSubtitle ? `<div class="mt-2"><label class="text-[10px] font-bold text-slate-500 uppercase">Subtitle</label><input data-sec-subtitle="${s.key}" value="${esc(cfg.subtitle || '')}" class="${baseCls} mt-1"></div>` : ''}
               ${extra}
+              </div>
             </div>`;
           }).join('')}
         </div>
@@ -4127,6 +4205,116 @@
       if (this.checked) { catList.classList.add('opacity-50','pointer-events-none'); }
       else { catList.classList.remove('opacity-50','pointer-events-none'); }
     });
+    // ---- Batch Page Category Tabs: batch-wise position (dropdown + Up/Down) ----
+    const CTAB_DEFAULT = ['academic', 'admission', 'revision'];
+    const CTAB_META = { academic: { name: 'Academic', icon: 'fa-book-open' }, admission: { name: 'Admission', icon: 'fa-building-columns' }, revision: { name: 'Revision', icon: 'fa-bullseye' } };
+    const ctabCfg0 = (hp.sections && hp.sections.categoryTabs) || {};
+    let ctabGlobalOrder = Array.isArray(ctabCfg0.tabOrder) && ctabCfg0.tabOrder.length ? ctabCfg0.tabOrder.map(String) : CTAB_DEFAULT.slice();
+    let ctabPerBatch = Object.assign({}, ctabCfg0.perBatch || {});
+    let ctabCurrentKey = '__default';
+    let ctabNameMap = {};
+    function refreshCtabNumbers(){
+      const rows = Array.from(view.querySelectorAll('#ctabList [data-ctab]'));
+      rows.forEach((row, idx)=>{
+        const num = row.querySelector('[data-ctab-num]');
+        if (num) num.textContent = idx + 1;
+        const up = row.querySelector('[data-ctab-up]');
+        const down = row.querySelector('[data-ctab-down]');
+        if (up) { up.dataset.ctabUp = idx; if (idx === 0) up.setAttribute('disabled',''); else up.removeAttribute('disabled'); }
+        if (down) { down.dataset.ctabDown = idx; if (idx === rows.length - 1) down.setAttribute('disabled',''); else down.removeAttribute('disabled'); }
+      });
+    }
+    function renderCtabRows(order){
+      const list = $('ctabList');
+      if (!list) return;
+      if (!order.length) { list.innerHTML = '<p class="text-[11px] text-slate-400 py-3 text-center">Ei batch e ekhono kono category nai</p>'; return; }
+      list.innerHTML = order.map((slug) => {
+        const m = CTAB_META[slug] || {};
+        const nm = m.name || ctabNameMap[slug] || slug;
+        const ic = m.icon || 'fa-layer-group';
+        return `<div data-ctab="${esc(slug)}" class="flex items-center gap-2 bg-[#F8F9FD] rounded-[10px] border border-slate-100 px-3 py-2">`
+          + `<span data-ctab-num class="w-6 h-6 rounded-full bg-[#EDE9FF] text-[#4F46E5] text-[11px] font-extrabold flex items-center justify-center flex-shrink-0"></span>`
+          + `<span class="w-8 h-8 rounded-full bg-white border border-slate-100 flex items-center justify-center flex-shrink-0"><i class="fa-solid ${ic} text-[#1A56FF] text-[14px]"></i></span>`
+          + `<span class="text-[13px] font-bold text-[#0F2043]">${esc(nm)}</span>`
+          + `<span class="ml-auto flex items-center gap-1">`
+          + `<button type="button" data-ctab-up class="w-8 h-8 rounded-[8px] bg-white border border-slate-200 text-slate-600 hover:bg-[#EEF2FF] hover:text-[#1A56FF] disabled:opacity-30 disabled:pointer-events-none" title="Upore naw"><i class="fa-solid fa-chevron-up text-[12px]"></i></button>`
+          + `<button type="button" data-ctab-down class="w-8 h-8 rounded-[8px] bg-white border border-slate-200 text-slate-600 hover:bg-[#EEF2FF] hover:text-[#1A56FF] disabled:opacity-30 disabled:pointer-events-none" title="Niche naw"><i class="fa-solid fa-chevron-down text-[12px]"></i></button>`
+          + `</span></div>`;
+      }).join('');
+      refreshCtabNumbers();
+    }
+    function captureCtabRows(){
+      const rows = Array.from(view.querySelectorAll('#ctabList [data-ctab]')).map(el => el.dataset.ctab).filter(Boolean);
+      if (ctabCurrentKey === '__default') { if (rows.length) ctabGlobalOrder = rows; }
+      else { ctabPerBatch[ctabCurrentKey] = rows; }
+    }
+    function mergeCtabOrder(saved, fresh){
+      const out = [];
+      (saved || []).forEach(s => { if (fresh.includes(s) && !out.includes(s)) out.push(s); });
+      ctabGlobalOrder.forEach(s => { if (fresh.includes(s) && !out.includes(s)) out.push(s); });
+      fresh.slice().sort().forEach(s => { if (!out.includes(s)) out.push(s); });
+      return out;
+    }
+    async function refreshCtabList(){
+      const list = $('ctabList'), hint = $('ctabHint');
+      if (ctabCurrentKey === '__default') {
+        ctabNameMap = {};
+        renderCtabRows(ctabGlobalOrder);
+        if (hint) hint.textContent = 'Default position — je batch er nijer setting nai, sekhane eta apply hobe. Notun category default er pore auto alphabetically asbe.';
+        return;
+      }
+      const sep = ctabCurrentKey.indexOf(':');
+      const tag = ctabCurrentKey.slice(0, sep), bid = ctabCurrentKey.slice(sep + 1);
+      if (list) list.innerHTML = '<p class="text-[12px] text-slate-400 py-3 text-center"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Category loading...</p>';
+      try {
+        const url = tag === 'eb'
+          ? '/api/public/ebooks?ebookBatchId=' + encodeURIComponent(bid) + '&limit=200'
+          : '/api/public/courses?batchId=' + encodeURIComponent(bid) + '&limit=200';
+        const r = await fetch(url);
+        const j = await r.json();
+        const items = Array.isArray(j) ? j : (j.data || []);
+        const seen = {}, fresh = [];
+        ctabNameMap = {};
+        items.forEach(it => {
+          const slug = String(it.categorySlug || it.categoryName || '').toLowerCase().trim();
+          if (!slug || seen[slug]) return;
+          seen[slug] = true;
+          fresh.push(slug);
+          ctabNameMap[slug] = it.categoryName || slug;
+        });
+        // oi batch er save kora order thakle setai age, nahole default
+        const saved = ctabPerBatch[ctabCurrentKey];
+        const order = mergeCtabOrder(Array.isArray(saved) ? saved : null, fresh);
+        renderCtabRows(order);
+        if (hint) hint.textContent = fresh.length
+          ? 'Ei batch er ' + fresh.length + ' ta category — Up/Down diye position set kore Save Changes daw.'
+          : 'Ei batch e ekhono kono course/e-book nai, tai category o nai.';
+      } catch (e) {
+        if (list) list.innerHTML = '<p class="text-[12px] text-red-500 py-3 text-center">Category load hoyni — abar try koro</p>';
+      }
+    }
+    const ctabSel = $('ctabBatchSel');
+    if (ctabSel) ctabSel.addEventListener('change', function(){
+      captureCtabRows();
+      ctabCurrentKey = this.value;
+      refreshCtabList();
+    });
+    const ctabListEl = $('ctabList');
+    if (ctabListEl) ctabListEl.addEventListener('click', function(e){
+      const btn = e.target.closest('[data-ctab-up],[data-ctab-down]');
+      if (!btn) return;
+      const row = btn.closest('[data-ctab]');
+      if (!row) return;
+      if (btn.hasAttribute('data-ctab-up')) {
+        const prev = row.previousElementSibling;
+        if (prev) ctabListEl.insertBefore(row, prev);
+      } else {
+        const next = row.nextElementSibling;
+        if (next) ctabListEl.insertBefore(next, row);
+      }
+      refreshCtabNumbers();
+    });
+    refreshCtabList();
     // Row select -> auto set limit = rows*4 (Desktop 1 row = 4 cards)
     view.querySelectorAll('[data-sec-rows]').forEach(rowEl=>{
       rowEl.addEventListener('change', function(){
@@ -4195,6 +4383,18 @@
           sectionsPayload.categories.batchIds = checked;
         }
       }
+      // Batch page category tabs: default order + per-batch order + columns
+      try { captureCtabRows(); } catch (e) {}
+      const ctabColsEl = view.querySelector('#ctabCols');
+      const cleanPer = {};
+      Object.keys(ctabPerBatch || {}).forEach(k => {
+        if (Array.isArray(ctabPerBatch[k]) && ctabPerBatch[k].length) cleanPer[k] = ctabPerBatch[k];
+      });
+      sectionsPayload.categoryTabs = {
+        tabOrder: ctabGlobalOrder.length ? ctabGlobalOrder : ['academic', 'admission', 'revision'],
+        cols: ctabColsEl ? Math.min(6, Math.max(1, parseInt(ctabColsEl.value, 10) || 3)) : 3,
+        perBatch: cleanPer
+      };
       // keep legacy items for fallback
       const catRows = view.querySelectorAll('[data-cat-name]');
       if (catRows.length) {
@@ -4251,6 +4451,47 @@
         try { await api('/api/admin/homepage/reset', {method:'POST'}); toast('Reset done'); renderHomePage(); } catch(e){ toast(e.message,false); }
       }, 'Yes, Reset');
     });
+    // ---- Home editor UX: collapse cards, show/hide all, visible counter ----
+    try {
+      view.querySelectorAll('[data-sec-head]').forEach(function(head){
+        head.addEventListener('click', function(e){
+          if (e.target.closest('label,input,select,textarea,button,a')) return;
+          var body = head.parentElement.querySelector('[data-sec-body]');
+          var chev = head.querySelector('[data-sec-chev]');
+          if (body) body.classList.toggle('hidden');
+          if (chev) chev.classList.toggle('rotate-180');
+        });
+      });
+      var secInputs = function(){ return Array.from(view.querySelectorAll('[data-sec-enabled]')); };
+      var paintStatus = function(input){
+        var st = input.closest('[data-sec-head]').querySelector('[data-sec-status]');
+        if (!st) return;
+        st.innerHTML = input.checked ? '<span class="text-[#16A34A] font-bold">Visible</span>' : '<span class="text-slate-400">Hidden</span>';
+      };
+      var paintCount = function(){
+        var all = secInputs();
+        var on = all.filter(function(i){ return i.checked; }).length;
+        var el = $('secVisibleCount');
+        if (el) el.textContent = on + ' / ' + all.length + ' sections visible';
+      };
+      if (!view._secDelegated) {
+        view.addEventListener('change', function(e){
+          if (e.target && e.target.matches && e.target.matches('[data-sec-enabled]')) { paintStatus(e.target); paintCount(); }
+        });
+        view._secDelegated = true;
+      }
+      secInputs().forEach(paintStatus); paintCount();
+      var allOn = $('secAllOn'), allOff = $('secAllOff');
+      if (allOn) allOn.addEventListener('click', function(){ secInputs().forEach(function(i){ i.checked = true; paintStatus(i); }); paintCount(); });
+      if (allOff) allOff.addEventListener('click', function(){ secInputs().forEach(function(i){ i.checked = false; paintStatus(i); }); paintCount(); });
+      var setAllBodies = function(show){
+        view.querySelectorAll('#secGrid [data-sec-body]').forEach(function(b){ b.classList.toggle('hidden', !show); });
+        view.querySelectorAll('#secGrid [data-sec-chev]').forEach(function(c){ c.classList.toggle('rotate-180', show); });
+      };
+      var expAll = $('secExpandAll'), colAll = $('secCollapseAll');
+      if (expAll) expAll.addEventListener('click', function(){ setAllBodies(true); });
+      if (colAll) colAll.addEventListener('click', function(){ setAllBodies(false); });
+    } catch (e) {}
   }
 
   /* ---------------- boot / init ---------------- */

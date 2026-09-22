@@ -45,7 +45,7 @@
       <nav class="flex items-center gap-6 text-[14px] font-semibold flex-shrink-0 ml-2">
         <a data-sm-nav="home" href="index.html" class="sm-desk-nav-link" data-i18n="home">Home</a>
         <a data-sm-nav="courses" href="courses.html" class="sm-desk-nav-link" data-i18n="courses">Courses</a>
-        <a data-sm-nav="ebooks" href="index.html#secEbooks" class="sm-desk-nav-link" data-i18n="ebooks">Ebooks</a>
+        <a data-sm-nav="ebooks" href="ebooks.html" class="sm-desk-nav-link" data-i18n="ebooks">Ebooks</a>
         <a data-sm-nav="free" href="courses.html?q=" class="sm-desk-nav-link" data-i18n="free">Free Resources</a>
         <a data-sm-nav="telegram" href="#" data-sm-telegram class="sm-desk-nav-link" data-i18n="telegram">Telegram</a>
       </nav>
@@ -56,7 +56,7 @@
       <div class="sm-desk-drop flex-shrink-0"><button data-sm-desk-account-btn class="sm-desk-pill"><i class="fa-regular fa-user text-[15px] text-slate-600"></i><span data-i18n="account">Account</span><i class="fa-solid fa-chevron-down text-[11px] text-slate-400"></i></button><div data-sm-desk-account-menu class="sm-desk-menu hidden"></div></div>
     </div>
   </div>
-  <div id="smDeskDrawer" class="hidden"><div class="sm-backdrop"></div><div class="sm-panel"><div class="flex items-center justify-between mb-3"><span class="text-[18px] font-extrabold"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span><button data-sm-drawer-close class="w-9 h-9 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-xmark"></i></button></div><nav class="flex flex-col gap-1 text-[14px] font-semibold"><a href="index.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Home</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Courses</a><a href="index.html#secEbooks" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Ebooks</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Free Resources</a><a href="#" data-sm-telegram class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Telegram</a><a href="dashboard.html" data-account-link class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Account / Dashboard</a><a href="cart.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Cart (<span data-sm-cart-count>0</span>)</a></nav></div></div>
+  <div id="smDeskDrawer" class="hidden"><div class="sm-backdrop"></div><div class="sm-panel"><div class="flex items-center justify-between mb-3"><span class="text-[18px] font-extrabold"><span class="text-[#0F2043]">Study</span><span class="text-[#1A56FF]">Mart</span></span><button data-sm-drawer-close class="w-9 h-9 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-xmark"></i></button></div><nav class="flex flex-col gap-1 text-[14px] font-semibold"><a href="index.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Home</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Courses</a><a href="ebooks.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Ebooks</a><a href="courses.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Free Resources</a><a href="#" data-sm-telegram class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Telegram</a><a href="dashboard.html" data-account-link class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Account / Dashboard</a><a href="cart.html" class="px-3 py-2.5 rounded-xl hover:bg-slate-50">Cart (<span data-sm-cart-count>0</span>)</a></nav></div></div>
   <!-- phone bar (unchanged) -->
     <div class="lg:hidden max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 h-[60px] sm:h-[62px] flex items-center justify-between gap-3">
       <div class="flex items-center gap-3">
@@ -147,7 +147,7 @@
           class="fa-solid fa-check text-[#16A34A] text-[26px]"></i></div>
       <h2 class="mt-4 text-[20px] font-extrabold text-[#0F2043]">Order Placed Successfully!</h2>
       <p class="mt-1 text-[13px] text-slate-500">Order No: <b id="orderNoTxt" class="text-[#1A56FF]"></b></p>
-      <p class="mt-1 text-[13px] text-slate-500">আমাদের টিম শীঘ্রই আপনার সাথে যোগাযোগ করবে।</p>
+      <!-- <p class="mt-1 text-[13px] text-slate-500">আমাদের টিম শীঘ্রই আপনার সাথে যোগাযোগ করবে।</p> -->
       <div class="mt-5 flex flex-wrap justify-center gap-2">
         <a href="courses.html" class="px-5 py-2.5 rounded-[10px] bg-[#1A56FF] text-white font-bold text-[13px]">Continue
           Shopping</a>
@@ -162,7 +162,7 @@
       <div class="w-20 h-20 mx-auto rounded-full bg-[#EEF2FF] flex items-center justify-center"><i
           class="fa-solid fa-cart-shopping text-[#1A56FF] text-[30px]"></i></div>
       <h2 class="mt-4 text-[18px] font-extrabold text-[#0F2043]">Your cart is empty</h2>
-      <p class="mt-1 text-[13px] text-slate-500">কোর্স বা ই-বুক যোগ করে এখানে দেখুন।</p>
+      <!-- <p class="mt-1 text-[13px] text-slate-500">কোর্স বা ই-বুক যোগ করে এখানে দেখুন।</p> -->
       <div class="mt-5 flex flex-wrap justify-center gap-2">
         <a href="courses.html" class="px-5 py-2.5 rounded-[10px] bg-[#1A56FF] text-white font-bold text-[13px]">Browse
           Courses</a>
@@ -255,6 +255,10 @@
 
 
           <p id="orderMsg" class="hidden mt-3 text-[12px] font-semibold rounded-[10px] px-3 py-2"></p>
+          <div id="loginGate" class="hidden mt-3 flex items-center justify-between gap-2 bg-[#EEF2FF] border border-[#D7E3FF] rounded-[10px] px-3 py-2.5">
+            <span class="text-[12px] font-bold text-[#0F2043]"><i class="fa-solid fa-circle-user text-[#1A56FF] mr-1"></i>Please login to place order</span>
+            <a href="auth.html?next=cart.html" class="px-3 py-1.5 rounded-full bg-[#1A56FF] text-white text-[11px] font-bold whitespace-nowrap">Login</a>
+          </div>
           <button id="placeOrderBtn"
             class="mt-4 w-full py-3 rounded-[12px] bg-[#1A56FF] hover:bg-[#1445D6] text-white font-extrabold text-[14px] flex items-center justify-center gap-2 transition shadow-[0_8px_24px_rgba(26,86,255,0.35)]">
             <i class="fa-solid fa-bag-shopping"></i> Place Order
@@ -475,7 +479,7 @@
         if (!CP.code) return;
         try {
           const t = totals(items);
-          const r = await fetch('/api/public/coupons/validate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: CP.code, subtotal: t.sub, items: items.map(c => ({ courseId: c.id, price: c.price })) }) });
+          const r = await fetch('/api/public/coupons/validate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: CP.code, subtotal: t.sub, items: items.map(c => ({ courseId: c.id, type: c.type, price: c.price })) }) });
           const j = await r.json();
           if (!r.ok) throw new Error(j.message || 'Coupon invalid');
           CP = { code: j.data.code, discount: Number(j.data.discount) || 0 };
@@ -498,7 +502,7 @@
         const btn = document.getElementById('cpnApply');
         btn.disabled = true; btn.textContent = '...';
         try {
-          const r = await fetch('/api/public/coupons/validate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code, subtotal: t.sub, items: items.map(c => ({ courseId: c.id, price: c.price })) }) });
+          const r = await fetch('/api/public/coupons/validate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code, subtotal: t.sub, items: items.map(c => ({ courseId: c.id, type: c.type, price: c.price })) }) });
           const j = await r.json();
           if (!r.ok) throw new Error(j.message || 'Invalid coupon');
           CP = { code: j.data.code, discount: Number(j.data.discount) || 0 };
@@ -512,6 +516,13 @@
       async function placeOrder() {
         const items = read();
         if (!items.length) { toast('Your cart is empty'); return }
+        // Login required — guest order blocked
+        const tok0 = (function(){ try { return localStorage.getItem('sm_user_token') || sessionStorage.getItem('sm_user_token') || (window.SM && SM.token) || ''; } catch(e){ return ''; } })();
+        if (!tok0) {
+          toast('Please login first to place order');
+          setTimeout(function(){ window.location.href = 'auth.html?next=' + encodeURIComponent('cart.html'); }, 800);
+          return;
+        }
         const msg = document.getElementById('orderMsg');
         const btn = document.getElementById('placeOrderBtn');
         btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Placing order...';
@@ -530,16 +541,27 @@
           if (!isFree && method === 'piprapay' && !em && !ph) { throw new Error('Online payment-এর জন্য email বা phone দিন') }
           const headers = { 'Content-Type': 'application/json' };
           const tok = localStorage.getItem('sm_user_token') || sessionStorage.getItem('sm_user_token') || (window.SM && SM.token) || '';
-          if (tok) headers['Authorization'] = 'Bearer ' + tok;
+          if (!tok) {
+            toast('Please login first to place order');
+            setTimeout(function(){ window.location.href = 'auth.html?next=' + encodeURIComponent('cart.html'); }, 800);
+            btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-bag-shopping"></i> Place Order';
+            return;
+          }
+          headers['Authorization'] = 'Bearer ' + tok;
           const r = await fetch('/api/public/orders', {
             method: 'POST', headers: headers, body: JSON.stringify({
-              items: items.map(c => ({ courseId: c.id })),
+              items: items.map(c => (c.type === 'ebook' ? { ebookId: c.id } : { courseId: c.id })),
               couponCode: CP.code || '',
               paymentMethod: method,
-              name: nm, email: em, phone: ph
+              phone: ph
             })
           });
           const j = await r.json();
+          if (r.status === 401) {
+            toast('Please login first to place order');
+            setTimeout(function(){ window.location.href = 'auth.html?next=' + encodeURIComponent('cart.html'); }, 800);
+            throw new Error(j.message || 'Please login first');
+          }
           if (!r.ok) throw new Error(j.message || 'Order failed');
           if (j.data && j.data.pp_url) {
             // online payment -> go to PipaPay checkout
@@ -618,6 +640,16 @@
         };
         try { if (window.SM && SM.me) populateUser(SM.me); } catch (e) { }
         const t = localStorage.getItem('sm_user_token') || sessionStorage.getItem('sm_user_token') || '';
+        // Guest hole login gate dekhao
+        try {
+          var lg = document.getElementById('loginGate');
+          if (lg) {
+            lg.classList.toggle('hidden', !!t);
+            lg.classList.toggle('flex', !t);
+            var lgA = lg.querySelector('a');
+            if (lgA) lgA.href = 'auth.html?next=' + encodeURIComponent('cart.html');
+          }
+        } catch (e) {}
         if (t) {
           fetch('/api/public/auth/me', { headers: { 'Authorization': 'Bearer ' + t } })
             .then(r => r.json())
